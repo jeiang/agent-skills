@@ -1,0 +1,4 @@
+interface:
+  display_name: "Start Task"
+  short_description: "Approve, implement, commit, and review code"
+  default_prompt: "Use $start-task to plan this feature for my approval, then implement, commit, and review it."

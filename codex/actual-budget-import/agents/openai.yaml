@@ -1,0 +1,4 @@
+interface:
+  display_name: "Actual Budget Import"
+  short_description: "Import natural-language transactions"
+  default_prompt: "Use $actual-budget-import to save these transactions to my Actual budget."
