@@ -16,8 +16,9 @@ The repository currently includes:
 
 - `codex/actual-budget-import/` — imports natural-language transactions through
   the configured Actual Budget CLI.
-- `codex/start-task/` — routes feature work through dedicated planning,
-  implementation, and review agents until approval or five review cycles.
+- `codex/start-task/` — routes feature work through user-approved planning,
+  commit-sized implementation, and commit-range review until approval or five
+  review cycles.
 
 System-managed skills under `~/.codex/skills/.system` and runtime-managed
 entries are intentionally excluded from this repository.
@@ -57,17 +58,33 @@ Run the feature workflow from a Git repository:
 $start-task Add pagination to the activity feed
 ```
 
-The feature workflow uses `gpt-5.6-sol` at extra-high reasoning for planning,
-`gpt-5.6-terra` at high reasoning for implementation, and `gpt-5.6-sol` at high
-reasoning for review. Only the implementer may edit repository files.
+The feature workflow uses `gpt-5.6-sol` at high reasoning for planning,
+`gpt-5.6-terra` at medium reasoning for implementation, and `gpt-5.6-sol` at
+medium reasoning for review. Only the implementer may edit repository files.
+
+Before implementation, the workflow records the Git baseline, presents a
+commit-sized plan, and waits for explicit approval. Requested plan edits are
+returned to the planner and presented again before work starts. When starting
+from the default branch, the workflow creates a `codex/` feature branch after
+approval.
+
+The implementer validates and commits each changed plan step separately. The
+first review covers every feature commit from the baseline; later reviews focus
+on new repair commits while verifying prior findings and the cumulative result.
+An invalid planning assumption stops implementation and returns the evidence to
+the planner for a revised plan and renewed approval. On completion, the workflow
+lists any manual follow-up and asks before pushing or opening a ready pull
+request.
 
 ## Updating
 
-After pulling repository changes, rerun:
+After pulling repository changes, activate the updated skills and custom agents
+by running:
 
 ```sh
 ./install.sh
 ```
 
-Symlinked skill updates are otherwise visible immediately. Rerunning the
-installer refreshes the copied custom-agent definitions.
+Then restart Codex. Symlinked skill files update immediately, but rerunning the
+installer refreshes the copied custom-agent definitions and restarting Codex
+ensures the updated skill and agents are loaded.
