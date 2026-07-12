@@ -1,6 +1,6 @@
-# Codex Skills
+# Agent Skills
 
-A Git-managed collection of reusable skills and custom agents.
+A Git-managed collection of reusable agent skills and Codex custom agents.
 
 ## Layout
 
@@ -40,7 +40,9 @@ The installer:
 
 If an existing skill directory exactly matches the repository copy, the
 installer moves it to `~/.codex/skill-backups` before replacing it with a
-symlink. It refuses to replace differing content or unrelated symlinks.
+symlink. It recreates broken skill symlinks, such as after this repository is
+renamed or moved, and refuses to replace differing content or active symlinks
+pointing elsewhere.
 
 Restart Codex after installation if skill changes do not appear immediately.
 

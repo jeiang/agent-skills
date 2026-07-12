@@ -18,6 +18,12 @@ link_skill() {
   if [ -L "$target" ]; then
     current_target=$(readlink "$target")
     if [ "$current_target" != "$source" ]; then
+      if [ ! -e "$target" ]; then
+        rm "$target"
+        ln -s "$source" "$target"
+        echo "Replaced broken skill symlink: $target -> $source"
+        return 0
+      fi
       echo "Refusing to replace skill symlink pointing elsewhere: $target -> $current_target" >&2
       exit 1
     fi
