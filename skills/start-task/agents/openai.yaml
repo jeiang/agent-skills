@@ -1,0 +1,4 @@
+interface:
+  display_name: "Start Task"
+  short_description: "Plan, implement, review, and repair code"
+  default_prompt: "Use $start-task to implement this feature through the configured planning, implementation, and review loop."
