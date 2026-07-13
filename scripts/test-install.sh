@@ -7,7 +7,44 @@ trap 'rm -rf "$test_root"' EXIT HUP INT TERM
 
 run_installer() {
   home=$1
-  HOME="$home" "$repo_dir/install.sh" >/dev/null
+  config="$home/.codex/config.toml"
+  if [ -e "$config" ]; then
+    assert_toml "$config"
+  fi
+  if ! HOME="$home" "$repo_dir/install.sh" >/dev/null; then
+    return 1
+  fi
+  assert_toml "$config"
+}
+
+assert_toml() {
+  CONFIG_FILE=$1 python - <<'PY'
+import os
+from pathlib import Path
+import tomllib
+
+with Path(os.environ["CONFIG_FILE"]).open("rb") as stream:
+    tomllib.load(stream)
+PY
+}
+
+assert_refused_unchanged() {
+  home=$1
+  expected_error=$2
+  config="$home/.codex/config.toml"
+  fixture=$(basename -- "$home")
+  before="$test_root/$fixture.before"
+  error="$test_root/$fixture.stderr"
+
+  assert_toml "$config"
+  cp "$config" "$before"
+  if run_installer "$home" 2>"$error"; then
+    echo "Installer accepted unsupported agents TOML in $fixture" >&2
+    exit 1
+  fi
+  cmp "$before" "$config"
+  assert_toml "$config"
+  grep -F "$expected_error" "$error" >/dev/null
 }
 
 assert_agents() {
@@ -28,6 +65,9 @@ agents = config["agents"]
 assert agents["max_threads"] == int(os.environ["EXPECTED_THREADS"]), agents
 assert agents["max_depth"] == int(os.environ["EXPECTED_DEPTH"]), agents
 PY
+
+  count=$(grep -Ec '^[[:space:]]*\[agents\][[:space:]]*(#.*)?$' "$config")
+  [ "$count" -eq 1 ]
 }
 
 new_home() {
@@ -101,12 +141,60 @@ assert_agents "$home/.codex/config.toml" 3 4
 # Malformed direct thread values are refused without modifying the configuration.
 home=$(new_home malformed_threads)
 printf '%s\n' '[agents]' 'max_depth = 3' 'max_threads = "4" # invalid direct value' >"$home/.codex/config.toml"
-cp "$home/.codex/config.toml" "$test_root/malformed.before"
-if run_installer "$home" 2>/dev/null; then
-  echo "Installer accepted a malformed agents.max_threads value" >&2
+assert_refused_unchanged "$home" 'Unsupported agents.max_threads value'
+
+# Valid noncanonical agents representations are refused atomically.
+home=$(new_home quoted_table)
+printf '%s\n' '["agents"]' 'max_threads = 4' 'max_depth = 2' >"$home/.codex/config.toml"
+assert_refused_unchanged "$home" 'agents must be declared first as a top-level bare [agents] table'
+
+home=$(new_home quoted_key)
+printf '%s\n' '[agents]' '"max_threads" = 4' 'max_depth = 2' >"$home/.codex/config.toml"
+assert_refused_unchanged "$home" 'max_threads and max_depth must be direct bare keys'
+
+home=$(new_home dotted_root)
+printf '%s\n' 'agents.max_threads = 4' 'agents.max_depth = 2' >"$home/.codex/config.toml"
+assert_refused_unchanged "$home" 'dotted, quoted, or inline root agents keys are not supported'
+
+home=$(new_home inline_root)
+printf '%s\n' 'agents = { max_threads = 4, max_depth = 2 }' >"$home/.codex/config.toml"
+assert_refused_unchanged "$home" 'dotted, quoted, or inline root agents keys are not supported'
+
+home=$(new_home agents_array)
+printf '%s\n' '[agents]' 'max_threads = 4' 'max_depth = 2' '[[agents.roles]]' 'name = "reviewer"' >"$home/.codex/config.toml"
+assert_refused_unchanged "$home" 'array-of-tables form for agents is not supported'
+
+home=$(new_home nested_before_root)
+printf '%s\n' '[agents.roles]' 'enabled = true' >"$home/.codex/config.toml"
+assert_refused_unchanged "$home" 'agents must be declared first as a top-level bare [agents] table'
+
+# Duplicate canonical definitions are invalid TOML but are still refused atomically.
+home=$(new_home duplicate_agents)
+printf '%s\n' '[agents]' 'max_threads = 4' '[agents]' 'max_depth = 2' >"$home/.codex/config.toml"
+cp "$home/.codex/config.toml" "$test_root/duplicate_agents.before"
+if HOME="$home" "$repo_dir/install.sh" >"$test_root/duplicate_agents.stdout" 2>"$test_root/duplicate_agents.stderr"; then
+  echo "Installer accepted a duplicate [agents] table" >&2
   exit 1
 fi
-cmp "$test_root/malformed.before" "$home/.codex/config.toml"
+cmp "$test_root/duplicate_agents.before" "$home/.codex/config.toml"
+grep -F 'duplicate [agents] table' "$test_root/duplicate_agents.stderr" >/dev/null
+
+# Quoted and dotted TOML outside the agents namespace remains untouched.
+home=$(new_home unrelated_noncanonical)
+printf '%s\n' \
+  '["service.settings"]' \
+  'agents.mode = "unrelated"' \
+  '' \
+  '[agents]' \
+  'max_threads = 4' \
+  'max_depth = 2' \
+  '' \
+  '[agents.roles]' \
+  'enabled = true' >"$home/.codex/config.toml"
+cp "$home/.codex/config.toml" "$test_root/unrelated.before"
+run_installer "$home"
+assert_agents "$home/.codex/config.toml" 2 4
+cmp "$test_root/unrelated.before" "$home/.codex/config.toml"
 
 # Repeated runs are idempotent.
 home=$(new_home idempotent)

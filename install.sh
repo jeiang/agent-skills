@@ -13,6 +13,11 @@ configure_agents() {
   trap 'rm -f "$temporary_config"' EXIT HUP INT TERM
   cp "$config" "$temporary_config"
   if ! awk '
+    function reject_agents_form(reason) {
+      print "Unsupported agents configuration in " FILENAME ": " reason ". Use a top-level bare [agents] table with direct bare max_threads and max_depth integer keys." > "/dev/stderr"
+      invalid = 1
+    }
+
     function add_missing_settings() {
       if (!found_threads) {
         print "max_threads = 4"
@@ -30,7 +35,31 @@ configure_agents() {
       return line ~ /^[[:space:]]*\[agents\][[:space:]]*(#.*)?$/
     }
 
+    function is_array_table(line) {
+      return line ~ /^[[:space:]]*\[\[/
+    }
+
+    function first_table_key_is_agents(line, body) {
+      body = line
+      sub(/^[[:space:]]*\[\[?[[:space:]]*/, "", body)
+      return body ~ /^agents[[:space:]]*(\.|\])/ || index(body, "\"agents\"") == 1 || index(body, single_quote "agents" single_quote) == 1
+    }
+
+    function root_key_is_agents(line, body) {
+      body = line
+      sub(/^[[:space:]]*/, "", body)
+      return body ~ /^agents[[:space:]]*(\.|=)/ || index(body, "\"agents\"") == 1 || index(body, single_quote "agents" single_quote) == 1
+    }
+
+    function is_noncanonical_limit_key(line, body) {
+      body = line
+      sub(/^[[:space:]]*/, "", body)
+      return body ~ /^(max_threads|max_depth)[[:space:]]*\./ || index(body, "\"max_threads\"") == 1 || index(body, "\"max_depth\"") == 1 || index(body, single_quote "max_threads" single_quote) == 1 || index(body, single_quote "max_depth" single_quote) == 1
+    }
+
     BEGIN {
+      single_quote = sprintf("%c", 39)
+      at_root = 1
       in_agents = 0
       found_agents = 0
       found_threads = 0
@@ -39,6 +68,25 @@ configure_agents() {
     }
 
     {
+      if (is_array_table($0)) {
+        if (first_table_key_is_agents($0)) {
+          reject_agents_form("array-of-tables form for agents is not supported")
+        }
+        at_root = 0
+      } else if (is_table($0)) {
+        if (first_table_key_is_agents($0) && !is_agents_table($0)) {
+          if ($0 ~ /^[[:space:]]*\[[[:space:]]*agents[[:space:]]*\./ && found_agents) {
+            # A bare nested table after canonical [agents] is safe to preserve.
+          } else {
+            reject_agents_form("agents must be declared first as a top-level bare [agents] table")
+          }
+        }
+
+        at_root = 0
+      } else if (at_root && root_key_is_agents($0)) {
+        reject_agents_form("dotted, quoted, or inline root agents keys are not supported")
+      }
+
       if (is_table($0)) {
         if (in_agents) {
           add_missing_settings()
@@ -46,6 +94,9 @@ configure_agents() {
         }
 
         if (is_agents_table($0)) {
+          if (found_agents) {
+            reject_agents_form("duplicate [agents] table")
+          }
           found_agents = 1
           found_threads = 0
           found_depth = 0
@@ -53,7 +104,14 @@ configure_agents() {
         }
       }
 
+      if (in_agents && is_noncanonical_limit_key($0)) {
+        reject_agents_form("max_threads and max_depth must be direct bare keys")
+      }
+
       if (in_agents && $0 ~ /^[[:space:]]*max_threads[[:space:]]*=/) {
+        if (found_threads) {
+          reject_agents_form("duplicate max_threads definition")
+        }
         found_threads = 1
         if ($0 !~ /^[[:space:]]*max_threads[[:space:]]*=[[:space:]]*[0-9]+[[:space:]]*(#.*)?$/) {
           print "Unsupported agents.max_threads value in " FILENAME > "/dev/stderr"
@@ -69,6 +127,9 @@ configure_agents() {
       }
 
       if (in_agents && $0 ~ /^[[:space:]]*max_depth[[:space:]]*=/) {
+        if (found_depth) {
+          reject_agents_form("duplicate max_depth definition")
+        }
         found_depth = 1
         if ($0 !~ /^[[:space:]]*max_depth[[:space:]]*=[[:space:]]*[0-9]+[[:space:]]*(#.*)?$/) {
           print "Unsupported agents.max_depth value in " FILENAME > "/dev/stderr"

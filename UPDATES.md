@@ -127,3 +127,10 @@
 - Changed installer configuration handling to require `agents.max_threads >= 4`, preserve higher numeric values and inline comments, and reject malformed direct values without replacing the configuration file.
 - Extended disposable-home coverage for absent, low, exact, high, and malformed thread values, comment preservation, and repeated-run idempotency while retaining the existing depth scenarios.
 - `devenv test`: passed, including the complete installer matrix and repository validation suite.
+
+### Review repair 2: canonical agents TOML handling
+
+- Restricted installer rewrites to a top-level bare `[agents]` table with direct bare integer `max_threads` and `max_depth` keys.
+- Added atomic refusal for quoted, dotted, inline, array-of-tables, duplicate, conflicting, and other agents aliases that could otherwise be silently shadowed or corrupted.
+- Added before-and-after TOML parsing and byte-identity checks for valid refused fixtures, explicit duplicate-definition refusal, canonical root-table assertions for supported fixtures, and preservation coverage for unrelated quoted and dotted TOML.
+- `devenv test`: passed, including the expanded safe-support and atomic-refusal installer fixtures and the complete repository validation suite.
