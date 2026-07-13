@@ -42,25 +42,32 @@ home=$(new_home fresh)
 run_installer "$home"
 assert_agents "$home/.codex/config.toml" 2 4
 
-# A shallow depth is raised while inline comments and unrelated settings remain.
+# Low limits are raised while inline comments and unrelated settings remain.
 home=$(new_home shallow)
 printf '%s\n' \
   '# leading comment' \
   '[agents] # agent settings' \
-  'max_threads = 7 # user override' \
+  'max_threads = 2 # raise this value' \
   'max_depth = 1 # raise this value' \
   'max_jobs = 3' \
   '' \
   '[features]' \
   'experimental = true' >"$home/.codex/config.toml"
 run_installer "$home"
-assert_agents "$home/.codex/config.toml" 2 7
-grep -Fqx 'max_threads = 7 # user override' "$home/.codex/config.toml"
+assert_agents "$home/.codex/config.toml" 2 4
+grep -Fqx 'max_threads = 4 # raise this value' "$home/.codex/config.toml"
 grep -Fqx 'max_depth = 2 # raise this value' "$home/.codex/config.toml"
 grep -Fqx 'max_jobs = 3' "$home/.codex/config.toml"
 grep -Fqx 'experimental = true' "$home/.codex/config.toml"
 
-# Higher depths and existing thread limits are preserved.
+# Exact thread limits are preserved.
+home=$(new_home exact_threads)
+printf '%s\n' '[agents]' 'max_depth = 2' 'max_threads = 4 # exact minimum' >"$home/.codex/config.toml"
+run_installer "$home"
+assert_agents "$home/.codex/config.toml" 2 4
+grep -Fqx 'max_threads = 4 # exact minimum' "$home/.codex/config.toml"
+
+# Higher depths and thread limits are preserved.
 home=$(new_home higher)
 printf '%s\n' '[agents]' 'max_depth = 5' 'max_threads = 9' >"$home/.codex/config.toml"
 run_installer "$home"
@@ -91,7 +98,22 @@ printf '%s\n' '[agents]' 'max_depth = 3' >"$home/.codex/config.toml"
 run_installer "$home"
 assert_agents "$home/.codex/config.toml" 3 4
 
+# Malformed direct thread values are refused without modifying the configuration.
+home=$(new_home malformed_threads)
+printf '%s\n' '[agents]' 'max_depth = 3' 'max_threads = "4" # invalid direct value' >"$home/.codex/config.toml"
+cp "$home/.codex/config.toml" "$test_root/malformed.before"
+if run_installer "$home" 2>/dev/null; then
+  echo "Installer accepted a malformed agents.max_threads value" >&2
+  exit 1
+fi
+cmp "$test_root/malformed.before" "$home/.codex/config.toml"
+
 # Repeated runs are idempotent.
+home=$(new_home idempotent)
+printf '%s\n' '[agents]' 'max_depth = 3' 'max_threads = 1 # raise once' >"$home/.codex/config.toml"
+run_installer "$home"
+assert_agents "$home/.codex/config.toml" 3 4
+grep -Fqx 'max_threads = 4 # raise once' "$home/.codex/config.toml"
 cp "$home/.codex/config.toml" "$test_root/config.before"
 run_installer "$home"
 cmp "$test_root/config.before" "$home/.codex/config.toml"

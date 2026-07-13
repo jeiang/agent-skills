@@ -55,6 +55,17 @@ configure_agents() {
 
       if (in_agents && $0 ~ /^[[:space:]]*max_threads[[:space:]]*=/) {
         found_threads = 1
+        if ($0 !~ /^[[:space:]]*max_threads[[:space:]]*=[[:space:]]*[0-9]+[[:space:]]*(#.*)?$/) {
+          print "Unsupported agents.max_threads value in " FILENAME > "/dev/stderr"
+          invalid = 1
+        } else {
+          value = $0
+          sub(/^[^=]*=[[:space:]]*/, "", value)
+          if ((value + 0) < 4) {
+            match($0, /[0-9]+/)
+            $0 = substr($0, 1, RSTART - 1) "4" substr($0, RSTART + RLENGTH)
+          }
+        }
       }
 
       if (in_agents && $0 ~ /^[[:space:]]*max_depth[[:space:]]*=/) {

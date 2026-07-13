@@ -121,3 +121,9 @@
 - Replaced the unsupported `languages.python.packages` option with a stable `python3.withPackages` package expression containing PyYAML.
 - `nix-instantiate --parse devenv.nix`: passed.
 - `devenv test`: passed, including skill validation, agent and launcher semantic validation, YAML and TOML parsing, shell validation and formatting, installer tests, and `git diff --check`.
+
+### Review repair 1: agent thread capacity
+
+- Changed installer configuration handling to require `agents.max_threads >= 4`, preserve higher numeric values and inline comments, and reject malformed direct values without replacing the configuration file.
+- Extended disposable-home coverage for absent, low, exact, high, and malformed thread values, comment preservation, and repeated-run idempotency while retaining the existing depth scenarios.
+- `devenv test`: passed, including the complete installer matrix and repository validation suite.
