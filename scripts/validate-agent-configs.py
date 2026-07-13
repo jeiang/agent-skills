@@ -14,6 +14,12 @@ EXPECTED = {
         "model_reasoning_effort": "high",
         "sandbox_mode": "workspace-write",
     },
+    "documentation-author.toml": {
+        "name": "documentation_author",
+        "model": "gpt-5.6-luna",
+        "model_reasoning_effort": "high",
+        "sandbox_mode": "workspace-write",
+    },
     "feature-implementer.toml": {
         "name": "feature_implementer",
         "model": "gpt-5.6-terra",
@@ -67,6 +73,19 @@ AUTHOR_CONTRACT = (
     "Do not create or switch branches, commit, push, or open a pull request",
 )
 
+DOCUMENTATION_AUTHOR_CONTRACT = (
+    "after product-code review has reached a provisional pass",
+    "stale, missing, contradictory, or invalid",
+    "implementation, repository guidance, or verified user-facing behavior",
+    "Do not create speculative guides, duplicate existing documentation",
+    "Edit documentation files only",
+    "Do not modify product code, configuration, tests",
+    "Validate links, commands, paths, examples",
+    "self-review the complete documentation diff",
+    "focused conventional commit boundary",
+    "Do not create or switch branches, commit, push, open a pull request",
+)
+
 ORCHESTRATOR_CONTRACT = (
     "Establish the baseline before delegation",
     "If the root `AGENTS.md` is missing",
@@ -88,6 +107,15 @@ ORCHESTRATOR_CONTRACT = (
     "PRE_EXISTING_MISSED",
     "exhaustive entire-part review",
     "require `plan_reviewer` to adversarially review and approve each resulting repair plan",
+    "product-code review reaches a provisional `VERDICT: PASS`",
+    "spawn `documentation_author`",
+    "final cumulative review across code, tests, configuration, and documentation",
+    "exceeds 400 changed lines or exceeds 8 files",
+    "partition it by cohesive subsystem or concern",
+    "independent `feature_reviewer` for each subsection",
+    "cross-section interfaces and interactions",
+    "Route each final-review finding independently",
+    "five-verdict policy",
     "never concurrently",
     "explicit approval",
 )
@@ -234,6 +262,7 @@ def main() -> int:
                 )
 
     contract_markers = {
+        "documentation-author.toml": DOCUMENTATION_AUTHOR_CONTRACT,
         "task-orchestrator.toml": ORCHESTRATOR_CONTRACT,
         "prompt-validator.toml": PROMPT_VALIDATOR_CONTRACT,
         "task-researcher.toml": RESEARCHER_CONTRACT,

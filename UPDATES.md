@@ -2,8 +2,8 @@
 
 ## Progress
 
-- Current step: 8. Add documentation generation and final cumulative review.
-- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles; 5. Add adversarial plan review and simplify planner output; 6. Harden implementation behavior; 7. Strengthen code review and repair.
+- Current step: 9. Rewrite the skill contract and public documentation.
+- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles; 5. Add adversarial plan review and simplify planner output; 6. Harden implementation behavior; 7. Strengthen code review and repair; 8. Add documentation generation and final cumulative review.
 - Blockers: `devenv test` cannot evaluate on the current host because Lix rejects devenv's restricted client-specified `system` setting for an untrusted user. The equivalent pinned checks pass through `nix shell`.
 
 ## Implementation steps
@@ -98,3 +98,12 @@
 - Preserved the five-completed-verdict limit and stop-without-publication behavior for unresolved findings.
 - Extended semantic agent validation to protect the adversarial review and isolated repair-loop contracts.
 - The semantic agent validator and `git diff --check` passed. The complete check entry point could not run in this shell because the ambient Python lacks `tomllib` and the available fallback Nix environments did not provide both the `python` executable and PyYAML together.
+
+### Step 8
+
+- Added the Luna-high, workspace-write `documentation_author`, restricted to necessary documentation changes after a provisional product-code pass.
+- Required a repository-grounded audit for stale, missing, contradictory, or invalid documentation without speculative guides, duplicate content, or changes to code, configuration, tests, workflow state, or Git publication state.
+- Required documentation validation, complete-diff self-review, and a focused conventional documentation commit boundary.
+- Added orchestration for queued documentation findings, a focused documentation stage, and final cumulative review across code, tests, configuration, and documentation.
+- Added sectional review when the substantive cumulative diff exceeds 400 lines or 8 files, using independent reviewers for cohesive subsections plus a separate cross-section interface review.
+- Required all distinct findings to be retained and routed independently through implementer or documentation-author repairs according to file domain, followed by another cumulative review within the five-verdict policy.
