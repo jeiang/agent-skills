@@ -78,6 +78,16 @@ ORCHESTRATOR_CONTRACT = (
     "only when unresolved repository facts",
     "Process only independently reviewable and shippable parts",
     "Process parts sequentially",
+    "Count a completed review cycle only when a reviewer returns a verdict",
+    "five reviewer verdicts",
+    "repair each finding independently",
+    "invoke the planner separately",
+    "invoke the implementer separately",
+    "review the cumulative part again",
+    "REPAIR_INTRODUCED",
+    "PRE_EXISTING_MISSED",
+    "exhaustive entire-part review",
+    "require `plan_reviewer` to adversarially review and approve each resulting repair plan",
     "never concurrently",
     "explicit approval",
 )
@@ -149,6 +159,29 @@ IMPLEMENTER_CONTRACT = (
     "sensible conventional commit boundaries",
 )
 
+FEATURE_REVIEWER_CONTRACT = (
+    "adversarial reviewer",
+    "Search exhaustively",
+    "correctness, security, regression, compatibility, error-handling, plan-fulfillment, and required-validation defects",
+    "complete `baseline..HEAD` diff",
+    "previous reviewed HEAD",
+    "disposition of every prior finding",
+    "cumulative result",
+    "REPAIR_INTRODUCED",
+    "PRE_EXISTING_MISSED",
+    "evidence from the tree at the previous reviewed HEAD",
+    "exhaustive entire-part review",
+    "VERDICT: PASS",
+    "VERDICT: ISSUES",
+    "severity",
+    "file and line or symbol",
+    "concrete evidence",
+    "consequence",
+    "required correction",
+    "origin",
+    "Do not edit files",
+)
+
 
 def main() -> int:
     errors: list[str] = []
@@ -207,6 +240,7 @@ def main() -> int:
         "feature-planner.toml": PLANNER_CONTRACT,
         "plan-reviewer.toml": PLAN_REVIEWER_CONTRACT,
         "feature-implementer.toml": IMPLEMENTER_CONTRACT,
+        "feature-reviewer.toml": FEATURE_REVIEWER_CONTRACT,
     }
     for filename, markers in contract_markers.items():
         path = AGENTS_DIR / filename

@@ -2,8 +2,8 @@
 
 ## Progress
 
-- Current step: 7. Strengthen code review and repair.
-- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles; 5. Add adversarial plan review and simplify planner output; 6. Harden implementation behavior.
+- Current step: 8. Add documentation generation and final cumulative review.
+- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles; 5. Add adversarial plan review and simplify planner output; 6. Harden implementation behavior; 7. Strengthen code review and repair.
 - Blockers: `devenv test` cannot evaluate on the current host because Lix rejects devenv's restricted client-specified `system` setting for an untrusted user. The equivalent pinned checks pass through `nix shell`.
 
 ## Implementation steps
@@ -87,3 +87,14 @@
 - Added final self-review of approved risks, diff necessity and scope, static and focused validation, style, conventions, and workaround justification.
 - Let the implementer select sensible conventional commit boundaries while preserving staged-file isolation and the prohibition on empty or rewritten commits.
 - Extended semantic agent validation to protect the hardened implementer contract.
+
+### Step 7
+
+- Made the Sol-medium, read-only feature reviewer adversarial and exhaustive across correctness, security, regressions, compatibility, error handling, plan fulfillment, and required validation.
+- Required complete baseline-to-HEAD review on the first pass and prior-finding disposition, repair-range inspection, and cumulative assessment on later passes.
+- Added evidence-based `REPAIR_INTRODUCED` and `PRE_EXISTING_MISSED` classifications for new findings, with exact verdict and issue-reporting fields.
+- Required a separate planner and implementer invocation, validation, self-review, and conventional commit for every review finding before cumulative re-review.
+- Added escalation from the first missed pre-existing issue to exhaustive entire-part review, then to adversarial plan-reviewer approval if another pre-existing issue is missed.
+- Preserved the five-completed-verdict limit and stop-without-publication behavior for unresolved findings.
+- Extended semantic agent validation to protect the adversarial review and isolated repair-loop contracts.
+- The semantic agent validator and `git diff --check` passed. The complete check entry point could not run in this shell because the ambient Python lacks `tomllib` and the available fallback Nix environments did not provide both the `python` executable and PyYAML together.
