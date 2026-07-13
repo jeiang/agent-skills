@@ -2,8 +2,8 @@
 
 ## Progress
 
-- Current step: 3. Add repository-guidance generation.
-- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration.
+- Current step: 4. Add orchestration, research, and prompt validation roles.
+- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation.
 - Blockers: `devenv test` cannot evaluate on the current host because Lix rejects devenv's restricted client-specified `system` setting for an untrusted user. The equivalent pinned checks pass through `nix shell`.
 
 ## Implementation steps
@@ -52,3 +52,11 @@
 - Temporary-home tests cover fresh configuration, depth upgrades, higher depths, missing settings, unrelated settings and nested tables, comment preservation, and repeated installation.
 - Installer tests, POSIX syntax checks, ShellCheck, and strict shfmt checks are integrated into `scripts/check.sh`.
 - Complete `scripts/check.sh` execution passed in the Nix-provided validation environment.
+
+### Step 3
+
+- Added `agents_md_author` with the required Luna high model and workspace-write sandbox.
+- The author is restricted to one explicitly approved canonical `AGENTS.md` for its assigned root or component and cannot modify other files or manage Git publication.
+- Author guidance requires repository-grounded structure, build, validation, and convention instructions; path and command verification; and a final self-review without invented policy.
+- Added semantic agent-config validation for required names, models, reasoning efforts, sandbox modes, non-empty role instructions, and the repository-guidance safety contract.
+- Integrated agent-config validation into `scripts/check.sh`.

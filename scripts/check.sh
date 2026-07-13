@@ -15,6 +15,8 @@ for skill in codex/*; do
   python "$validator" "$skill"
 done
 
+python scripts/validate-agent-configs.py
+
 python - <<'PY'
 from pathlib import Path
 import tomllib
