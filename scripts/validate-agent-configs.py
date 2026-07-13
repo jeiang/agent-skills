@@ -129,6 +129,26 @@ PLAN_REVIEWER_CONTRACT = (
     "Do not edit files",
 )
 
+IMPLEMENTER_CONTRACT = (
+    "exactly one supplied, user-approved cohesive change",
+    "Do not create or edit documentation",
+    "documentation agent",
+    "unnecessary tests, CI changes, comments, or files",
+    "Use repository-provided static tools first",
+    "strict compiler, type-checker, and linter settings for touched code only",
+    "more than 500 non-generated changed lines",
+    "more than 10 product files",
+    "more than two independently testable architectural components",
+    "generated files, lock files, and mechanical formatting",
+    "stop uncommitted and return the design to the planner",
+    "material planning assumption is invalid",
+    "Reassess every applicable risk",
+    "Inspect the complete diff for unnecessary changes",
+    "Re-run the relevant static tools and focused tests after the final edit",
+    "one-line justification",
+    "sensible conventional commit boundaries",
+)
+
 
 def main() -> int:
     errors: list[str] = []
@@ -186,6 +206,7 @@ def main() -> int:
         "task-researcher.toml": RESEARCHER_CONTRACT,
         "feature-planner.toml": PLANNER_CONTRACT,
         "plan-reviewer.toml": PLAN_REVIEWER_CONTRACT,
+        "feature-implementer.toml": IMPLEMENTER_CONTRACT,
     }
     for filename, markers in contract_markers.items():
         path = AGENTS_DIR / filename

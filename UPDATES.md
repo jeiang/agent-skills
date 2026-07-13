@@ -2,8 +2,8 @@
 
 ## Progress
 
-- Current step: 6. Harden implementation behavior.
-- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles; 5. Add adversarial plan review and simplify planner output.
+- Current step: 7. Strengthen code review and repair.
+- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles; 5. Add adversarial plan review and simplify planner output; 6. Harden implementation behavior.
 - Blockers: `devenv test` cannot evaluate on the current host because Lix rejects devenv's restricted client-specified `system` setting for an untrusted user. The equivalent pinned checks pass through `nix shell`.
 
 ## Implementation steps
@@ -76,3 +76,14 @@
 - Prohibited commit planning, commit-message prescriptions, and unnecessary line-, parameter-, or symbol-level implementation minutiae.
 - Required isolated treatment of reviewer findings and evidence-based replanning for invalid implementation assumptions.
 - Extended semantic agent validation to protect the planner and plan-reviewer contracts.
+
+### Step 6
+
+- Restricted the implementer to one approved cohesive change and only the context needed for that change.
+- Prohibited implementer documentation edits and required documentation needs to be queued for the dedicated documentation agent.
+- Required repository static tooling first, with language-standard formatting and strict compiler, type-checker, and linter settings for touched code when no repository style policy exists.
+- Added explicit limits of 500 substantive non-generated lines, 10 product files, or two independently testable architectural components; exceeding a limit stops work uncommitted for planner-directed splitting.
+- Required one-line workaround justification and planner rework or replanning when a workaround cannot be justified concisely.
+- Added final self-review of approved risks, diff necessity and scope, static and focused validation, style, conventions, and workaround justification.
+- Let the implementer select sensible conventional commit boundaries while preserving staged-file isolation and the prohibition on empty or rewritten commits.
+- Extended semantic agent validation to protect the hardened implementer contract.
