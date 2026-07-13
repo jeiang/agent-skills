@@ -147,3 +147,10 @@
 - Kept the start-task launcher and UI semantic validator as a separate workflow-specific check.
 - Added disposable valid and failure fixtures for malformed YAML, missing, extra, and duplicate fields, path/name mismatches, invalid names and descriptions, missing skill files, and missing or empty bodies.
 - `devenv test`: passed without an external Codex skill installation, including all generic fixtures, start-task semantic validation, and the complete repository suite.
+
+### Review repair 5: mandatory reviewed-plan gate
+
+- Replaced optional plan-review coordination with a mandatory same-planner correction loop through the adversarial `plan_reviewer` until exact `PASS` for every initial per-part plan.
+- Required the complete reviewed plan and every materially corrected replacement to receive explicit user approval before implementation or resumed implementation, with initial part-branch creation only after approval.
+- Added ordered semantic assertions for both initial and materially corrected plan gates and an explicit prohibition on the former optional-review wording.
+- `devenv test`: passed, including ordered orchestrator-contract validation and the complete repository suite.

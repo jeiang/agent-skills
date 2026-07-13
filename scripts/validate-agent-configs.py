@@ -120,6 +120,26 @@ ORCHESTRATOR_CONTRACT = (
     "explicit approval",
 )
 
+ORCHESTRATOR_INITIAL_PLAN_GATE = (
+    "Spawn `feature_planner` for the initial per-part plan",
+    "Send the resulting complete plan to `plan_reviewer`",
+    "return every finding to the same `feature_planner` thread",
+    "Repeat planner correction and adversarial plan review",
+    "returns exactly `PASS`",
+    "present the complete reviewed plan to the user",
+    "Wait for explicit user approval",
+    "Only after that approval, create and switch to",
+    "invoke `feature_implementer`",
+)
+
+ORCHESTRATOR_CORRECTED_PLAN_GATE = (
+    "When a per-part plan needs a material correction",
+    "return the evidence and current plan to the same `feature_planner` thread",
+    "run the complete corrected plan through the same mandatory `plan_reviewer` loop",
+    "obtain explicit user approval again",
+    "before implementation resumes",
+)
+
 PROMPT_VALIDATOR_CONTRACT = (
     "every distinct issue",
     "independently reviewable and shippable parts",
@@ -211,6 +231,20 @@ FEATURE_REVIEWER_CONTRACT = (
 )
 
 
+def require_ordered_markers(
+    text: str, markers: tuple[str, ...], contract: str
+) -> list[str]:
+    errors: list[str] = []
+    cursor = 0
+    for marker in markers:
+        position = text.find(marker, cursor)
+        if position < 0:
+            errors.append(f"{contract}: missing or out-of-order step {marker!r}")
+            break
+        cursor = position + len(marker)
+    return errors
+
+
 def main() -> int:
     errors: list[str] = []
     paths = sorted(AGENTS_DIR.glob("*.toml"))
@@ -282,6 +316,29 @@ def main() -> int:
                 errors.append(
                     f"agents/{filename}: missing contract text {marker!r}"
                 )
+
+    orchestrator_path = AGENTS_DIR / "task-orchestrator.toml"
+    if orchestrator_path.exists():
+        with orchestrator_path.open("rb") as stream:
+            instructions = tomllib.load(stream).get("developer_instructions", "")
+        errors.extend(
+            require_ordered_markers(
+                instructions,
+                ORCHESTRATOR_INITIAL_PLAN_GATE,
+                "agents/task-orchestrator.toml initial plan gate",
+            )
+        )
+        errors.extend(
+            require_ordered_markers(
+                instructions,
+                ORCHESTRATOR_CORRECTED_PLAN_GATE,
+                "agents/task-orchestrator.toml corrected plan gate",
+            )
+        )
+        if "plan review when configured" in instructions:
+            errors.append(
+                "agents/task-orchestrator.toml: plan review must not be optional"
+            )
 
     if errors:
         print("Agent configuration validation failed:", file=sys.stderr)

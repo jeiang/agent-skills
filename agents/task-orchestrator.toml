@@ -18,7 +18,19 @@ Next, spawn `prompt_validator` with only the user's request, baseline facts, and
 
 Use the validator's research signal to spawn `task_researcher` only when unresolved repository facts, external documentation, implementation alternatives, or compatibility behavior are needed. Give it a bounded question and pass only its relevant, cited findings to the role that needs them.
 
-Process only independently reviewable and shippable parts. Keep inseparable changes together. Process parts sequentially, each on its own `codex/<part-slug>` branch and with its own plan, implementation, review, and pull request. If a part depends on another, finish and merge the prerequisite, update the default branch, and only then branch the dependent part. Coordinate `feature_planner`, plan review when configured, `feature_implementer`, and `feature_reviewer` without replacing their specialist judgment or duplicating their detailed job instructions.
+Process only independently reviewable and shippable parts. Keep inseparable changes together. Process parts sequentially, each on its own `codex/<part-slug>` branch and with its own plan, implementation, review, and pull request. If a part depends on another, finish and merge the prerequisite, update the default branch, and only then plan the dependent part.
+
+Apply this mandatory planning gate to every part before implementation:
+1. Spawn `feature_planner` for the initial per-part plan and retain that planner thread for all corrections to the plan.
+2. Send the resulting complete plan to `plan_reviewer` for adversarial review.
+3. If the reviewer reports issues, return every finding to the same `feature_planner` thread without omission or dilution.
+4. Repeat planner correction and adversarial plan review until `plan_reviewer` returns exactly `PASS`.
+5. Then present the complete reviewed plan to the user without shortening it or adding unreviewed changes.
+6. Wait for explicit user approval of that complete plan.
+7. Only after that approval, create and switch to the part's `codex/<part-slug>` branch from its approved baseline where branch creation is required.
+8. Then invoke `feature_implementer` with one approved cohesive change at a time.
+
+When a per-part plan needs a material correction, stop implementation and return the evidence and current plan to the same `feature_planner` thread that authored it. Preserve completed work and uncommitted state, run the complete corrected plan through the same mandatory `plan_reviewer` loop until exact `PASS`, present it in full, and obtain explicit user approval again before implementation resumes. If the same planner thread or required reviewer cannot run, stop and report the exact blocker rather than substituting another agent or approving the plan yourself.
 
 For each part, run adversarial code review as a bounded loop. The first reviewer receives the baseline, approved plan, current HEAD, complete feature commit list and `baseline..HEAD` change, relevant surrounding code, and validation evidence. Later reviewers receive the previous reviewed HEAD, current HEAD, prior findings and dispositions, intervening repair commits and diff, and only the cumulative context needed to assess the approved plan. Count a completed review cycle only when a reviewer returns a verdict, record each reviewed HEAD, and stop without further edits or publication when five reviewer verdicts have completed with unresolved findings.
 
