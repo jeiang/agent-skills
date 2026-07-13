@@ -140,3 +140,10 @@
 - Added a preflight check before every installer mutation that refuses a symlinked `~/.codex/config.toml` and identifies both the link and its recorded target.
 - Added relative, absolute, and dangling symlink fixtures that verify link identity, target bytes where present, actionable errors, and absence of partial skill or agent installation, plus an explicit regular-file success case.
 - `devenv test`: passed, including the symlink identity, atomic-refusal, regular-file, and complete repository validation scenarios.
+
+### Review repair 4: self-contained skill validation
+
+- Replaced the required external `$CODEX_HOME` quick validator with a repository-owned generic validator for readable `SKILL.md` files, exact YAML frontmatter fields, names, descriptions, directory matching, and nonempty bodies.
+- Kept the start-task launcher and UI semantic validator as a separate workflow-specific check.
+- Added disposable valid and failure fixtures for malformed YAML, missing, extra, and duplicate fields, path/name mismatches, invalid names and descriptions, missing skill files, and missing or empty bodies.
+- `devenv test`: passed without an external Codex skill installation, including all generic fixtures, start-task semantic validation, and the complete repository suite.

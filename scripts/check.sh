@@ -4,17 +4,8 @@ set -eu
 repo_dir=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$repo_dir"
 
-validator="${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py"
-if [ ! -f "$validator" ]; then
-  echo "Codex skill validator not found: $validator" >&2
-  exit 1
-fi
-
-for skill in codex/*; do
-  [ -f "$skill/SKILL.md" ] || continue
-  python "$validator" "$skill"
-done
-
+python scripts/validate-skills.py codex/*
+python scripts/test-validate-skills.py
 python scripts/validate-agent-configs.py
 python scripts/validate-start-task-skill.py
 
