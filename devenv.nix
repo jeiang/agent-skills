@@ -3,15 +3,11 @@
 {
   packages = with pkgs; [
     jq
+    (python3.withPackages (pythonPackages: [ pythonPackages.pyyaml ]))
     shellcheck
     shfmt
     taplo
   ];
-
-  languages.python = {
-    enable = true;
-    packages = pythonPackages: [ pythonPackages.pyyaml ];
-  };
 
   tasks."repo:check".exec = "./scripts/check.sh";
 

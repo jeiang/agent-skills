@@ -4,7 +4,7 @@
 
 - Current step: 9. Rewrite the skill contract and public documentation; the thin skill interface is complete and public README work is pending the documentation-author stage.
 - Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles; 5. Add adversarial plan review and simplify planner output; 6. Harden implementation behavior; 7. Strengthen code review and repair; 8. Add documentation generation and final cumulative review.
-- Blockers: `devenv test` cannot evaluate on the current host because Lix rejects devenv's restricted client-specified `system` setting for an untrusted user. The equivalent pinned checks pass through `nix shell`.
+- Blockers: None.
 
 ## Implementation steps
 
@@ -43,7 +43,7 @@
 - Taplo formatting check for `agents/*.toml`: passed.
 - `git diff --check`: passed.
 - Complete `scripts/check.sh` execution through Nix-provided Python with PyYAML, ShellCheck, shfmt, Taplo, and jq: passed.
-- `devenv test`: blocked before project evaluation by the host Lix/devenv trust-setting incompatibility described above.
+- `devenv test` initially failed during evaluation because the configured devenv version does not provide `languages.python.packages`; the Python environment repair recorded below replaces that unsupported option.
 
 ### Step 2
 
@@ -97,7 +97,7 @@
 - Added escalation from the first missed pre-existing issue to exhaustive entire-part review, then to adversarial plan-reviewer approval if another pre-existing issue is missed.
 - Preserved the five-completed-verdict limit and stop-without-publication behavior for unresolved findings.
 - Extended semantic agent validation to protect the adversarial review and isolated repair-loop contracts.
-- The semantic agent validator and `git diff --check` passed. The complete check entry point could not run in this shell because the ambient Python lacks `tomllib` and the available fallback Nix environments did not provide both the `python` executable and PyYAML together.
+- The semantic agent validator and `git diff --check` passed. The complete check entry point was deferred until the devenv Python environment repair recorded below.
 
 ### Step 8
 
@@ -115,3 +115,9 @@
 - Updated the skill trigger description and UI metadata to cover repository guidance, prompt validation and research, approved planning, focused implementation, adversarial review, documentation maintenance, and per-part publication.
 - Added semantic validation for the thin-launcher boundary, trigger description, and UI contract, and integrated it into `scripts/check.sh`.
 - Public README synchronization remains pending for the dedicated documentation-author stage.
+
+### Devenv Python environment repair
+
+- Replaced the unsupported `languages.python.packages` option with a stable `python3.withPackages` package expression containing PyYAML.
+- `nix-instantiate --parse devenv.nix`: passed.
+- `devenv test`: passed, including skill validation, agent and launcher semantic validation, YAML and TOML parsing, shell validation and formatting, installer tests, and `git diff --check`.
