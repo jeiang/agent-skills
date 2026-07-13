@@ -32,6 +32,24 @@ EXPECTED = {
         "model_reasoning_effort": "medium",
         "sandbox_mode": "read-only",
     },
+    "prompt-validator.toml": {
+        "name": "prompt_validator",
+        "model": "gpt-5.6-sol",
+        "model_reasoning_effort": "medium",
+        "sandbox_mode": "read-only",
+    },
+    "task-orchestrator.toml": {
+        "name": "task_orchestrator",
+        "model": "gpt-5.6-luna",
+        "model_reasoning_effort": "high",
+        "sandbox_mode": "workspace-write",
+    },
+    "task-researcher.toml": {
+        "name": "task_researcher",
+        "model": "gpt-5.6-luna",
+        "model_reasoning_effort": "high",
+        "sandbox_mode": "read-only",
+    },
 }
 
 AUTHOR_CONTRACT = (
@@ -41,6 +59,41 @@ AUTHOR_CONTRACT = (
     "Do not invent policy",
     "Verify every referenced path",
     "Do not create or switch branches, commit, push, or open a pull request",
+)
+
+ORCHESTRATOR_CONTRACT = (
+    "Establish the baseline before delegation",
+    "If the root `AGENTS.md` is missing",
+    "Run authors sequentially",
+    "wait for it to merge",
+    "Do not continue until the user confirms the scope",
+    ".codex/start-task/<YYYY-MM-DD>_<task-slug>_PLAN.md",
+    "never commit that control file",
+    "only when unresolved repository facts",
+    "Process only independently reviewable and shippable parts",
+    "Process parts sequentially",
+    "never concurrently",
+    "explicit approval",
+)
+
+PROMPT_VALIDATOR_CONTRACT = (
+    "every distinct issue",
+    "independently reviewable and shippable parts",
+    "acceptance criteria",
+    "dependencies",
+    "missing or ambiguous requirements",
+    "whether research is required",
+    "clarification questions",
+    "Do not edit files",
+)
+
+RESEARCHER_CONTRACT = (
+    "bounded question",
+    "Prefer repository evidence and primary sources",
+    "verified findings",
+    "source links as citations",
+    "unresolved facts",
+    "Do not edit files",
 )
 
 
@@ -92,6 +145,23 @@ def main() -> int:
             if marker not in instructions:
                 errors.append(
                     f"agents/agents-md-author.toml: missing contract text {marker!r}"
+                )
+
+    contract_markers = {
+        "task-orchestrator.toml": ORCHESTRATOR_CONTRACT,
+        "prompt-validator.toml": PROMPT_VALIDATOR_CONTRACT,
+        "task-researcher.toml": RESEARCHER_CONTRACT,
+    }
+    for filename, markers in contract_markers.items():
+        path = AGENTS_DIR / filename
+        if not path.exists():
+            continue
+        with path.open("rb") as stream:
+            instructions = tomllib.load(stream).get("developer_instructions", "")
+        for marker in markers:
+            if marker not in instructions:
+                errors.append(
+                    f"agents/{filename}: missing contract text {marker!r}"
                 )
 
     if errors:

@@ -2,8 +2,8 @@
 
 ## Progress
 
-- Current step: 4. Add orchestration, research, and prompt validation roles.
-- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation.
+- Current step: 5. Add adversarial plan review and simplify planner output.
+- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles.
 - Blockers: `devenv test` cannot evaluate on the current host because Lix rejects devenv's restricted client-specified `system` setting for an untrusted user. The equivalent pinned checks pass through `nix shell`.
 
 ## Implementation steps
@@ -60,3 +60,10 @@
 - Author guidance requires repository-grounded structure, build, validation, and convention instructions; path and command verification; and a final self-review without invented policy.
 - Added semantic agent-config validation for required names, models, reasoning efforts, sandbox modes, non-empty role instructions, and the repository-guidance safety contract.
 - Integrated agent-config validation into `scripts/check.sh`.
+
+### Step 4
+
+- Added the Luna-high, workspace-write `task_orchestrator` as the workflow coordinator, with baseline and guidance discovery, prompt confirmation, research delegation, per-part state, dependency gates, isolated context, sequential writes, and publication approvals.
+- Added the Luna-high, read-only `task_researcher`, restricted to bounded questions and concise findings cited to repository evidence or primary sources.
+- Added the Sol-medium, read-only `prompt_validator`, which separates independently shippable concerns and reports acceptance criteria, dependencies, ambiguities, clarification questions, and explicit research signals without editing files.
+- Extended semantic agent validation to assert all three roles' models, reasoning efforts, sandbox modes, and critical workflow boundaries.
