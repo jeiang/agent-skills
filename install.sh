@@ -6,6 +6,97 @@ agent_target="$HOME/.codex/agents"
 config_file="$HOME/.codex/config.toml"
 backup_root="$HOME/.codex/skill-backups"
 
+configure_agents() {
+  config=$1
+  temporary_config="$config.tmp.$$"
+
+  trap 'rm -f "$temporary_config"' EXIT HUP INT TERM
+  cp "$config" "$temporary_config"
+  if ! awk '
+    function add_missing_settings() {
+      if (!found_threads) {
+        print "max_threads = 4"
+      }
+      if (!found_depth) {
+        print "max_depth = 2"
+      }
+    }
+
+    function is_table(line) {
+      return line ~ /^[[:space:]]*\[[^]]+\][[:space:]]*(#.*)?$/
+    }
+
+    function is_agents_table(line) {
+      return line ~ /^[[:space:]]*\[agents\][[:space:]]*(#.*)?$/
+    }
+
+    BEGIN {
+      in_agents = 0
+      found_agents = 0
+      found_threads = 0
+      found_depth = 0
+      invalid = 0
+    }
+
+    {
+      if (is_table($0)) {
+        if (in_agents) {
+          add_missing_settings()
+          in_agents = 0
+        }
+
+        if (is_agents_table($0)) {
+          found_agents = 1
+          found_threads = 0
+          found_depth = 0
+          in_agents = 1
+        }
+      }
+
+      if (in_agents && $0 ~ /^[[:space:]]*max_threads[[:space:]]*=/) {
+        found_threads = 1
+      }
+
+      if (in_agents && $0 ~ /^[[:space:]]*max_depth[[:space:]]*=/) {
+        found_depth = 1
+        if ($0 !~ /^[[:space:]]*max_depth[[:space:]]*=[[:space:]]*[0-9]+[[:space:]]*(#.*)?$/) {
+          print "Unsupported agents.max_depth value in " FILENAME > "/dev/stderr"
+          invalid = 1
+        } else {
+          value = $0
+          sub(/^[^=]*=[[:space:]]*/, "", value)
+          if ((value + 0) < 2) {
+            match($0, /[0-9]+/)
+            $0 = substr($0, 1, RSTART - 1) "2" substr($0, RSTART + RLENGTH)
+          }
+        }
+      }
+
+      print
+    }
+
+    END {
+      if (in_agents) {
+        add_missing_settings()
+      } else if (!found_agents) {
+        print ""
+        print "[agents]"
+        print "max_threads = 4"
+        print "max_depth = 2"
+      }
+
+      if (invalid) {
+        exit 1
+      }
+    }
+  ' "$config" >"$temporary_config"; then
+    return 1
+  fi
+
+  mv "$temporary_config" "$config"
+  trap - EXIT HUP INT TERM
+}
+
 link_skill() {
   source=$1
   target_parent=$2
@@ -74,14 +165,10 @@ for source in "$repo_dir"/agents/*.toml; do
 done
 
 if [ ! -e "$config_file" ]; then
-  : > "$config_file"
+  : >"$config_file"
 fi
 
-if ! grep -Eq '^\[agents\][[:space:]]*$' "$config_file"; then
-  printf '\n[agents]\nmax_threads = 4\nmax_depth = 1\n' >> "$config_file"
-else
-  echo "Existing [agents] configuration left unchanged in $config_file"
-fi
+configure_agents "$config_file"
 
 legacy_start_task="$HOME/.agents/skills/start-task"
 if [ -L "$legacy_start_task" ] && [ ! -e "$legacy_start_task" ]; then

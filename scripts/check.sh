@@ -34,8 +34,11 @@ for pattern in ("*.yaml", "*.yml"):
 PY
 
 sh -n install.sh
+sh -n scripts/test-install.sh
 shellcheck --exclude=SC1007 install.sh
 shellcheck scripts/check.sh
-shfmt -d -i 2 -ci scripts/check.sh
+shellcheck scripts/test-install.sh
+shfmt -d -i 2 -ci install.sh scripts/check.sh scripts/test-install.sh
 taplo format --check agents/*.toml
+scripts/test-install.sh
 git diff --check

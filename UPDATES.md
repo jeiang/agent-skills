@@ -2,8 +2,8 @@
 
 ## Progress
 
-- Current step: 2. Update installer support for nested orchestration.
-- Completed steps: 1. Add progress tracking and the development shell.
+- Current step: 3. Add repository-guidance generation.
+- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration.
 - Blockers: `devenv test` cannot evaluate on the current host because Lix rejects devenv's restricted client-specified `system` setting for an untrusted user. The equivalent pinned checks pass through `nix shell`.
 
 ## Implementation steps
@@ -44,3 +44,11 @@
 - `git diff --check`: passed.
 - Complete `scripts/check.sh` execution through Nix-provided Python with PyYAML, ShellCheck, shfmt, Taplo, and jq: passed.
 - `devenv test`: blocked before project evaluation by the host Lix/devenv trust-setting incompatibility described above.
+
+### Step 2
+
+- `install.sh` now raises `agents.max_depth` values below 2, preserves higher values, and adds `max_threads = 4` only when absent.
+- Installer configuration updates preserve inline comments, unrelated keys and tables, user-selected thread limits, and repeated-run idempotency.
+- Temporary-home tests cover fresh configuration, depth upgrades, higher depths, missing settings, unrelated settings and nested tables, comment preservation, and repeated installation.
+- Installer tests, POSIX syntax checks, ShellCheck, and strict shfmt checks are integrated into `scripts/check.sh`.
+- Complete `scripts/check.sh` execution passed in the Nix-provided validation environment.
