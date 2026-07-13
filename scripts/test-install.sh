@@ -47,6 +47,40 @@ assert_refused_unchanged() {
   grep -F "$expected_error" "$error" >/dev/null
 }
 
+assert_symlink_refused() {
+  home=$1
+  expected_link_target=$2
+  target_file=$3
+  config="$home/.codex/config.toml"
+  fixture=$(basename -- "$home")
+  error="$test_root/$fixture.stderr"
+
+  [ -L "$config" ]
+  [ "$(readlink "$config")" = "$expected_link_target" ]
+  if [ "$target_file" != '-' ]; then
+    cp "$target_file" "$test_root/$fixture.target.before"
+  fi
+
+  if HOME="$home" "$repo_dir/install.sh" >"$test_root/$fixture.stdout" 2>"$error"; then
+    echo "Installer accepted symlinked config in $fixture" >&2
+    exit 1
+  fi
+
+  [ -L "$config" ]
+  [ "$(readlink "$config")" = "$expected_link_target" ]
+  grep -F "Refusing symlinked Codex config: $config -> $expected_link_target" "$error" >/dev/null
+  [ ! -e "$home/.codex/skills" ]
+  [ ! -e "$home/.codex/agents" ]
+  [ ! -e "$home/.agents" ]
+
+  if [ "$target_file" = '-' ]; then
+    [ ! -e "$config" ]
+  else
+    cmp "$test_root/$fixture.target.before" "$target_file"
+    assert_toml "$target_file"
+  fi
+}
+
 assert_agents() {
   config=$1
   expected_depth=$2
@@ -76,6 +110,28 @@ new_home() {
   mkdir -p "$home/.codex"
   printf '%s\n' "$home"
 }
+
+# Config symlinks are refused before any installation mutation.
+home=$(new_home relative_symlink)
+printf '%s\n' '[identity]' 'name = "relative"' >"$home/.codex/config-target.toml"
+ln -s 'config-target.toml' "$home/.codex/config.toml"
+assert_symlink_refused "$home" 'config-target.toml' "$home/.codex/config-target.toml"
+
+home=$(new_home absolute_symlink)
+printf '%s\n' '[identity]' 'name = "absolute"' >"$home/absolute-config.toml"
+ln -s "$home/absolute-config.toml" "$home/.codex/config.toml"
+assert_symlink_refused "$home" "$home/absolute-config.toml" "$home/absolute-config.toml"
+
+home=$(new_home dangling_symlink)
+ln -s 'missing-config.toml' "$home/.codex/config.toml"
+assert_symlink_refused "$home" 'missing-config.toml' '-'
+
+# A regular config remains supported.
+home=$(new_home regular_config)
+printf '%s\n' '[identity]' 'name = "regular"' >"$home/.codex/config.toml"
+run_installer "$home"
+[ ! -L "$home/.codex/config.toml" ]
+assert_agents "$home/.codex/config.toml" 2 4
 
 # Fresh configuration receives both required settings.
 home=$(new_home fresh)

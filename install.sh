@@ -6,6 +6,20 @@ agent_target="$HOME/.codex/agents"
 config_file="$HOME/.codex/config.toml"
 backup_root="$HOME/.codex/skill-backups"
 
+refuse_symlinked_config() {
+  if [ ! -L "$config_file" ]; then
+    return 0
+  fi
+
+  if link_target=$(readlink "$config_file" 2>/dev/null); then
+    :
+  else
+    link_target='<unreadable link target>'
+  fi
+  echo "Refusing symlinked Codex config: $config_file -> $link_target. Replace the link with a regular config file before installing." >&2
+  exit 1
+}
+
 configure_agents() {
   config=$1
   temporary_config="$config.tmp.$$"
@@ -223,6 +237,8 @@ install_skill_tree() {
     link_skill "$source" "$target_parent"
   done
 }
+
+refuse_symlinked_config
 
 # Codex-only skills live under codex/ and are discovered from ~/.codex/skills.
 install_skill_tree "$repo_dir/codex" "$HOME/.codex/skills"

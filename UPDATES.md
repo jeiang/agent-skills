@@ -134,3 +134,9 @@
 - Added atomic refusal for quoted, dotted, inline, array-of-tables, duplicate, conflicting, and other agents aliases that could otherwise be silently shadowed or corrupted.
 - Added before-and-after TOML parsing and byte-identity checks for valid refused fixtures, explicit duplicate-definition refusal, canonical root-table assertions for supported fixtures, and preservation coverage for unrelated quoted and dotted TOML.
 - `devenv test`: passed, including the expanded safe-support and atomic-refusal installer fixtures and the complete repository validation suite.
+
+### Review repair 3: symlinked config refusal
+
+- Added a preflight check before every installer mutation that refuses a symlinked `~/.codex/config.toml` and identifies both the link and its recorded target.
+- Added relative, absolute, and dangling symlink fixtures that verify link identity, target bytes where present, actionable errors, and absence of partial skill or agent installation, plus an explicit regular-file success case.
+- `devenv test`: passed, including the symlink identity, atomic-refusal, regular-file, and complete repository validation scenarios.
