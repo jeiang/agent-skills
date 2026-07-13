@@ -26,6 +26,12 @@ EXPECTED = {
         "model_reasoning_effort": "high",
         "sandbox_mode": "read-only",
     },
+    "plan-reviewer.toml": {
+        "name": "plan_reviewer",
+        "model": "gpt-5.6-sol",
+        "model_reasoning_effort": "high",
+        "sandbox_mode": "read-only",
+    },
     "feature-reviewer.toml": {
         "name": "feature_reviewer",
         "model": "gpt-5.6-sol",
@@ -96,6 +102,33 @@ RESEARCHER_CONTRACT = (
     "Do not edit files",
 )
 
+PLANNER_CONTRACT = (
+    "mid-level plan",
+    "affected subsystems and public or internal interfaces",
+    "proportionate validation",
+    "risks, edge cases",
+    "Do not plan commits or commit messages",
+    "Do not prescribe line-level edits, parameter-level changes",
+    "each isolated finding",
+    "invalid planning assumption",
+    "Never edit files",
+)
+
+PLAN_REVIEWER_CONTRACT = (
+    "adversarial plan reviewer",
+    "completely solves the stated problem",
+    "feasible in the current repository",
+    "material risks, edge cases, compatibility concerns, and failure modes",
+    "proportionate validation",
+    "unnecessary changes, overengineering, or speculative abstractions",
+    "one-line justification",
+    "PASS",
+    "ISSUES",
+    "every issue found in one exhaustive pass",
+    "until no issues remain",
+    "Do not edit files",
+)
+
 
 def main() -> int:
     errors: list[str] = []
@@ -151,6 +184,8 @@ def main() -> int:
         "task-orchestrator.toml": ORCHESTRATOR_CONTRACT,
         "prompt-validator.toml": PROMPT_VALIDATOR_CONTRACT,
         "task-researcher.toml": RESEARCHER_CONTRACT,
+        "feature-planner.toml": PLANNER_CONTRACT,
+        "plan-reviewer.toml": PLAN_REVIEWER_CONTRACT,
     }
     for filename, markers in contract_markers.items():
         path = AGENTS_DIR / filename

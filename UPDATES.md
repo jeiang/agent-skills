@@ -2,8 +2,8 @@
 
 ## Progress
 
-- Current step: 5. Add adversarial plan review and simplify planner output.
-- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles.
+- Current step: 6. Harden implementation behavior.
+- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles; 5. Add adversarial plan review and simplify planner output.
 - Blockers: `devenv test` cannot evaluate on the current host because Lix rejects devenv's restricted client-specified `system` setting for an untrusted user. The equivalent pinned checks pass through `nix shell`.
 
 ## Implementation steps
@@ -67,3 +67,12 @@
 - Added the Luna-high, read-only `task_researcher`, restricted to bounded questions and concise findings cited to repository evidence or primary sources.
 - Added the Sol-medium, read-only `prompt_validator`, which separates independently shippable concerns and reports acceptance criteria, dependencies, ambiguities, clarification questions, and explicit research signals without editing files.
 - Extended semantic agent validation to assert all three roles' models, reasoning efforts, sandbox modes, and critical workflow boundaries.
+
+### Step 5
+
+- Added the Sol-high, read-only `plan_reviewer`, which adversarially checks complete problem coverage, feasibility, requirements, risks, validation, scope, workarounds, and overengineering.
+- Defined an exact `PASS` or `ISSUES` verdict protocol and require exhaustive, concrete findings to return to the planner until none remain.
+- Reframed planner output around mid-level outcomes, behavior, subsystems, interfaces, risks, edge cases, and proportionate validation.
+- Prohibited commit planning, commit-message prescriptions, and unnecessary line-, parameter-, or symbol-level implementation minutiae.
+- Required isolated treatment of reviewer findings and evidence-based replanning for invalid implementation assumptions.
+- Extended semantic agent validation to protect the planner and plan-reviewer contracts.
