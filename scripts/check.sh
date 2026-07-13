@@ -16,6 +16,7 @@ for skill in codex/*; do
 done
 
 python scripts/validate-agent-configs.py
+python scripts/validate-start-task-skill.py
 
 python - <<'PY'
 from pathlib import Path

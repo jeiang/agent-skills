@@ -2,7 +2,7 @@
 
 ## Progress
 
-- Current step: 9. Rewrite the skill contract and public documentation.
+- Current step: 9. Rewrite the skill contract and public documentation; the thin skill interface is complete and public README work is pending the documentation-author stage.
 - Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles; 5. Add adversarial plan review and simplify planner output; 6. Harden implementation behavior; 7. Strengthen code review and repair; 8. Add documentation generation and final cumulative review.
 - Blockers: `devenv test` cannot evaluate on the current host because Lix rejects devenv's restricted client-specified `system` setting for an untrusted user. The equivalent pinned checks pass through `nix shell`.
 
@@ -107,3 +107,11 @@
 - Added orchestration for queued documentation findings, a focused documentation stage, and final cumulative review across code, tests, configuration, and documentation.
 - Added sectional review when the substantive cumulative diff exceeds 400 lines or 8 files, using independent reviewers for cohesive subsections plus a separate cross-section interface review.
 - Required all distinct findings to be retained and routed independently through implementer or documentation-author repairs according to file domain, followed by another cumulative review within the five-verdict policy.
+
+### Step 9
+
+- Replaced the legacy parent-managed planner, implementer, and reviewer procedure in `codex/start-task/SKILL.md` with a thin launcher that records the minimum invocation baseline and spawns only `task_orchestrator`.
+- Restricted the launcher to relaying orchestrator questions, approvals, blockers, progress, and results through the same orchestrator thread; specialist work cannot be performed or substituted by the parent.
+- Updated the skill trigger description and UI metadata to cover repository guidance, prompt validation and research, approved planning, focused implementation, adversarial review, documentation maintenance, and per-part publication.
+- Added semantic validation for the thin-launcher boundary, trigger description, and UI contract, and integrated it into `scripts/check.sh`.
+- Public README synchronization remains pending for the dedicated documentation-author stage.
