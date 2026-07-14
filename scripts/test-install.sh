@@ -256,6 +256,14 @@ make_signal_installer() {
   cleanup_signal=${4-}
   awk -v source_repo="$repo_dir" -v allocation="$allocation" -v signal_name="$signal_name" -v cleanup_signal="$cleanup_signal" '
     {
+      if ($0 ~ (" " signal_name "$")) {
+        hook = "; "
+        if (cleanup_signal != "") {
+          hook = hook "kill -" cleanup_signal " \"$$\"; "
+        }
+        hook = hook ": >\"$TMPDIR/claim-marker\"; trap - EXIT;"
+        sub(/; trap - EXIT;/, hook)
+      }
       print
       if ($0 ~ /^repo_dir=/) {
         printf "repo_dir=%c%s%c\n", 39, source_repo, 39
@@ -263,9 +271,6 @@ make_signal_installer() {
       if ((allocation == "workspace" && $0 == "  workspace_owned=1") ||
           (allocation == "lock" && $0 == "  lock_owned=1")) {
         print "  kill -" signal_name " \"$$\""
-      }
-      if (cleanup_signal != "" && $0 == "  cleanup_active=1") {
-        print "  kill -" cleanup_signal " \"$$\""
       }
     }
   ' "$repo_dir/install.sh" >"$output"
@@ -292,6 +297,8 @@ assert_deferred_signal_cleanup() {
     echo "Installer returned $status instead of $expected_status for $allocation $signal_name" >&2
     exit 1
   fi
+  [ -f "$installer_tmp/claim-marker" ]
+  rm "$installer_tmp/claim-marker"
 
   snapshot_home "$home" "$test_root/$fixture.home.after"
   cmp "$test_root/$fixture.home.before" "$test_root/$fixture.home.after"
@@ -339,11 +346,27 @@ assert_deferred_signal_cleanup lock HUP 129
 assert_deferred_signal_cleanup lock INT 130
 assert_deferred_signal_cleanup lock TERM 143
 
-# A second termination signal after cleanup starts cannot interrupt owned-resource removal
-# or replace the status from the signal that initiated cleanup.
+# The first executed claim suppresses competing signals and preserves its status.
 assert_deferred_signal_cleanup lock TERM 143 HUP
-assert_deferred_signal_cleanup lock TERM 143 INT
-assert_deferred_signal_cleanup lock TERM 143 TERM
+assert_deferred_signal_cleanup lock HUP 129 TERM
+
+# An ordinary EXIT claim preserves the command status when later signals arrive.
+exit_claim_installer="$test_root/signal-exit-claim.sh"
+awk '
+  {
+    if ($0 ~ / EXIT$/) {
+      sub(/; trap - EXIT;/, "; kill -TERM \"$$\"; kill -HUP \"$$\"; : >\"$TMPDIR/claim-marker\"; trap - EXIT;")
+    }
+    print
+  }
+' "$repo_dir/install.sh" >"$exit_claim_installer"
+chmod +x "$exit_claim_installer"
+home=$(new_home signal_exit_claim)
+HOME="$home" "$exit_claim_installer" >/dev/null
+[ -f "$installer_tmp/claim-marker" ]
+rm "$installer_tmp/claim-marker"
+assert_toml "$home/.codex/config.toml"
+assert_installer_temp_clean
 
 # A late skill conflict refuses before earlier planned links or agents mutate HOME.
 home=$(new_home skill_conflict)

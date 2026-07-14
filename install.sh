@@ -12,42 +12,23 @@ lock_dir=''
 workspace_owned=0
 lock_owned=0
 resource_transition=0
-pending_signal=0
 cleanup_active=0
 cleanup_status=0
-
-handle_termination() {
-  signal_status=$1
-  if [ "$cleanup_active" -eq 1 ]; then
-    return 0
-  fi
-  if [ "$resource_transition" -eq 1 ]; then
-    if [ "$pending_signal" -eq 0 ]; then
-      pending_signal=$signal_status
-    fi
-    return 0
-  fi
-  exit "$signal_status"
-}
+cleanup_pending=0
 
 finish_resource_transition() {
   resource_transition=0
-  if [ "$pending_signal" -ne 0 ]; then
-    signal_status=$pending_signal
-    pending_signal=0
-    exit "$signal_status"
+  if [ "$cleanup_pending" -eq 1 ]; then
+    cleanup_pending=0
+    cleanup_workspace
   fi
 }
 
 cleanup_workspace() {
-  initiating_status=$?
-  if [ "$cleanup_active" -eq 1 ]; then
-    return 0
+  if [ "$cleanup_active" -ne 1 ]; then
+    echo 'Refusing cleanup without an established cleanup claim.' >&2
+    exit 1
   fi
-  cleanup_active=1
-  cleanup_status=$initiating_status
-  trap - EXIT
-  trap '' HUP INT TERM
   if [ "$workspace_owned" -eq 1 ]; then
     if ! rm -rf "$workspace"; then
       echo "Warning: unable to remove installer workspace: $workspace" >&2
@@ -63,10 +44,10 @@ cleanup_workspace() {
   exit "$cleanup_status"
 }
 
-trap cleanup_workspace EXIT
-trap 'handle_termination 129' HUP
-trap 'handle_termination 130' INT
-trap 'handle_termination 143' TERM
+trap 'cleanup_status=$? cleanup_active=1 trap "" HUP INT TERM; trap - EXIT; if [ "$resource_transition" -eq 1 ]; then cleanup_pending=1; else cleanup_workspace; fi' EXIT
+trap 'cleanup_status=129 cleanup_active=1 trap "" HUP INT TERM; trap - EXIT; if [ "$resource_transition" -eq 1 ]; then cleanup_pending=1; else cleanup_workspace; fi' HUP
+trap 'cleanup_status=130 cleanup_active=1 trap "" HUP INT TERM; trap - EXIT; if [ "$resource_transition" -eq 1 ]; then cleanup_pending=1; else cleanup_workspace; fi' INT
+trap 'cleanup_status=143 cleanup_active=1 trap "" HUP INT TERM; trap - EXIT; if [ "$resource_transition" -eq 1 ]; then cleanup_pending=1; else cleanup_workspace; fi' TERM
 
 create_workspace() {
   temporary_root=${TMPDIR:-/tmp}
