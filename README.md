@@ -1,27 +1,24 @@
 # Agent Skills
 
-A Git-managed collection of reusable agent skills and Codex custom agents.
+A Git-managed collection of Codex skills and custom agents.
 
 ## Layout
 
-- `codex/` contains skills intended specifically for Codex. Every skill in this
-  directory is linked into `~/.codex/skills` by the installer.
-- `generic/` is reserved for future portable agent skills. Skills added there
-  are linked into `~/.agents/skills`.
-- `agents/` contains Codex custom-agent definitions installed into
-  `~/.codex/agents`.
-- `install.sh` installs or updates the links and custom-agent files.
+- `codex/` contains Codex-specific skills linked into `~/.codex/skills`.
+- `generic/` is reserved for portable skills linked into `~/.agents/skills`.
+- `agents/` contains custom-agent definitions linked into `~/.codex/agents`.
+- `install.sh` installs the links and required Codex agent limits.
 
-The repository currently includes:
+The included skills are:
 
-- `codex/actual-budget-import/` — imports natural-language transactions through
-  the configured Actual Budget CLI.
-- `codex/start-task/` — runs a repository-aware, approval-gated workflow for
-  prompt validation, research, planning, implementation, adversarial review,
-  documentation maintenance, and per-part pull requests.
+- `actual-budget-import` for importing natural-language transactions through the Actual Budget CLI.
+- `start-task` for a repository change with confirmed scope, approved planning, focused implementation, bounded review, and optional publication.
+- `kubernetes-delivery` for preparing and validating Helm, Kubernetes, container, and delivery configuration without deploying it.
+- `kubernetes-diagnose` for investigating Kubernetes workload and platform failures.
+- `nixos-change-validation` for preparing and validating NixOS changes and safe activation instructions.
+- `azure-pipelines-maintenance` for Azure Pipelines YAML, templates, conditions, artifacts, and deployments.
 
-System-managed skills under `~/.codex/skills/.system` and runtime-managed
-entries are intentionally excluded from this repository.
+Use the installed `gh-fix-ci`, `gh-address-comments`, and `yeet` skills directly for failing GitHub Actions, pull request feedback, and publication instead of routing those tasks through `start-task`.
 
 ## Installation
 
@@ -33,85 +30,50 @@ Run:
 
 The installer:
 
-1. links every valid skill under `codex/` into `~/.codex/skills`;
-2. links future skills under `generic/` into `~/.agents/skills`;
-3. copies custom-agent definitions into `~/.codex/agents`; and
-4. configures Codex for nested agent workflows with `agents.max_depth >= 2` and
-   `agents.max_threads >= 4` while preserving higher values and unrelated
-   configuration.
+1. links skills under `codex/` and `generic/` into their discovery directories;
+2. links agent TOML files into `~/.codex/agents` so repository edits take effect without reinstalling;
+3. backs up `~/.codex/config.toml` before changing it; and
+4. sets `agents.max_threads` to at least 4 and `agents.max_depth` to at least 2 while preserving unrelated configuration.
 
-If an existing skill directory exactly matches the repository copy, the
-installer moves it to `~/.codex/skill-backups` before replacing it with a
-symlink. It recreates broken skill symlinks, such as after this repository is
-renamed or moved, and refuses to replace differing content or active symlinks
-pointing elsewhere.
+Matching copied agents and skills from an older installation are migrated to links. A matching skill directory is moved to `~/.codex/skill-backups`. The installer refuses conflicting destinations or symlinks pointing elsewhere.
 
-Restart Codex after installation if skill changes do not appear immediately.
+The installer also removes the retired `prompt-validator` and `agents-md-author` configurations from `~/.codex/agents`.
 
-## Usage
+Restart Codex when updated configuration is not detected immediately.
 
-Import Actual Budget transactions:
+## Start Task Behavior
 
-```text
-$actual-budget-import Save these transactions to my budget: ...
-```
-
-Run the feature workflow from a Git repository:
+Invoke the repository-change launcher from a Git repository:
 
 ```text
 $start-task Add pagination to the activity feed
 ```
 
-The parent launches a Luna-high orchestrator, which coordinates specialized
-agents with only the context needed for their assignments. The workflow checks
-repository guidance, validates and confirms the requested scope, performs
-bounded research when needed, and splits independently shippable work into
-separate branches and pull requests.
+The coordinator inspects the repository before asking questions, confirms observable acceptance criteria and scope, and proposes independently shippable subtasks when the request is too broad. Approved subtasks are handled sequentially with separate plans, branches, reviews, and pull requests.
 
-Each part receives a mid-level implementation plan from a Sol-high planner. An
-adversarial Sol-high plan reviewer must pass the plan before the user approves
-implementation. A Terra-medium implementer receives one focused change at a
-time, uses repository static tooling, reviews plan risks and its own diff, and
-stops for replanning when the change exceeds the workflow thresholds or exposes
-an invalid assumption.
+Each completed subtask updates the repository-root `CHANGELOG.md` under its existing unreleased section. The workflow creates a changelog with an `Unreleased` section when the repository does not have one.
 
-A Sol-medium adversarial reviewer checks correctness, security, regressions,
-compatibility, error handling, plan fulfillment, and validation. Findings are
-repaired independently. After product review passes, a Luna-high documentation
-agent updates only documentation required by the completed behavior. Large
-cumulative reviews are split by cohesive concern before publication.
+Routine coordination, planning, implementation, and review use medium reasoning. Research and complex plan review remain high reasoning and run only when justified.
 
-The workflow preserves unrelated work and requires explicit approval before
-creating each branch, resuming materially revised implementation, pushing, or
-opening a pull request. It never force-pushes as part of the workflow.
+The implementer makes the smallest practical change, avoids speculative abstractions and excessive comments, and does not add tests unless the approved plan requires them. It runs relevant existing validation, self-reviews against the acceptance criteria, and creates one conventional commit per cohesive change.
+
+Review has a fixed termination rule:
+
+1. One initial review reports only demonstrable merge-blocking defects introduced by the change.
+2. Confirmed findings receive one cohesive repair pass where practical.
+3. One targeted verification checks those findings and direct repair regressions.
+4. Unresolved defects are reported to the user. No second general review or automatic repair cycle starts.
+
+The coordinator asks before committing a dirty worktree, materially replanning, pushing, or opening a pull request.
 
 ## Development
 
-Enter the reproducible development shell:
+Run all checks through the devenv-provided `check` command:
 
 ```sh
-devenv shell
+devenv shell -- check
 ```
 
-Run the complete validation suite:
+Inside an existing `devenv shell`, run `check`. `devenv test` uses the same command.
 
-```sh
-devenv test
-```
-
-The suite validates skills and agent contracts, parses YAML and TOML, checks
-shell syntax and formatting, exercises installer fixtures, and runs
-`git diff --check`.
-
-## Updating
-
-After pulling repository changes, activate the updated skills and custom agents
-by running:
-
-```sh
-./install.sh
-```
-
-Then restart Codex. Symlinked skill files update immediately, but rerunning the
-installer refreshes the copied custom-agent definitions and restarting Codex
-ensures the updated skill and agents are loaded.
+The suite validates skill and agent structure, parses YAML and TOML, checks shell formatting and syntax, runs focused installer smoke tests, and checks the Git diff.

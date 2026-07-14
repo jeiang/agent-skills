@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kubernetes Delivery"
+  short_description: "Prepare and validate Kubernetes delivery changes"
+  default_prompt: "Use $kubernetes-delivery to prepare and validate this Kubernetes delivery change."

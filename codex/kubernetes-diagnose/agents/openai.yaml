@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kubernetes Diagnose"
+  short_description: "Diagnose Kubernetes workload and platform failures"
+  default_prompt: "Use $kubernetes-diagnose to investigate this Kubernetes failure."
