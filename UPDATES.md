@@ -212,3 +212,14 @@
 - Prohibited resetting, decrementing, transferring, combining, or reusing either counter across repairs, replanning, documentation, or review repartitioning.
 - Added ordered semantic validation for initialization, qualifying verdicts, control-file evidence, success and exhaustion exits, and counter isolation.
 - `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including ordered counter lifecycle assertions, shared-budget rejection, and the complete repository suite.
+
+### Review repair 12: post-repair documentation refresh
+
+- Added a conditional documentation refresh before cumulative re-review whenever final-review repairs affect product code, configuration, tests, generated user-facing behavior, or interface behavior.
+- Required all isolated product repairs to finish before an audit-only documentation-author invocation evaluates newly queued stale, missing, contradictory, or invalid documentation.
+- Routed every resulting documentation finding through its own focused planner plan, applicable escalation review, explicit user approval, documentation-author repair, validation, self-review, and documentation-only commit.
+- Allowed documentation-only repair batches to proceed directly to cumulative re-review without a redundant audit.
+- Ordered mixed batches as product repairs, documentation audit and isolated repairs, then cumulative re-review, with no concurrent writers.
+- Preserved the existing final-review budget: audits and repair commits do not consume, reset, or reinitialize the counter; only the next cumulative global verdict counts.
+- Added ordered semantic validation for product-affecting, documentation-only, mixed-batch, approval, commit, and counter-preservation paths.
+- `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including ordered post-repair documentation transitions, final-counter preservation, and the complete repository suite.

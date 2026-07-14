@@ -153,6 +153,14 @@ ORCHESTRATOR_CONTRACT = (
     "invoke `feature_implementer` once",
     "invoke `documentation_author` once",
     "one separate conventional commit containing only that repair",
+    "Before rerunning any final cumulative review after repairs",
+    "changed product code, configuration, tests, generated user-facing behavior, or interface behavior",
+    "spawn `documentation_author` in an audit-only invocation",
+    "Explicitly prohibit edits in this audit invocation",
+    "Process each necessary documentation finding independently",
+    "documentation-only repairs",
+    "For a mixed repair batch",
+    "do not initialize, reset, increment, or otherwise alter `final_review_verdicts`",
     "Increment `final_review_verdicts` exactly once",
     "fifth final global verdict",
     "Never reset, decrement, reuse, transfer, or combine the final counter with the product counter",
@@ -506,6 +514,36 @@ ORCHESTRATOR_FINAL_REVIEW_BUDGET = (
     "Never reset, decrement, reuse, transfer, or combine the final counter with the product counter",
 )
 
+ORCHESTRATOR_POST_REPAIR_DOCUMENTATION_GATE = (
+    "Before rerunning any final cumulative review after repairs",
+    "classify the completed repair batch by changed behavior and file domain",
+    "If at least one repair changed product code, configuration, tests, generated user-facing behavior, or interface behavior",
+    "first finish every approved isolated product repair and commit",
+    "Queue every new documentation impact or finding",
+    "After those product repairs finish",
+    "spawn `documentation_author` in an audit-only invocation",
+    "Explicitly prohibit edits in this audit invocation",
+    "focused report of every stale, missing, contradictory, or invalid document",
+    "Process each necessary documentation finding independently through the final-review repair gate",
+    "one focused planner-produced plan",
+    "complete isolated-plan presentation",
+    "explicit user approval",
+    "one `documentation_author` repair invocation",
+    "isolated documentation validation and self-review",
+    "one documentation-only conventional commit",
+    "Record the audit result and every documentation disposition, approval, validation, and commit in the control file",
+    "Only after the documentation audit has no unresolved findings",
+    "rerun final cumulative review at the new current HEAD",
+    "If the completed batch contains documentation-only repairs",
+    "proceed directly to cumulative re-review without a redundant documentation audit",
+    "For a mixed repair batch",
+    "complete all isolated product repairs first",
+    "then the audit and all isolated documentation repairs",
+    "Never run product and documentation writers concurrently",
+    "do not initialize, reset, increment, or otherwise alter `final_review_verdicts`",
+    "only the next qualifying cumulative global verdict consumes the existing final-review budget",
+)
+
 
 def require_ordered_markers(
     text: str, markers: tuple[str, ...], contract: str
@@ -669,6 +707,10 @@ def main() -> int:
             (ORCHESTRATOR_FINAL_REPAIR_GATE, "final repair gate"),
             (ORCHESTRATOR_PRODUCT_REVIEW_BUDGET, "product review budget"),
             (ORCHESTRATOR_FINAL_REVIEW_BUDGET, "final review budget"),
+            (
+                ORCHESTRATOR_POST_REPAIR_DOCUMENTATION_GATE,
+                "post-repair documentation gate",
+            ),
         ):
             errors.extend(
                 require_ordered_markers(
