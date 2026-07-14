@@ -26,13 +26,28 @@ create_workspace() {
     exit 1
   fi
   umask "$saved_umask"
-  trap 'rm -rf "$workspace"; rmdir "$lock_dir" 2>/dev/null || :' EXIT HUP INT TERM
+  trap cleanup_workspace EXIT
+  trap 'exit 129' HUP
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
 
   manifest="$workspace/manifest"
   mkdir "$manifest" "$workspace/reserved-backups" "$workspace/frozen-agents"
   planned_directories="$workspace/planned-directories"
   : >"$planned_directories"
   action_count=0
+}
+
+cleanup_workspace() {
+  original_status=$?
+  trap - EXIT HUP INT TERM
+  if ! rm -rf "$workspace"; then
+    echo "Warning: unable to remove installer workspace: $workspace" >&2
+  fi
+  if ! rmdir "$lock_dir" 2>/dev/null; then
+    echo "Warning: unable to remove installer lock: $lock_dir" >&2
+  fi
+  exit "$original_status"
 }
 
 snapshot_path() {
@@ -77,6 +92,49 @@ add_action() {
   printf '%s' "${2-}" >"$record/source"
   printf '%s' "${3-}" >"$record/target"
   printf '%s' "${4-}" >"$record/extra"
+  printf '%s' "${5-}" >"$record/mode"
+}
+
+regular_file_mode() {
+  mode_path=$1
+  case $(uname -s) in
+    Darwin) mode_value=$(/usr/bin/stat -f '%Lp' "$mode_path" 2>/dev/null) || mode_value='' ;;
+    *) mode_value=$(stat -c '%a' "$mode_path" 2>/dev/null) || mode_value='' ;;
+  esac
+  case "$mode_value" in
+    '' | *[!0-7]*)
+      echo "Unsupported POSIX mode for Codex config: $mode_path" >&2
+      return 1
+      ;;
+  esac
+  printf '%s\n' "$mode_value"
+}
+
+refuse_blocking_config_metadata() {
+  metadata_path=$1
+
+  bsd_flags=''
+  if [ "$(uname -s)" = Darwin ]; then
+    bsd_flags=$(/usr/bin/stat -f '%Sf' "$metadata_path" 2>/dev/null) || bsd_flags=''
+  fi
+  if [ -n "$bsd_flags" ]; then
+    case ",$bsd_flags," in
+      *,uchg,* | *,schg,* | *,uappnd,* | *,sappnd,*)
+        echo "Refusing immutable or append-only Codex config: $metadata_path. Remove the blocking file flag before installing." >&2
+        return 1
+        ;;
+    esac
+  fi
+
+  if command -v lsattr >/dev/null 2>&1; then
+    linux_attributes=$(lsattr -d -- "$metadata_path" 2>/dev/null | awk 'NR == 1 { print $1 }') || linux_attributes=''
+    case "$linux_attributes" in
+      *i* | *a*)
+        echo "Refusing immutable or append-only Codex config: $metadata_path. Remove the blocking file attribute before installing." >&2
+        return 1
+        ;;
+    esac
+  fi
 }
 
 plan_directory() {
@@ -173,6 +231,7 @@ validate_manifest_feasibility() {
     source=$(cat "$record/source")
     target=$(cat "$record/target")
     extra=$(cat "$record/extra")
+    mode=$(cat "$record/mode")
     case "$action" in
       mkdir)
         [ ! -e "$target" ] && [ ! -L "$target" ] || {
@@ -216,6 +275,12 @@ validate_manifest_feasibility() {
           return 1
         fi
         require_mutable_parent "$extra" "create temporary Codex config $extra" || return 1
+        case "$mode" in
+          '' | *[!0-7]*)
+            echo "Cannot write Codex config: invalid frozen POSIX mode: $mode" >&2
+            return 1
+            ;;
+        esac
         ;;
       remove_legacy)
         require_mutable_parent "$target" "remove legacy link $target" || return 1
@@ -525,7 +590,10 @@ plan_agents() {
     [ -f "$source" ] || continue
     name=$(basename -- "$source")
     frozen="$workspace/frozen-agents/$name"
-    cp -p "$source" "$frozen"
+    if ! dd if="$source" of="$frozen" bs=65536 2>/dev/null; then
+      echo "Unable to freeze agent configuration: $source" >&2
+      exit 1
+    fi
     target="$agent_target/$name"
     if [ -d "$target" ] && [ ! -L "$target" ]; then
       echo "Refusing agent destination that is a directory: $target" >&2
@@ -551,15 +619,20 @@ plan_config() {
   fi
 
   rendered="$workspace/rendered-config"
-  cp -p "$input" "$rendered"
   render_agents_config "$input" "$rendered"
   if [ ! -e "$config_file" ] || ! cmp -s "$rendered" "$config_file"; then
+    if [ -e "$config_file" ]; then
+      refuse_blocking_config_metadata "$config_file" || exit 1
+      config_mode=$(regular_file_mode "$config_file") || exit 1
+    else
+      config_mode=0600
+    fi
     temporary_config="$config_file.agent-skills-install.tmp"
     if [ -e "$temporary_config" ] || [ -L "$temporary_config" ]; then
       echo "Refusing existing Codex config temporary path: $temporary_config. Remove it before installing." >&2
       exit 1
     fi
-    add_action write_config "$rendered" "$config_file" "$temporary_config"
+    add_action write_config "$rendered" "$config_file" "$temporary_config" "$config_mode"
   fi
 }
 
@@ -579,6 +652,7 @@ execute_manifest() {
     source=$(cat "$record/source")
     target=$(cat "$record/target")
     extra=$(cat "$record/extra")
+    mode=$(cat "$record/mode")
     case "$action" in
       mkdir)
         mkdir "$target"
@@ -602,7 +676,7 @@ execute_manifest() {
         install -m 0644 "$source" "$target"
         ;;
       write_config)
-        cp -p "$source" "$extra"
+        install -m "$mode" "$source" "$extra"
         mv "$extra" "$target"
         ;;
       remove_legacy)

@@ -61,7 +61,7 @@ assert_refused_unchanged() {
   error="$test_root/$fixture.stderr"
 
   assert_toml "$config"
-  cp "$config" "$before"
+  dd if="$config" of="$before" bs=65536 2>/dev/null
   snapshot_home "$home" "$home_before"
   if run_installer "$home" "$installer" 2>"$error"; then
     echo "Installer accepted unsupported agents TOML in $fixture" >&2
@@ -153,6 +153,43 @@ PY
 
   count=$(grep -Ec '^[[:space:]]*\[agents\][[:space:]]*(#.*)?$' "$config")
   [ "$count" -eq 1 ]
+}
+
+file_mode() {
+  case $(uname -s) in
+    Darwin) /usr/bin/stat -f '%Lp' "$1" ;;
+    *) stat -c '%a' "$1" ;;
+  esac
+}
+
+detect_immutable_tool() {
+  probe="$test_root/immutable-probe"
+  : >"$probe"
+  immutable_tool=''
+  if command -v chflags >/dev/null 2>&1 && chflags uchg "$probe" 2>/dev/null; then
+    immutable_tool=chflags
+    chflags nouchg "$probe"
+  elif command -v chattr >/dev/null 2>&1 && chattr +i "$probe" 2>/dev/null; then
+    immutable_tool=chattr
+    chattr -i "$probe"
+  fi
+  rm -f "$probe"
+}
+
+set_immutable() {
+  case "$immutable_tool" in
+    chflags) chflags uchg "$1" ;;
+    chattr) chattr +i "$1" ;;
+    *) return 1 ;;
+  esac
+}
+
+clear_immutable() {
+  case "$immutable_tool" in
+    chflags) chflags nouchg "$1" ;;
+    chattr) chattr -i "$1" ;;
+    *) return 1 ;;
+  esac
 }
 
 assert_permission_refusal() {
@@ -308,6 +345,31 @@ printf '%s\n' '[identity]' 'name = "regular"' >"$home/.codex/config.toml"
 run_installer "$home"
 [ ! -L "$home/.codex/config.toml" ]
 assert_agents "$home/.codex/config.toml" 2 4
+
+# Config replacement preserves its POSIX mode without copying other metadata.
+home=$(new_home config_mode)
+printf '%s\n' '[agents]' 'max_threads = 1' 'max_depth = 1' >"$home/.codex/config.toml"
+chmod 0640 "$home/.codex/config.toml"
+run_installer "$home"
+[ "$(file_mode "$home/.codex/config.toml")" = 640 ]
+assert_agents "$home/.codex/config.toml" 2 4
+
+# Immutable configs are refused before HOME mutation and leave no lock residue.
+detect_immutable_tool
+if [ -n "$immutable_tool" ]; then
+  home=$(new_home immutable_config)
+  printf '%s\n' '[agents]' 'max_threads = 1' 'max_depth = 1' >"$home/.codex/config.toml"
+  set_immutable "$home/.codex/config.toml"
+  assert_refused_unchanged "$home" 'Refusing immutable or append-only Codex config'
+  clear_immutable "$home/.codex/config.toml"
+  run_installer "$home"
+  assert_agents "$home/.codex/config.toml" 2 4
+  set_immutable "$home/.codex/config.toml"
+  run_installer "$home"
+  clear_immutable "$home/.codex/config.toml"
+else
+  echo 'Skipping immutable config fixture because this filesystem cannot set a user immutable flag.'
+fi
 
 # A feasible same-filesystem migration remains supported.
 home=$(new_home migration_success)
@@ -522,3 +584,28 @@ run_installer "$home"
 cmp "$test_root/config.before" "$home/.codex/config.toml"
 snapshot_home "$home" "$test_root/idempotent.home.after"
 cmp "$test_root/idempotent.home.before" "$test_root/idempotent.home.after"
+
+# Cleanup attempts lock removal even when an immutable workspace cannot be removed.
+if [ "$immutable_tool" = chflags ]; then
+  cleanup_installer="$test_root/install-cleanup-failure.sh"
+  awk '
+    $0 == "execute_manifest" { print "chflags uchg \"$workspace\"" }
+    { print }
+  ' "$repo_dir/install.sh" >"$cleanup_installer"
+  chmod +x "$cleanup_installer"
+  home=$(new_home cleanup_independence)
+  if ! HOME="$home" "$cleanup_installer" >"$test_root/cleanup-independence.stdout" 2>"$test_root/cleanup-independence.stderr"; then
+    echo 'Installer changed the original success status when workspace cleanup failed' >&2
+    exit 1
+  fi
+  grep -F 'Warning: unable to remove installer workspace:' "$test_root/cleanup-independence.stderr" >/dev/null
+  lock_key=$(printf '%s' "$home" | cksum | awk '{ print $1 "-" $2 }')
+  [ ! -e "$installer_tmp/agent-skills-install-lock.$lock_key" ]
+  cleanup_workspace=$(find "$installer_tmp" -mindepth 1 -maxdepth 1 -type d -name 'agent-skills-install.*' -print)
+  [ -n "$cleanup_workspace" ]
+  clear_immutable "$cleanup_workspace"
+  rm -rf "$cleanup_workspace"
+  assert_installer_temp_clean
+else
+  echo 'Skipping cleanup independence fixture because immutable directory flags are unavailable.'
+fi
