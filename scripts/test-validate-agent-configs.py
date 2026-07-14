@@ -65,6 +65,42 @@ FIXTURES = (
         "per-part baseline gate",
     ),
     Fixture(
+        "unsafe-guidance-branch-reuse",
+        "task-orchestrator.toml",
+        replace_once(
+            "Create it only when neither branch exists.",
+            "Reuse any existing local or remote branch.",
+        ),
+        "guidance prerequisite lifecycle",
+    ),
+    Fixture(
+        "broad-guidance-staging",
+        "task-orchestrator.toml",
+        replace_once(
+            "Stage only the approved `AGENTS.md` paths",
+            "Stage the working tree",
+        ),
+        "guidance prerequisite lifecycle",
+    ),
+    Fixture(
+        "unbounded-component-author-context",
+        "task-orchestrator.toml",
+        replace_once(
+            "Exclude sibling components, future task or feature context, unrelated commits and conversation",
+            "Include sibling components and future task context",
+        ),
+        "guidance prerequisite lifecycle",
+    ),
+    Fixture(
+        "unverified-guidance-merge",
+        "task-orchestrator.toml",
+        replace_once(
+            "Stop if merge status or equivalence cannot be proven.",
+            "Continue when merge status cannot be proven.",
+        ),
+        "guidance prerequisite lifecycle",
+    ),
+    Fixture(
         "optional-plan-review",
         "task-orchestrator.toml",
         replace_once(

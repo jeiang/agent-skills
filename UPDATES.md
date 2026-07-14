@@ -262,3 +262,15 @@
 - Kept the repair within the approved limit of 500 substantive lines, 10 files, and two independently testable components.
 - Focused POSIX syntax, ShellCheck, and installer fixtures passed.
 - `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including whole-HOME refusal snapshots, generic and shared-backup scenarios, frozen success, cleanup, and whole-HOME idempotency.
+
+### Review repair 17: repository-guidance prerequisite lifecycle
+
+- Required approved guidance generation to start from a clean, safely refreshed default-branch baseline and to preserve the invocation baseline and user work.
+- Added fail-closed local and remote branch-collision handling; reuse is allowed only for the same recorded run, exact baseline, and expected branch, tree, index, worktree, and publication state.
+- Restricted sequential root and component authors to the minimum parent and component context, excluding siblings, future tasks, unrelated commits, and unrelated conversation.
+- Required every approved `AGENTS.md` to be nonempty and to be the only changed path, with author self-review and validation evidence recorded before staging.
+- Repeated preservation and identity gates before staging, commit, and publication; staged only approved guidance files into one focused documentation commit and recorded its SHA, parent, files, diff, and evidence.
+- Required user approval of the exact committed SHA and diff, normal non-force publication, merge wait, safe default refresh, and proof of the recorded commit or an equivalent merged result before guidance rediscovery.
+- Added ordered semantic coverage and mutation fixtures for unsafe branch reuse, broad staging, unbounded component context, and unverified merge continuation.
+- Focused semantic validation and all 14 mutation fixtures passed.
+- `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including the complete repository suite.

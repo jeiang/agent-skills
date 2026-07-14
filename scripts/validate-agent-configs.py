@@ -95,6 +95,12 @@ ORCHESTRATOR_CONTRACT = (
     "If the root `AGENTS.md` is missing",
     "Run authors sequentially",
     "wait for it to merge",
+    "exact recorded guidance baseline",
+    "Exclude sibling components, future task or feature context",
+    "Stage only the approved `AGENTS.md` paths",
+    "never publish an unapproved SHA",
+    "normal non-force push",
+    "approved `AGENTS.md` paths and blob contents exactly match",
     "Do not continue until the user confirms the scope",
     ".codex/start-task/<YYYY-MM-DD>_<task-slug>_PLAN.md",
     "never commit that control file",
@@ -183,6 +189,51 @@ ORCHESTRATOR_INITIAL_PLAN_GATE = (
     "Only after that approval and the required baseline recheck",
     "directly from its confirmed refreshed default-branch tip",
     "invoke `feature_implementer`",
+)
+
+ORCHESTRATOR_GUIDANCE_LIFECYCLE = (
+    "If files are approved, run this prerequisite lifecycle in order",
+    "Ensure no write-capable agent is active",
+    "return to the recorded default branch",
+    "safely fetch its configured upstream",
+    "update by fast-forward only",
+    "record the refreshed default tip as the guidance baseline",
+    "Inspect both local and remote `codex/add-agents-guidance` branch state",
+    "Create it only when neither branch exists",
+    "same workflow run created it from the exact recorded guidance baseline",
+    "HEAD, parent, tree, index, worktree, and publication state match",
+    "never delete, overwrite, force-update, or adopt an unrecorded local or remote branch",
+    "Record the approved canonical `AGENTS.md` paths",
+    "Run authors sequentially",
+    "Give the root author only repository-wide structure, manifests, commands, and conventions",
+    "Give each component author only its component files and commands plus applicable approved parent guidance",
+    "Exclude sibling components, future task or feature context, unrelated commits and conversation",
+    "verify every approved path exists as a nonempty regular `AGENTS.md`",
+    "every changed path is an approved guidance file",
+    "no other tracked or untracked path changed",
+    "no changes are staged",
+    "record each author's self-review and validation evidence",
+    "Immediately before staging and committing",
+    "repeat branch identity, exact guidance-baseline ancestry, clean index, approved-file-only diff",
+    "Stage only the approved `AGENTS.md` paths",
+    "one focused conventional documentation commit",
+    "Record the guidance commit SHA, its exact parent, committed file list, complete committed diff, validation evidence, and branch identity",
+    "Verify the committed files equal the approved paths",
+    "Present the exact committed diff, SHA, parent, file list, and validation evidence",
+    "obtain explicit approval for that exact commit before publication",
+    "never publish an unapproved SHA",
+    "Immediately before publication",
+    "repeat preservation and identity gates",
+    "Stop on drift or collision",
+    "normal non-force push",
+    "never force-push or silently replace an existing remote branch or pull request",
+    "Record the pull request and wait for it to merge",
+    "return to the default branch and safely refresh it by fast-forward only",
+    "verify the refreshed default history contains the recorded guidance commit",
+    "record evidence of an equivalent merged result",
+    "approved `AGENTS.md` paths and blob contents exactly match the approved commit",
+    "Stop if merge status or equivalence cannot be proven",
+    "Only after that verification, rediscover every applicable root and component `AGENTS.md`",
 )
 
 ORCHESTRATOR_CORRECTED_PLAN_GATE = (
@@ -595,6 +646,7 @@ def validate_cross_contract_audit() -> list[str]:
         return errors
 
     ordered_gates = (
+        ("guidance prerequisite", orchestrator, ORCHESTRATOR_GUIDANCE_LIFECYCLE),
         ("approval", orchestrator, ORCHESTRATOR_INITIAL_PLAN_GATE),
         ("branch freshness", orchestrator, ORCHESTRATOR_PART_BASELINE_GATE),
         ("threshold and invalid assumption", orchestrator, ORCHESTRATOR_IMPLEMENTER_REPLAN_GATE),
@@ -747,6 +799,13 @@ def main() -> int:
     if orchestrator_path.exists():
         with orchestrator_path.open("rb") as stream:
             instructions = tomllib.load(stream).get("developer_instructions", "")
+        errors.extend(
+            require_ordered_markers(
+                instructions,
+                ORCHESTRATOR_GUIDANCE_LIFECYCLE,
+                "agents/task-orchestrator.toml guidance prerequisite lifecycle",
+            )
+        )
         errors.extend(
             require_ordered_markers(
                 instructions,
