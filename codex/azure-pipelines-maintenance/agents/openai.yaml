@@ -1,0 +1,4 @@
+interface:
+  display_name: "Azure Pipelines Maintenance"
+  short_description: "Maintain and validate Azure Pipelines definitions"
+  default_prompt: "Use $azure-pipelines-maintenance to update and validate this Azure Pipelines configuration."

@@ -9,9 +9,11 @@
     taplo
   ];
 
-  tasks."repo:check".exec = "./scripts/check.sh";
+  scripts.check.exec = "./scripts/check.sh";
+
+  tasks."repo:check".exec = "check";
 
   enterTest = ''
-    ./scripts/check.sh
+    check
   '';
 }

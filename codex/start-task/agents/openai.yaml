@@ -1,4 +1,4 @@
 interface:
   display_name: "Start Task"
-  short_description: "Orchestrate an approved multi-agent code workflow"
-  default_prompt: "Use $start-task to validate, plan, implement, adversarially review, document, and publish this task in independently shippable parts."
+  short_description: "Coordinate a focused repository change"
+  default_prompt: "Use $start-task to clarify, plan, implement, review once, and prepare this repository change for publication."

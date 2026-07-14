@@ -1,0 +1,4 @@
+interface:
+  display_name: "NixOS Change Validation"
+  short_description: "Prepare and validate NixOS configuration changes"
+  default_prompt: "Use $nixos-change-validation to prepare and validate this NixOS change."
