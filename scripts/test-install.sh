@@ -220,6 +220,27 @@ home=$(new_home agents_array)
 printf '%s\n' '[agents]' 'max_threads = 4' 'max_depth = 2' '[[agents.roles]]' 'name = "reviewer"' >"$home/.codex/config.toml"
 assert_refused_unchanged "$home" 'array-of-tables form for agents is not supported'
 
+# Multiline strings are valid TOML but are refused before the line-oriented rewrite.
+home=$(new_home multiline_basic)
+printf '%s\n' \
+  '[notes]' \
+  'content = """' \
+  '[agents]' \
+  'max_threads = 1' \
+  'max_depth = 1' \
+  '"""' >"$home/.codex/config.toml"
+assert_refused_unchanged "$home" 'Refusing Codex config with a TOML multiline string delimiter'
+
+home=$(new_home multiline_literal)
+printf '%s\n' \
+  '[notes]' \
+  "content = '''" \
+  '[agents]' \
+  'max_threads = 1' \
+  'max_depth = 1' \
+  "'''" >"$home/.codex/config.toml"
+assert_refused_unchanged "$home" 'Refusing Codex config with a TOML multiline string delimiter'
+
 home=$(new_home nested_before_root)
 printf '%s\n' '[agents.roles]' 'enabled = true' >"$home/.codex/config.toml"
 assert_refused_unchanged "$home" 'agents must be declared first as a top-level bare [agents] table'

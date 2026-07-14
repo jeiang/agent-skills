@@ -232,3 +232,11 @@
 - Integrated the mutation fixture runner into the repository check entry point.
 - Kept the repair within the implementer limits: fewer than 500 substantive lines, fewer than 10 files, and no more than two independently testable components.
 - `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including the final cross-contract audit, all 10 rejected mutation fixtures, and the complete repository suite.
+
+### Review repair 14: multiline TOML preflight refusal
+
+- Added an installer preflight that refuses multiline basic (`"""`) or literal (`'''`) string delimiters anywhere in the Codex configuration before the line-oriented AWK rewrite starts.
+- Added an actionable diagnostic directing the user to replace multiline strings with single-line strings before installation.
+- Added valid multiline basic and literal TOML fixtures whose contents mimic `[agents]`, `max_threads`, and `max_depth` configuration.
+- Required both fixtures to exit nonzero while preserving byte-identical, parseable TOML through the existing atomic-refusal assertions.
+- `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including multiline basic and literal atomic-refusal fixtures and the complete repository suite.

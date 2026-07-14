@@ -20,9 +20,20 @@ refuse_symlinked_config() {
   exit 1
 }
 
+refuse_multiline_toml_strings() {
+  config=$1
+
+  if grep -F '"""' "$config" >/dev/null 2>&1 || grep -F "'''" "$config" >/dev/null 2>&1; then
+    printf '%s\n' "Refusing Codex config with a TOML multiline string delimiter: $config. Replace multiline basic or literal strings with single-line strings before installing." >&2
+    return 1
+  fi
+}
+
 configure_agents() {
   config=$1
   temporary_config="$config.tmp.$$"
+
+  refuse_multiline_toml_strings "$config" || return 1
 
   trap 'rm -f "$temporary_config"' EXIT HUP INT TERM
   cp "$config" "$temporary_config"
