@@ -274,3 +274,14 @@
 - Added ordered semantic coverage and mutation fixtures for unsafe branch reuse, broad staging, unbounded component context, and unverified merge continuation.
 - Focused semantic validation and all 14 mutation fixtures passed.
 - `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including the complete repository suite.
+
+### Review repair 18: assignment-completion transaction
+
+- Added a mandatory orchestrator transaction for every normal and repair implementer assignment, with a recorded baseline envelope, exact approved scope, risks, validation, and byte-exact user staged and unstaged patches.
+- Required exactly one nonempty conventional commit per successful cohesive assignment and preserved threshold or invalid-assumption exits as uncommitted replanning transitions.
+- Required final static and focused validation, risk-aware self-review, an immutable validated snapshot, exact-hunk staging, and independent proof that the commit has the recorded sole parent and exactly matches the approved validated patch.
+- Prohibited implementer documentation edits, user-work commits, mixed or empty commits, prior or future assignment changes, post-validation edits without revalidation, and residual workflow-owned changes.
+- Aligned the implementer contract with the orchestrator transaction and required evidence for the baseline, staged patch, commit, user-state preservation, validation, risks, scope, style, workaround, counts, documentation queue, and residue.
+- Added ordered validator coverage and 12 negative semantic fixtures for omitted baseline, multiple commits, committed failures, post-validation edits, broad staging, implementer documentation edits, omitted parent proof, committed-diff mismatch, user or cross-assignment content leakage, omitted user-patch proof, residual workflow changes, and continuation before control-state evidence.
+- Focused validation passed for all 9 agent configurations and all 26 negative semantic mutation fixtures.
+- `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including the complete repository suite.

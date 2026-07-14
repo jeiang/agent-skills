@@ -129,6 +129,11 @@ ORCHESTRATOR_CONTRACT = (
     "Do not switch branches while preserved partial work remains",
     "mandatory `plan_reviewer` correction loop until exact `PASS`",
     "obtain renewed explicit user approval before resuming implementation",
+    "mandatory assignment-completion transaction",
+    "byte-exact patches for all pre-existing user staged and unstaged changes",
+    "Create exactly one nonempty conventional commit",
+    "diff exactly equals the staged validated patch",
+    "Verify no residual workflow-owned staged or unstaged change remains",
     "product_review_verdicts = 0",
     "Increment `product_review_verdicts` exactly once",
     "fifth product verdict",
@@ -381,7 +386,10 @@ PLAN_REVIEWER_CONTRACT = (
 )
 
 IMPLEMENTER_CONTRACT = (
-    "exactly one supplied, user-approved cohesive change",
+    "exactly one supplied, user-approved cohesive assignment",
+    "create exactly one conventional commit when it succeeds",
+    "assignment envelope containing `pre_HEAD`",
+    "byte-exact pre-existing user staged and unstaged patches",
     "Do not create or edit documentation",
     "documentation agent",
     "unnecessary tests, CI changes, comments, or files",
@@ -397,7 +405,80 @@ IMPLEMENTER_CONTRACT = (
     "Inspect the complete diff for unnecessary changes",
     "Re-run the relevant static tools and focused tests after the final edit",
     "one-line justification",
-    "sensible conventional commit boundaries",
+    "leave workflow work uncommitted",
+    "Do not edit after this snapshot unless you rerun affected validation",
+    "Stage only exact workflow-owned hunks inside the envelope",
+    "isolated-index or equivalent exact-hunk procedure",
+    "Create exactly one nonempty conventional commit whose sole parent is `pre_HEAD`",
+    "Do not commit documentation, user work, mixed purposes, prior or future assignments",
+    "After committing, stop editing and independently inspect the result",
+    "absence of residual workflow-owned changes in every domain",
+)
+
+IMPLEMENTER_ASSIGNMENT_COMPLETION = (
+    "Implement exactly one supplied, user-approved cohesive assignment",
+    "Require an assignment envelope containing `pre_HEAD`",
+    "exact approved plan slice",
+    "applicable risks",
+    "allowed behavior and file or hunk scope",
+    "byte-exact pre-existing user staged and unstaged patches",
+    "If any field is missing, stop before editing",
+    "If ordinary implementation or validation fails, leave workflow work uncommitted",
+    "never commit a failed or superseded snapshot",
+    "perform a final self-review before staging",
+    "Reassess every applicable risk",
+    "Inspect the complete diff for unnecessary changes",
+    "Re-run the relevant static tools and focused tests after the final edit",
+    "Confirm the touched code follows repository style and conventions",
+    "Confirm any workaround has a sufficient one-line justification",
+    "Record the final validated workflow patch and fingerprint",
+    "Do not edit after this snapshot unless you rerun affected validation and the complete self-review",
+    "Stage only exact workflow-owned hunks inside the envelope",
+    "preserve overlapping and nonoverlapping user staged and unstaged patches byte-for-byte",
+    "Record staged paths, hunks, exact patch, and fingerprint",
+    "Create exactly one nonempty conventional commit whose sole parent is `pre_HEAD`",
+    "Do not commit documentation, user work, mixed purposes, prior or future assignments",
+    "After committing, stop editing",
+    "Verify the commit SHA and sole parent",
+    "equality to the staged validated patch and approved assignment",
+    "byte-identical user staged and unstaged patches",
+    "absence of residual workflow-owned changes in every domain except the untracked workflow control file",
+)
+
+ORCHESTRATOR_ASSIGNMENT_COMPLETION = (
+    "Apply this mandatory assignment-completion transaction to every normal or repair `feature_implementer` assignment",
+    "Record an assignment envelope in the control file containing `pre_HEAD`",
+    "exact approved plan slice",
+    "applicable risks",
+    "allowed behavior and file or hunk scope",
+    "byte-exact patches for all pre-existing user staged and unstaged changes",
+    "Require exactly one conventional commit for the approved cohesive assignment",
+    "must not create documentation, empty commits, mixed-purpose commits, multiple commits",
+    "commits containing prior assignments, future assignments, repairs, user work, or changes outside the envelope",
+    "If a threshold is exceeded or a material planning assumption is invalid",
+    "existing uncommitted replanning transition below",
+    "For an ordinary implementation, validation, or self-review failure",
+    "keep all workflow work uncommitted",
+    "Never commit a failed or superseded snapshot",
+    "Before staging, require successful final repository static checks and focused validation",
+    "complete risk, scope, style, workaround, substantive and excluded counts, documentation queue, failure, and constraint self-review",
+    "must not edit it",
+    "Record the validated working patch and its fingerprint",
+    "prohibit any edit unless the affected validation and complete self-review are rerun",
+    "Stage only exact workflow-owned hunks within the assignment envelope",
+    "Preserve overlapping and nonoverlapping user staged and unstaged patches byte-for-byte",
+    "record staged paths, staged hunks, and the exact staged patch and fingerprint",
+    "Create exactly one nonempty conventional commit, then stop editing",
+    "report `pre_HEAD`, commit SHA and parent",
+    "Independently verify that exactly one new commit exists",
+    "its sole parent is `pre_HEAD`",
+    "its diff exactly equals the staged validated patch and the approved assignment",
+    "Recompute the user staged and unstaged patches and require byte identity with the envelope",
+    "Verify no residual workflow-owned staged or unstaged change remains",
+    "Permit only the untracked workflow control file and the byte-identical recorded user state",
+    "do not start another assignment or review",
+    "Record the verified SHA, parent, subject, committed files and diff fingerprint",
+    "in the control file before continuing",
 )
 
 FEATURE_REVIEWER_CONTRACT = (
@@ -650,6 +731,7 @@ def validate_cross_contract_audit() -> list[str]:
         ("approval", orchestrator, ORCHESTRATOR_INITIAL_PLAN_GATE),
         ("branch freshness", orchestrator, ORCHESTRATOR_PART_BASELINE_GATE),
         ("threshold and invalid assumption", orchestrator, ORCHESTRATOR_IMPLEMENTER_REPLAN_GATE),
+        ("assignment completion", orchestrator, ORCHESTRATOR_ASSIGNMENT_COMPLETION),
         ("product repair approval", orchestrator, ORCHESTRATOR_PRODUCT_REPAIR_GATE),
         ("final repair approval", orchestrator, ORCHESTRATOR_FINAL_REPAIR_GATE),
         ("review aggregation", orchestrator, ORCHESTRATOR_SECTIONAL_REVIEW_GATE),
@@ -666,6 +748,11 @@ def validate_cross_contract_audit() -> list[str]:
             "reviewer cross-interface mode",
             reviewer,
             FEATURE_REVIEWER_CROSS_INTERFACE_MODE,
+        ),
+        (
+            "implementer assignment completion",
+            implementer,
+            IMPLEMENTER_ASSIGNMENT_COMPLETION,
         ),
     )
     for name, instructions, markers in ordered_gates:
@@ -858,6 +945,13 @@ def main() -> int:
         errors.extend(
             require_ordered_markers(
                 instructions,
+                ORCHESTRATOR_ASSIGNMENT_COMPLETION,
+                "agents/task-orchestrator.toml assignment completion transaction",
+            )
+        )
+        errors.extend(
+            require_ordered_markers(
+                instructions,
                 ORCHESTRATOR_SECTIONAL_REVIEW_GATE,
                 "agents/task-orchestrator.toml sectional review gate",
             )
@@ -945,6 +1039,18 @@ def main() -> int:
                         "agents/feature-reviewer.toml: "
                         f"{mode} must not contain whole-change requirement {marker!r}"
                     )
+
+    implementer_path = AGENTS_DIR / "feature-implementer.toml"
+    if implementer_path.exists():
+        with implementer_path.open("rb") as stream:
+            instructions = tomllib.load(stream).get("developer_instructions", "")
+        errors.extend(
+            require_ordered_markers(
+                instructions,
+                IMPLEMENTER_ASSIGNMENT_COMPLETION,
+                "agents/feature-implementer.toml assignment completion transaction",
+            )
+        )
 
     errors.extend(validate_cross_contract_audit())
 

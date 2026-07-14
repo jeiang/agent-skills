@@ -137,6 +137,114 @@ FIXTURES = (
         "implementer replan gate",
     ),
     Fixture(
+        "omitted-assignment-baseline",
+        "task-orchestrator.toml",
+        replace_once(
+            "Record an assignment envelope in the control file containing `pre_HEAD`",
+            "Record an assignment envelope in the control file",
+        ),
+        "assignment completion transaction",
+    ),
+    Fixture(
+        "multiple-assignment-commits",
+        "task-orchestrator.toml",
+        replace_once(
+            "Require exactly one conventional commit for the approved cohesive assignment.",
+            "Allow one or more commits for the approved cohesive assignment.",
+        ),
+        "assignment completion transaction",
+    ),
+    Fixture(
+        "committed-failed-assignment",
+        "task-orchestrator.toml",
+        replace_once(
+            "For an ordinary implementation, validation, or self-review failure, keep all workflow work uncommitted.",
+            "For an ordinary implementation, validation, or self-review failure, commit the partial workflow work.",
+        ),
+        "assignment completion transaction",
+    ),
+    Fixture(
+        "edited-validated-snapshot",
+        "task-orchestrator.toml",
+        replace_once(
+            "prohibit any edit unless the affected validation and complete self-review are rerun",
+            "allow edits without rerunning validation or self-review",
+        ),
+        "assignment completion transaction",
+    ),
+    Fixture(
+        "broad-assignment-staging",
+        "task-orchestrator.toml",
+        replace_once(
+            "Stage only exact workflow-owned hunks within the assignment envelope",
+            "Stage every changed file in the workspace",
+        ),
+        "assignment completion transaction",
+    ),
+    Fixture(
+        "implementer-documentation-edit",
+        "feature-implementer.toml",
+        replace_once(
+            "Do not create or edit documentation.",
+            "Create or edit documentation when useful.",
+        ),
+        "Do not create or edit documentation",
+    ),
+    Fixture(
+        "omitted-commit-parent-proof",
+        "task-orchestrator.toml",
+        replace_once(
+            "its sole parent is `pre_HEAD`",
+            "its parent is not checked",
+        ),
+        "assignment completion transaction",
+    ),
+    Fixture(
+        "committed-diff-mismatch",
+        "task-orchestrator.toml",
+        replace_once(
+            "its diff exactly equals the staged validated patch and the approved assignment",
+            "its diff may differ from the staged validated patch and approved assignment",
+        ),
+        "assignment completion transaction",
+    ),
+    Fixture(
+        "assignment-content-leakage",
+        "task-orchestrator.toml",
+        replace_once(
+            "commits containing prior assignments, future assignments, repairs, user work, or changes outside the envelope",
+            "commits may contain prior assignments, future assignments, repairs, user work, or changes outside the envelope",
+        ),
+        "assignment completion transaction",
+    ),
+    Fixture(
+        "omitted-user-patch-proof",
+        "task-orchestrator.toml",
+        replace_once(
+            "Recompute the user staged and unstaged patches and require byte identity with the envelope.",
+            "Assume the user staged and unstaged patches were preserved.",
+        ),
+        "assignment completion transaction",
+    ),
+    Fixture(
+        "residual-workflow-changes",
+        "task-orchestrator.toml",
+        replace_once(
+            "Verify no residual workflow-owned staged or unstaged change remains",
+            "Allow residual workflow-owned staged or unstaged changes",
+        ),
+        "assignment completion transaction",
+    ),
+    Fixture(
+        "continuation-before-evidence",
+        "task-orchestrator.toml",
+        replace_once(
+            "in the control file before continuing.",
+            "in the control file after continuing.",
+        ),
+        "assignment completion transaction",
+    ),
+    Fixture(
         "contradictory-section-diff",
         "feature-reviewer.toml",
         replace_once(
