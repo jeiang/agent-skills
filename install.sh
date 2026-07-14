@@ -14,9 +14,13 @@ lock_owned=0
 resource_transition=0
 pending_signal=0
 cleanup_active=0
+cleanup_status=0
 
 handle_termination() {
   signal_status=$1
+  if [ "$cleanup_active" -eq 1 ]; then
+    return 0
+  fi
   if [ "$resource_transition" -eq 1 ]; then
     if [ "$pending_signal" -eq 0 ]; then
       pending_signal=$signal_status
@@ -36,11 +40,12 @@ finish_resource_transition() {
 }
 
 cleanup_workspace() {
-  original_status=$?
+  initiating_status=$?
   if [ "$cleanup_active" -eq 1 ]; then
-    exit "$original_status"
+    return 0
   fi
   cleanup_active=1
+  cleanup_status=$initiating_status
   trap - EXIT
   trap '' HUP INT TERM
   if [ "$workspace_owned" -eq 1 ]; then
@@ -55,7 +60,7 @@ cleanup_workspace() {
     fi
     lock_owned=0
   fi
-  exit "$original_status"
+  exit "$cleanup_status"
 }
 
 trap cleanup_workspace EXIT

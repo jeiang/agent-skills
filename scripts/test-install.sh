@@ -264,7 +264,7 @@ make_signal_installer() {
           (allocation == "lock" && $0 == "  lock_owned=1")) {
         print "  kill -" signal_name " \"$$\""
       }
-      if (cleanup_signal != "" && $0 == "  trap '\'' '\'' HUP INT TERM") {
+      if (cleanup_signal != "" && $0 == "  cleanup_active=1") {
         print "  kill -" cleanup_signal " \"$$\""
       }
     }
@@ -339,7 +339,10 @@ assert_deferred_signal_cleanup lock HUP 129
 assert_deferred_signal_cleanup lock INT 130
 assert_deferred_signal_cleanup lock TERM 143
 
-# A second termination signal during cleanup cannot interrupt owned-resource removal.
+# A second termination signal after cleanup starts cannot interrupt owned-resource removal
+# or replace the status from the signal that initiated cleanup.
+assert_deferred_signal_cleanup lock TERM 143 HUP
+assert_deferred_signal_cleanup lock TERM 143 INT
 assert_deferred_signal_cleanup lock TERM 143 TERM
 
 # A late skill conflict refuses before earlier planned links or agents mutate HOME.
