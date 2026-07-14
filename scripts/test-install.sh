@@ -3,6 +3,7 @@ set -eu
 
 repo_dir=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 test_root=$(mktemp -d "${TMPDIR:-/tmp}/agent-skills-install.XXXXXX")
+test_root=$(CDPATH='' cd -- "$test_root" && pwd -P)
 trap 'rm -rf "$test_root"' EXIT HUP INT TERM
 installer_tmp="$test_root/external-tmp"
 mkdir "$installer_tmp"
@@ -130,6 +131,43 @@ assert_symlink_refused() {
     assert_toml "$target_file"
   fi
   assert_installer_temp_clean
+}
+
+assert_home_ancestry_refused() {
+  ancestry_home=$1
+  redirect_target=$2
+  expected_symlink=$3
+  fixture=$4
+  target_before="$test_root/$fixture.target.before"
+  target_after="$test_root/$fixture.target.after"
+  error="$test_root/$fixture.stderr"
+
+  [ -L "$expected_symlink" ]
+  link_target=$(readlink "$expected_symlink")
+  snapshot_home "$redirect_target" "$target_before"
+  if HOME="$ancestry_home" "$repo_dir/install.sh" >"$test_root/$fixture.stdout" 2>"$error"; then
+    echo "Installer accepted symlinked HOME ancestry in $fixture" >&2
+    exit 1
+  fi
+  [ -L "$expected_symlink" ]
+  [ "$(readlink "$expected_symlink")" = "$link_target" ]
+  snapshot_home "$redirect_target" "$target_after"
+  cmp "$target_before" "$target_after"
+  grep -F "Refusing installer destination ancestry symlink: $expected_symlink" "$error" >/dev/null
+  assert_installer_temp_clean
+}
+
+prepare_existing_destination_leaves() {
+  home=$1
+  mkdir -p \
+    "$home/.codex/skills" \
+    "$home/.codex/agents" \
+    "$home/.codex/skill-backups" \
+    "$home/.agents/skills"
+  printf '%s\n' '[agents]' 'max_threads = 4' 'max_depth = 2' >"$home/.codex/config.toml"
+  printf '%s\n' preserved >"$home/.codex/skills/existing-marker"
+  printf '%s\n' preserved >"$home/.codex/agents/existing-marker"
+  printf '%s\n' preserved >"$home/.agents/skills/existing-marker"
 }
 
 assert_agents() {
@@ -270,6 +308,31 @@ printf '%s\n' '[identity]' 'name = "ancestry symlink"' >"$home/.codex/config.tom
 mkdir "$home/skills-target"
 ln -s "$home/skills-target" "$home/.codex/skills"
 assert_refused_unchanged "$home" 'Refusing installer destination ancestry symlink'
+
+# A directly symlinked HOME is refused even when every managed leaf already exists.
+direct_home_target="$test_root/direct-home-target"
+mkdir "$direct_home_target"
+prepare_existing_destination_leaves "$direct_home_target"
+direct_home="$test_root/direct-home-link"
+ln -s "$direct_home_target" "$direct_home"
+assert_home_ancestry_refused "$direct_home" "$direct_home_target" "$direct_home" direct_home_symlink
+
+# A symlink above HOME is refused without changing the lexical link or redirect target.
+higher_root="$test_root/higher-home-root"
+higher_target="$test_root/higher-home-target"
+mkdir "$higher_root" "$higher_target" "$higher_target/home"
+prepare_existing_destination_leaves "$higher_target/home"
+ln -s "$higher_target" "$higher_root/redirected"
+higher_home="$higher_root/redirected/home"
+assert_home_ancestry_refused "$higher_home" "$higher_target" "$higher_root/redirected" higher_home_symlink
+
+# Final skill links remain replaceable after their real parent ancestry passes.
+home=$(new_home broken_skill_leaf)
+mkdir -p "$home/.codex/skills"
+ln -s missing-start-task "$home/.codex/skills/start-task"
+run_installer "$home"
+[ -L "$home/.codex/skills/start-task" ]
+[ "$(readlink "$home/.codex/skills/start-task")" = "$repo_dir/codex/start-task" ]
 
 # Permission fixtures run only when the matching external operation is denied.
 home=$(new_home mkdir_permission)

@@ -137,7 +137,54 @@ refuse_blocking_config_metadata() {
   fi
 }
 
+require_real_directory_ancestry() {
+  ancestry_path=$1
+  ancestry_operation=$2
+
+  case "$ancestry_path" in
+    /*) ;;
+    *)
+      echo "Cannot $ancestry_operation: destination path is not absolute: $ancestry_path" >&2
+      return 1
+      ;;
+  esac
+
+  ancestry_remaining=${ancestry_path#/}
+  ancestry_current=''
+  ancestry_missing=0
+  while [ -n "$ancestry_remaining" ]; do
+    ancestry_component=${ancestry_remaining%%/*}
+    if [ "$ancestry_remaining" = "$ancestry_component" ]; then
+      ancestry_remaining=''
+    else
+      ancestry_remaining=${ancestry_remaining#*/}
+    fi
+    [ -n "$ancestry_component" ] || continue
+    case "$ancestry_component" in
+      . | ..)
+        echo "Cannot $ancestry_operation: destination path contains a non-literal component: $ancestry_path" >&2
+        return 1
+        ;;
+    esac
+
+    ancestry_current="$ancestry_current/$ancestry_component"
+    if [ "$ancestry_missing" -eq 0 ] && [ -L "$ancestry_current" ]; then
+      echo "Refusing installer destination ancestry symlink: $ancestry_current. Replace it with a real directory." >&2
+      return 1
+    fi
+    if [ "$ancestry_missing" -eq 0 ] && [ -e "$ancestry_current" ]; then
+      if [ ! -d "$ancestry_current" ]; then
+        echo "Refusing installer destination with a non-directory ancestor: $ancestry_current" >&2
+        return 1
+      fi
+    else
+      ancestry_missing=1
+    fi
+  done
+}
+
 plan_directory() {
+  require_real_directory_ancestry "$1" "plan directory $1" || exit 1
   if [ -L "$1" ]; then
     echo "Refusing installer destination ancestry symlink: $1. Replace it with a real directory." >&2
     exit 1
@@ -166,6 +213,7 @@ plan_directory() {
 
 nearest_existing_directory() {
   ancestor_candidate=$1
+  require_real_directory_ancestry "$ancestor_candidate" "inspect destination ancestry $ancestor_candidate" || return 1
   while [ ! -e "$ancestor_candidate" ] && [ ! -L "$ancestor_candidate" ]; do
     ancestor_parent=$(dirname -- "$ancestor_candidate")
     [ "$ancestor_parent" != "$ancestor_candidate" ] || break
@@ -691,6 +739,7 @@ execute_manifest() {
   done
 }
 
+require_real_directory_ancestry "$HOME" "use configured HOME $HOME" || exit 1
 create_workspace
 snapshot_relevant_state "$workspace/initial-state"
 
