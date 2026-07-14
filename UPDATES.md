@@ -170,3 +170,14 @@
 - Required the refreshed default tip to be recorded in workflow state and supplied to planning and plan review, then reverified after user approval before creating the part branch directly from that exact commit.
 - Added ordered semantic validation for the full baseline-refresh and post-approval branch-creation transitions, including their stop conditions.
 - `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including ordered orchestrator-contract validation and the complete repository suite.
+
+### Review repair 8: implementer replanning transitions
+
+- Added one fail-closed transition for an implementer threshold overrun or invalid material planning assumption; implementation stops immediately without staging or committing partial work.
+- Required a complete replanning bundle containing completed commits, the partial diff and affected files, substantive and excluded counts, architectural-component count, validation results, trigger evidence, and distinguished pre-existing user changes.
+- Required the same planner to produce a corrected mid-level plan that accounts for preserved partial work and classifies focused subtasks as inseparable or independently shippable.
+- Kept inseparable subtasks in the current part and returned independent splits through prompt validation, bounded research when signaled, renewed scope confirmation, and separate baseline, branch, review-budget, and pull-request lifecycles.
+- Prohibited branch switching while partial work remains and required the corrected current-part plan to pass adversarial plan review and renewed user approval before one-subtask-at-a-time implementation resumes.
+- Added ordered semantic validation for the complete conditional transition and its preservation, splitting, scope-confirmation, and approval gates.
+- `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including the ordered implementer-replanning transition and the complete repository suite.
+- `devenv shell -- python scripts/validate-agent-configs.py`: passed after self-review narrowed the planner evidence bundle to workflow-owned partial work and necessary overlapping user context.

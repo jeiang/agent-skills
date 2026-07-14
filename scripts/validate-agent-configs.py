@@ -107,6 +107,18 @@ ORCHESTRATOR_CONTRACT = (
     "Record and confirm the refreshed default-branch tip",
     "After the reviewed plan receives explicit user approval",
     "Only from the reverified refreshed tip create and switch to `codex/<part-slug>`",
+    "whenever `feature_implementer` reports either",
+    "more than 500 non-generated changed lines",
+    "material planning assumption is invalid",
+    "Do not stage or commit the partial change",
+    "complete workflow-owned partial uncommitted diff and affected-file list",
+    "same `feature_planner` thread",
+    "independently reviewable and shippable",
+    "same `prompt_validator` thread",
+    "obtain renewed user scope confirmation",
+    "Do not switch branches while preserved partial work remains",
+    "mandatory `plan_reviewer` correction loop until exact `PASS`",
+    "obtain renewed explicit user approval before resuming implementation",
     "Count a completed review cycle only when a reviewer returns a verdict",
     "five reviewer verdicts",
     "repair each finding independently",
@@ -144,10 +156,11 @@ ORCHESTRATOR_INITIAL_PLAN_GATE = (
 )
 
 ORCHESTRATOR_CORRECTED_PLAN_GATE = (
-    "When a per-part plan needs a material correction",
+    "Use the same mandatory correction path when any other per-part plan needs a material correction",
+    "stop implementation",
     "return the evidence and current plan to the same `feature_planner` thread",
-    "run the complete corrected plan through the same mandatory `plan_reviewer` loop",
-    "obtain explicit user approval again",
+    "run the complete corrected plan through `plan_reviewer` until exact `PASS`",
+    "obtain renewed explicit user approval",
     "before implementation resumes",
 )
 
@@ -198,6 +211,45 @@ ORCHESTRATOR_PART_BRANCH_GATE = (
     "Only from the reverified refreshed tip create and switch to `codex/<part-slug>`",
     "Refuse an existing branch name unless it is the recorded branch for the same part at the same baseline",
     "Never create a part branch from another part branch",
+)
+
+ORCHESTRATOR_IMPLEMENTER_REPLAN_GATE = (
+    "whenever `feature_implementer` reports either",
+    "exceeds a substantive threshold",
+    "more than 500 non-generated changed lines",
+    "more than 10 product files",
+    "more than two independently testable architectural components",
+    "material planning assumption is invalid",
+    "Stop implementation immediately",
+    "Do not stage or commit the partial change",
+    "Capture the trigger and evidence",
+    "every completed workflow commit",
+    "the complete workflow-owned partial uncommitted diff and affected-file list",
+    "substantive line and product-file counts",
+    "separately reported generated files, lock files, and mechanical formatting",
+    "all validation attempted with its results",
+    "Record which files contain pre-existing user changes",
+    "Record unrelated user changes by path and status only",
+    "do not send their contents to the planner unless an overlapping edit makes that context necessary",
+    "Preserve completed commits, partial work, and user work exactly as found",
+    "Never discard, reset, clean, stash, overwrite, or silently commit partial work",
+    "Update the control file to mark the part paused for replanning",
+    "Return the evidence bundle, approved plan, and current part state to the same `feature_planner` thread",
+    "corrected mid-level plan",
+    "explicitly accounts for the preserved partial work",
+    "classify every proposed subtask as inseparable from the current part or independently reviewable and shippable",
+    "Keep inseparable subtasks in the current part and current branch",
+    "Send every independently shippable proposed split back to the same `prompt_validator` thread",
+    "Resolve any new research signal through the bounded researcher and validator loop",
+    "obtain renewed user scope confirmation",
+    "Each confirmed independent part must later use its own fresh-default baseline gate",
+    "never implement it on the current part branch",
+    "Do not switch branches while preserved partial work remains",
+    "Queue confirmed independent parts for sequential processing only after the current part reaches a safe completed state",
+    "Run the complete corrected current-part plan through the mandatory `plan_reviewer` correction loop until exact `PASS`",
+    "obtain renewed explicit user approval before resuming implementation",
+    "Update the control file with the approved plan and split dispositions",
+    "Resume the same implementer thread when available with exactly one approved subtask",
 )
 
 PROMPT_VALIDATOR_CONTRACT = (
@@ -421,6 +473,13 @@ def main() -> int:
                 instructions,
                 ORCHESTRATOR_PART_BRANCH_GATE,
                 "agents/task-orchestrator.toml per-part branch gate",
+            )
+        )
+        errors.extend(
+            require_ordered_markers(
+                instructions,
+                ORCHESTRATOR_IMPLEMENTER_REPLAN_GATE,
+                "agents/task-orchestrator.toml implementer replan gate",
             )
         )
         if "plan review when configured" in instructions:
