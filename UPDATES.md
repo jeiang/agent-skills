@@ -191,3 +191,13 @@
 - Required a global pass only when every section passes and the cross-interface review passes; missing, duplicate, stale, wrong-mode, or input-error results block consolidation.
 - Added semantic validation for mode inputs, verdicts, origin handling, ordered aggregation, and contradictory repository-wide diff requirements in bounded modes.
 - `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including reviewer-mode semantics, bounded-mode contradiction checks, cumulative aggregation rules, and the complete repository suite.
+
+### Review repair 10: explicit isolated repair approval
+
+- Replaced ambiguous repair approval wording with an ordered user gate for every individual product-review and final cumulative-review finding.
+- Required one separately spawned planner and one focused repair plan per finding, with plan-reviewer correction when missed-issue escalation requires it.
+- Required the complete isolated plan to be shown and explicitly approved before one implementer or documentation-author invocation.
+- Required isolated validation, writer self-review, one finding-only conventional commit, and control-file evidence before selecting the next finding.
+- Required material repair-plan, user-edit, or implementation changes to restart full per-part plan review and renewed approval, followed by the finding's separate isolated approval gate.
+- Added ordered semantic validation for product, material-change, and final-review repair transitions and removed the former `any required approval` ambiguity.
+- `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including ordered isolated-repair approval gates, ambiguity rejection, and the complete repository suite.

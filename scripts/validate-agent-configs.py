@@ -121,9 +121,14 @@ ORCHESTRATOR_CONTRACT = (
     "obtain renewed explicit user approval before resuming implementation",
     "Count a completed review cycle only when a full reviewer returns its verdict",
     "five reviewer verdicts",
-    "repair each finding independently",
-    "invoke the planner separately",
-    "invoke the implementer separately",
+    "repair each finding independently in this order",
+    "Require one focused repair plan",
+    "Present the complete isolated repair plan to the user",
+    "obtain explicit approval",
+    "Only after approval, invoke `feature_implementer` once",
+    "one separate conventional commit containing only that repair",
+    "restart the full mandatory `plan_reviewer` correction loop",
+    "repeat its separate user approval gate",
     "review the cumulative part again",
     "REPAIR_INTRODUCED",
     "PRE_EXISTING_MISSED",
@@ -139,7 +144,11 @@ ORCHESTRATOR_CONTRACT = (
     "Do not create a global cumulative verdict until every recorded section",
     "same current HEAD",
     "No individual bounded reviewer may supply or imply the global verdict",
-    "Route each final-review finding independently",
+    "For every individual final-review finding",
+    "Present the complete isolated repair plan to the user and obtain explicit approval",
+    "invoke `feature_implementer` once",
+    "invoke `documentation_author` once",
+    "one separate conventional commit containing only that repair",
     "five-verdict policy",
     "never concurrently",
     "explicit approval",
@@ -417,6 +426,53 @@ ORCHESTRATOR_SECTIONAL_REVIEW_GATE = (
     "No individual bounded reviewer may supply or imply the global verdict",
 )
 
+ORCHESTRATOR_PRODUCT_REPAIR_GATE = (
+    "When product-code review reports issues",
+    "repair each finding independently in this order",
+    "Select exactly one finding",
+    "Spawn `feature_planner` separately",
+    "Require one focused repair plan",
+    "If the missed-issue escalation already requires `plan_reviewer`",
+    "run the focused repair plan through the required adversarial plan-review correction loop until exact `PASS`",
+    "Present the complete isolated repair plan to the user",
+    "obtain explicit approval",
+    "Do not invoke a write-capable repair agent before that approval",
+    "Only after approval, invoke `feature_implementer` once",
+    "Require isolated validation, implementer self-review",
+    "one separate conventional commit containing only that repair",
+    "Record the finding disposition, approval, validation, and commit in the control file",
+    "Do not combine findings in one plan, approval, writer invocation, validation boundary, or commit",
+)
+
+ORCHESTRATOR_MATERIAL_REPAIR_GATE = (
+    "If a focused repair plan, a user-requested edit to it, or implementation evidence materially changes",
+    "stop the isolated repair",
+    "same original per-part `feature_planner` thread",
+    "restart the full mandatory `plan_reviewer` correction loop until exact `PASS`",
+    "present the complete corrected part plan",
+    "obtain renewed explicit user approval",
+    "regenerate or confirm the isolated repair plan",
+    "repeat its separate user approval gate before invoking a writer",
+)
+
+ORCHESTRATOR_FINAL_REPAIR_GATE = (
+    "For every individual final-review finding",
+    "Select exactly one finding and classify its file domain",
+    "Spawn `feature_planner` separately",
+    "Require one focused repair plan",
+    "If missed-issue escalation requires `plan_reviewer`",
+    "run the focused plan through that adversarial correction loop until exact `PASS`",
+    "Present the complete isolated repair plan to the user",
+    "obtain explicit approval before invoking any writer",
+    "Only after approval, invoke `feature_implementer` once",
+    "invoke `documentation_author` once",
+    "Require isolated validation, writer self-review",
+    "one separate conventional commit containing only that repair",
+    "Record the disposition, approval, validation, and commit in the control file",
+    "If the repair becomes material",
+    "repeat this finding's isolated approval gate",
+)
+
 
 def require_ordered_markers(
     text: str, markers: tuple[str, ...], contract: str
@@ -574,9 +630,25 @@ def main() -> int:
                 "agents/task-orchestrator.toml sectional review gate",
             )
         )
+        for markers, contract in (
+            (ORCHESTRATOR_PRODUCT_REPAIR_GATE, "product repair gate"),
+            (ORCHESTRATOR_MATERIAL_REPAIR_GATE, "material repair gate"),
+            (ORCHESTRATOR_FINAL_REPAIR_GATE, "final repair gate"),
+        ):
+            errors.extend(
+                require_ordered_markers(
+                    instructions,
+                    markers,
+                    f"agents/task-orchestrator.toml {contract}",
+                )
+            )
         if "plan review when configured" in instructions:
             errors.append(
                 "agents/task-orchestrator.toml: plan review must not be optional"
+            )
+        if "any required approval" in instructions:
+            errors.append(
+                "agents/task-orchestrator.toml: every isolated repair requires explicit user approval"
             )
 
     feature_reviewer_path = AGENTS_DIR / "feature-reviewer.toml"
