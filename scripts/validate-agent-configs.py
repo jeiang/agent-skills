@@ -119,8 +119,10 @@ ORCHESTRATOR_CONTRACT = (
     "Do not switch branches while preserved partial work remains",
     "mandatory `plan_reviewer` correction loop until exact `PASS`",
     "obtain renewed explicit user approval before resuming implementation",
-    "Count a completed review cycle only when a full reviewer returns its verdict",
-    "five reviewer verdicts",
+    "product_review_verdicts = 0",
+    "Increment `product_review_verdicts` exactly once",
+    "fifth product verdict",
+    "Never reset, decrement, reuse, or transfer the product counter",
     "repair each finding independently in this order",
     "Require one focused repair plan",
     "Present the complete isolated repair plan to the user",
@@ -136,6 +138,8 @@ ORCHESTRATOR_CONTRACT = (
     "require `plan_reviewer` to adversarially review and approve each resulting repair plan",
     "product-code review reaches a provisional `VERDICT: PASS`",
     "spawn `documentation_author`",
+    "final_review_verdicts = 0",
+    "final counter is a new budget",
     "final cumulative review across code, tests, configuration, and documentation",
     "exceeds 400 changed lines or exceeds 8 files",
     "partition the entire change into nonoverlapping cohesive sections",
@@ -149,7 +153,9 @@ ORCHESTRATOR_CONTRACT = (
     "invoke `feature_implementer` once",
     "invoke `documentation_author` once",
     "one separate conventional commit containing only that repair",
-    "five-verdict policy",
+    "Increment `final_review_verdicts` exactly once",
+    "fifth final global verdict",
+    "Never reset, decrement, reuse, transfer, or combine the final counter with the product counter",
     "never concurrently",
     "explicit approval",
 )
@@ -473,6 +479,33 @@ ORCHESTRATOR_FINAL_REPAIR_GATE = (
     "repeat this finding's isolated approval gate",
 )
 
+ORCHESTRATOR_PRODUCT_REVIEW_BUDGET = (
+    "initialize `product_review_verdicts = 0` in the control file immediately before the first product-code review",
+    "do not initialize the final-review counter yet",
+    "Increment `product_review_verdicts` exactly once only after a product `FULL` reviewer returns `VERDICT: PASS` or `VERDICT: ISSUES`",
+    "repairs, planner results, and any other agent report do not count",
+    "Record the reviewed HEAD and verdict with the counter value in the control file",
+    "A product `VERDICT: PASS` freezes the product counter",
+    "ends the product loop at provisional product pass",
+    "If the fifth product verdict is `VERDICT: ISSUES`",
+    "stop the part immediately without further repairs, documentation, final review, or publication",
+    "Never reset, decrement, reuse, or transfer the product counter",
+)
+
+ORCHESTRATOR_FINAL_REVIEW_BUDGET = (
+    "Only after the documentation stage completes",
+    "initialize a distinct `final_review_verdicts = 0` in the control file",
+    "Preserve the frozen `product_review_verdicts` value",
+    "final counter is a new budget, not a reset, continuation, replacement, or reuse of the product counter",
+    "Increment `final_review_verdicts` exactly once for either one final `FULL` verdict or one fully consolidated sectional-batch global verdict",
+    "Individual `SECTION` and `CROSS_INTERFACE` reports, repairs, planner results, and writer reports do not count",
+    "Record the reviewed HEAD, review form (`FULL` or `SECTIONAL_BATCH`), global verdict, and counter value in the control file",
+    "A final global `VERDICT: PASS` freezes the final counter",
+    "If the fifth final global verdict is `VERDICT: ISSUES`",
+    "stop immediately without further repairs or publication",
+    "Never reset, decrement, reuse, transfer, or combine the final counter with the product counter",
+)
+
 
 def require_ordered_markers(
     text: str, markers: tuple[str, ...], contract: str
@@ -634,6 +667,8 @@ def main() -> int:
             (ORCHESTRATOR_PRODUCT_REPAIR_GATE, "product repair gate"),
             (ORCHESTRATOR_MATERIAL_REPAIR_GATE, "material repair gate"),
             (ORCHESTRATOR_FINAL_REPAIR_GATE, "final repair gate"),
+            (ORCHESTRATOR_PRODUCT_REVIEW_BUDGET, "product review budget"),
+            (ORCHESTRATOR_FINAL_REVIEW_BUDGET, "final review budget"),
         ):
             errors.extend(
                 require_ordered_markers(
@@ -649,6 +684,16 @@ def main() -> int:
         if "any required approval" in instructions:
             errors.append(
                 "agents/task-orchestrator.toml: every isolated repair requires explicit user approval"
+            )
+        if "existing five-verdict policy" in instructions:
+            errors.append(
+                "agents/task-orchestrator.toml: product and final review budgets must not share a policy"
+            )
+        if instructions.find("product_review_verdicts = 0") > instructions.find(
+            "final_review_verdicts = 0"
+        ):
+            errors.append(
+                "agents/task-orchestrator.toml: product review counter must initialize before final review counter"
             )
 
     feature_reviewer_path = AGENTS_DIR / "feature-reviewer.toml"

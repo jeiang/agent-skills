@@ -201,3 +201,14 @@
 - Required material repair-plan, user-edit, or implementation changes to restart full per-part plan review and renewed approval, followed by the finding's separate isolated approval gate.
 - Added ordered semantic validation for product, material-change, and final-review repair transitions and removed the former `any required approval` ambiguity.
 - `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including ordered isolated-repair approval gates, ambiguity rejection, and the complete repository suite.
+
+### Review repair 11: separate review budgets
+
+- Added an immutable per-part `product_review_verdicts` counter initialized immediately before product review and capped at five `FULL` product verdicts.
+- Ended product review at a provisional product pass, or stopped the part before documentation and publication when the fifth product verdict still has issues.
+- Added a distinct `final_review_verdicts` counter initialized only after documentation while preserving the frozen product counter.
+- Counted one final `FULL` verdict or one complete sectional-batch global verdict as one final verdict; individual section and cross-interface reports never count separately.
+- Ended final review at a global pass, or stopped without further repairs or publication when the fifth final verdict still has issues.
+- Prohibited resetting, decrementing, transferring, combining, or reusing either counter across repairs, replanning, documentation, or review repartitioning.
+- Added ordered semantic validation for initialization, qualifying verdicts, control-file evidence, success and exhaustion exits, and counter isolation.
+- `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including ordered counter lifecycle assertions, shared-budget rejection, and the complete repository suite.
