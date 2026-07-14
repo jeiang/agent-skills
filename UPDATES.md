@@ -223,3 +223,12 @@
 - Preserved the existing final-review budget: audits and repair commits do not consume, reset, or reinitialize the counter; only the next cumulative global verdict counts.
 - Added ordered semantic validation for product-affecting, documentation-only, mixed-batch, approval, commit, and counter-preservation paths.
 - `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including ordered post-repair documentation transitions, final-counter preservation, and the complete repository suite.
+
+### Review repair 13: cross-contract mutation validation
+
+- Added a final cross-contract semantic audit spanning plan and repair approvals, role ownership, minimal context, branch freshness, implementation replanning, reviewer modes and aggregation, separate review budgets, and documentation reruns.
+- Added an isolated agent-directory override so the repository validator can evaluate disposable contract copies without modifying installed or tracked agent definitions.
+- Added targeted mutation fixtures proving validation fails for omitted approval and context steps, reordered branch refresh, optional plan review, wrong writer ownership, missing threshold stops, contradictory bounded review inputs, incomplete aggregation, shared review budgets, and weakened documentation-audit safety.
+- Integrated the mutation fixture runner into the repository check entry point.
+- Kept the repair within the implementer limits: fewer than 500 substantive lines, fewer than 10 files, and no more than two independently testable components.
+- `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including the final cross-contract audit, all 10 rejected mutation fixtures, and the complete repository suite.

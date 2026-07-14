@@ -7,6 +7,7 @@ cd "$repo_dir"
 python scripts/validate-skills.py codex/*
 python scripts/test-validate-skills.py
 python scripts/validate-agent-configs.py
+python scripts/test-validate-agent-configs.py
 python scripts/validate-start-task-skill.py
 
 python - <<'PY'

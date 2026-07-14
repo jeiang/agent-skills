@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import os
 import sys
 import tomllib
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-AGENTS_DIR = REPO_ROOT / "agents"
+AGENTS_DIR = Path(
+    os.environ.get("START_TASK_AGENT_CONFIG_DIR", REPO_ROOT / "agents")
+).resolve()
+DISPLAY_ROOT = AGENTS_DIR.parent if "START_TASK_AGENT_CONFIG_DIR" in os.environ else REPO_ROOT
 
 EXPECTED = {
     "agents-md-author.toml": {
@@ -569,6 +573,104 @@ def text_between(text: str, start: str, end: str) -> str:
     return text[start_position:end_position]
 
 
+def read_agent_instructions(filename: str) -> str:
+    path = AGENTS_DIR / filename
+    if not path.exists():
+        return ""
+    try:
+        with path.open("rb") as stream:
+            return tomllib.load(stream).get("developer_instructions", "")
+    except (OSError, tomllib.TOMLDecodeError):
+        return ""
+
+
+def validate_cross_contract_audit() -> list[str]:
+    errors: list[str] = []
+    orchestrator = read_agent_instructions("task-orchestrator.toml")
+    reviewer = read_agent_instructions("feature-reviewer.toml")
+    implementer = read_agent_instructions("feature-implementer.toml")
+    documentation_author = read_agent_instructions("documentation-author.toml")
+
+    if not all((orchestrator, reviewer, implementer, documentation_author)):
+        return errors
+
+    ordered_gates = (
+        ("approval", orchestrator, ORCHESTRATOR_INITIAL_PLAN_GATE),
+        ("branch freshness", orchestrator, ORCHESTRATOR_PART_BASELINE_GATE),
+        ("threshold and invalid assumption", orchestrator, ORCHESTRATOR_IMPLEMENTER_REPLAN_GATE),
+        ("product repair approval", orchestrator, ORCHESTRATOR_PRODUCT_REPAIR_GATE),
+        ("final repair approval", orchestrator, ORCHESTRATOR_FINAL_REPAIR_GATE),
+        ("review aggregation", orchestrator, ORCHESTRATOR_SECTIONAL_REVIEW_GATE),
+        ("product budget", orchestrator, ORCHESTRATOR_PRODUCT_REVIEW_BUDGET),
+        ("final budget", orchestrator, ORCHESTRATOR_FINAL_REVIEW_BUDGET),
+        (
+            "documentation rerun",
+            orchestrator,
+            ORCHESTRATOR_POST_REPAIR_DOCUMENTATION_GATE,
+        ),
+        ("reviewer full mode", reviewer, FEATURE_REVIEWER_FULL_MODE),
+        ("reviewer section mode", reviewer, FEATURE_REVIEWER_SECTION_MODE),
+        (
+            "reviewer cross-interface mode",
+            reviewer,
+            FEATURE_REVIEWER_CROSS_INTERFACE_MODE,
+        ),
+    )
+    for name, instructions, markers in ordered_gates:
+        errors.extend(
+            require_ordered_markers(
+                instructions,
+                markers,
+                f"cross-contract audit {name}",
+            )
+        )
+
+    role_markers = (
+        (
+            "minimal context",
+            orchestrator,
+            (
+                "For every delegation, provide only the current role's necessary request",
+                "Do not expose future-part context, unrelated commits, or unnecessary conversation history",
+            ),
+        ),
+        (
+            "implementer ownership",
+            implementer,
+            (
+                "Do not create or edit documentation",
+                "Never push or open a pull request",
+            ),
+        ),
+        (
+            "documentation ownership",
+            documentation_author,
+            (
+                "Edit documentation files only",
+                "Do not modify product code, configuration, tests",
+            ),
+        ),
+    )
+    for name, instructions, markers in role_markers:
+        for marker in markers:
+            if marker not in instructions:
+                errors.append(
+                    f"cross-contract audit {name}: missing contract text {marker!r}"
+                )
+
+    ownership_contradictions = (
+        "`documentation_author` once for a code, test, or configuration finding",
+        "`feature_implementer` once for a documentation finding",
+    )
+    for marker in ownership_contradictions:
+        if marker in orchestrator:
+            errors.append(
+                f"cross-contract audit role ownership: contradictory assignment {marker!r}"
+            )
+
+    return errors
+
+
 def main() -> int:
     errors: list[str] = []
     paths = sorted(AGENTS_DIR.glob("*.toml"))
@@ -589,7 +691,7 @@ def main() -> int:
             with path.open("rb") as stream:
                 config = tomllib.load(stream)
         except (OSError, tomllib.TOMLDecodeError) as error:
-            errors.append(f"{path.relative_to(REPO_ROOT)}: {error}")
+            errors.append(f"{path.relative_to(DISPLAY_ROOT)}: {error}")
             continue
 
         expected = EXPECTED.get(path.name)
@@ -599,14 +701,14 @@ def main() -> int:
         for field, value in expected.items():
             if config.get(field) != value:
                 errors.append(
-                    f"{path.relative_to(REPO_ROOT)}: {field} must be {value!r}, "
+                    f"{path.relative_to(DISPLAY_ROOT)}: {field} must be {value!r}, "
                     f"got {config.get(field)!r}"
                 )
 
         for field in ("description", "developer_instructions"):
             if not isinstance(config.get(field), str) or not config[field].strip():
                 errors.append(
-                    f"{path.relative_to(REPO_ROOT)}: {field} must be a non-empty string"
+                    f"{path.relative_to(DISPLAY_ROOT)}: {field} must be a non-empty string"
                 )
 
     author_path = AGENTS_DIR / "agents-md-author.toml"
@@ -784,6 +886,8 @@ def main() -> int:
                         "agents/feature-reviewer.toml: "
                         f"{mode} must not contain whole-change requirement {marker!r}"
                     )
+
+    errors.extend(validate_cross_contract_audit())
 
     if errors:
         print("Agent configuration validation failed:", file=sys.stderr)
