@@ -181,3 +181,13 @@
 - Added ordered semantic validation for the complete conditional transition and its preservation, splitting, scope-confirmation, and approval gates.
 - `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including the ordered implementer-replanning transition and the complete repository suite.
 - `devenv shell -- python scripts/validate-agent-configs.py`: passed after self-review narrowed the planner evidence bundle to workflow-owned partial work and necessary overlapping user context.
+
+### Review repair 9: explicit code-review modes
+
+- Added `FULL`, `SECTION`, and `CROSS_INTERFACE` reviewer modes with distinct required inputs, scopes, and mode-qualified verdicts.
+- Restricted whole-change approval to `FULL`; section reviewers receive bounded files and diffs and cannot claim global approval, while cross-interface reviewers receive declared boundaries and interactions and assess integration only.
+- Kept initial and later-pass origin classification consistent across modes, including prior-finding disposition and evidence-based `FEATURE_CHANGE`, `REPAIR_INTRODUCED`, and `PRE_EXISTING_MISSED` fields.
+- Required large cumulative reviews to cover every recorded nonoverlapping section plus one cross-interface review at the same HEAD before consolidation.
+- Required a global pass only when every section passes and the cross-interface review passes; missing, duplicate, stale, wrong-mode, or input-error results block consolidation.
+- Added semantic validation for mode inputs, verdicts, origin handling, ordered aggregation, and contradictory repository-wide diff requirements in bounded modes.
+- `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including reviewer-mode semantics, bounded-mode contradiction checks, cumulative aggregation rules, and the complete repository suite.

@@ -119,7 +119,7 @@ ORCHESTRATOR_CONTRACT = (
     "Do not switch branches while preserved partial work remains",
     "mandatory `plan_reviewer` correction loop until exact `PASS`",
     "obtain renewed explicit user approval before resuming implementation",
-    "Count a completed review cycle only when a reviewer returns a verdict",
+    "Count a completed review cycle only when a full reviewer returns its verdict",
     "five reviewer verdicts",
     "repair each finding independently",
     "invoke the planner separately",
@@ -133,9 +133,12 @@ ORCHESTRATOR_CONTRACT = (
     "spawn `documentation_author`",
     "final cumulative review across code, tests, configuration, and documentation",
     "exceeds 400 changed lines or exceeds 8 files",
-    "partition it by cohesive subsystem or concern",
-    "independent `feature_reviewer` for each subsection",
-    "cross-section interfaces and interactions",
+    "partition the entire change into nonoverlapping cohesive sections",
+    "`SECTION` mode for every recorded section",
+    "`CROSS_INTERFACE` mode",
+    "Do not create a global cumulative verdict until every recorded section",
+    "same current HEAD",
+    "No individual bounded reviewer may supply or imply the global verdict",
     "Route each final-review finding independently",
     "five-verdict policy",
     "never concurrently",
@@ -321,16 +324,32 @@ IMPLEMENTER_CONTRACT = (
 
 FEATURE_REVIEWER_CONTRACT = (
     "adversarial reviewer",
+    "exactly one review mode: `FULL`, `SECTION`, or `CROSS_INTERFACE`",
     "Search exhaustively",
     "correctness, security, regression, compatibility, error-handling, plan-fulfillment, and required-validation defects",
+    "Mode `FULL`",
     "complete `baseline..HEAD` diff",
+    "whole-change `VERDICT: PASS` or `VERDICT: ISSUES`",
+    "Mode `SECTION`",
+    "declared bounded file list",
+    "exact bounded diff for those files",
+    "applicable approved-plan slice",
+    "Return only `VERDICT: SECTION_PASS` or `VERDICT: SECTION_ISSUES`",
+    "cannot claim global or whole-change approval",
+    "Mode `CROSS_INTERFACE`",
+    "identifiers and boundaries of every declared section",
+    "declared interfaces and interactions between them",
+    "Evaluate integration behavior only",
+    "Return only `VERDICT: CROSS_INTERFACE_PASS` or `VERDICT: CROSS_INTERFACE_ISSUES`",
+    "Pass timing and finding origins",
     "previous reviewed HEAD",
-    "disposition of every prior finding",
-    "cumulative result",
+    "disposition of every supplied prior finding",
+    "FEATURE_CHANGE",
     "REPAIR_INTRODUCED",
     "PRE_EXISTING_MISSED",
     "evidence from the tree at the previous reviewed HEAD",
     "exhaustive entire-part review",
+    "MODE: INVALID",
     "VERDICT: PASS",
     "VERDICT: ISSUES",
     "severity",
@@ -340,6 +359,62 @@ FEATURE_REVIEWER_CONTRACT = (
     "required correction",
     "origin",
     "Do not edit files",
+)
+
+FEATURE_REVIEWER_FULL_MODE = (
+    "Mode `FULL`",
+    "recorded baseline commit",
+    "complete approved plan",
+    "complete `baseline..HEAD` diff",
+    "Inspect the whole cumulative change",
+    "only mode that may issue a whole-change `VERDICT: PASS` or `VERDICT: ISSUES`",
+)
+
+FEATURE_REVIEWER_SECTION_MODE = (
+    "Mode `SECTION`",
+    "section identifier",
+    "declared bounded file list",
+    "exact bounded diff for those files",
+    "applicable approved-plan slice",
+    "relevant supplied interfaces",
+    "in-scope prior findings when applicable",
+    "validation evidence",
+    "Review only the declared section",
+    "Do not require or inspect repository-wide diffs or unrelated files",
+    "Return only `VERDICT: SECTION_PASS` or `VERDICT: SECTION_ISSUES`",
+    "cannot claim global or whole-change approval",
+)
+
+FEATURE_REVIEWER_CROSS_INTERFACE_MODE = (
+    "Mode `CROSS_INTERFACE`",
+    "identifiers and boundaries of every declared section",
+    "declared interfaces and interactions between them",
+    "exact bounded interface diff and supplied interface context",
+    "applicable integration requirements from the approved plan",
+    "prior cross-interface findings when applicable",
+    "validation evidence",
+    "Evaluate integration behavior only",
+    "Do not require or inspect repository-wide diffs",
+    "Return only `VERDICT: CROSS_INTERFACE_PASS` or `VERDICT: CROSS_INTERFACE_ISSUES`",
+    "cannot claim global or whole-change approval",
+)
+
+ORCHESTRATOR_SECTIONAL_REVIEW_GATE = (
+    "If the substantive cumulative diff exceeds 400 changed lines or exceeds 8 files",
+    "partition the entire change into nonoverlapping cohesive sections",
+    "record every section identifier, bounded file list, diff boundary",
+    "Spawn one independent `feature_reviewer` in `SECTION` mode for every recorded section",
+    "Give each section reviewer only its recorded bounded inputs",
+    "Spawn one separate `feature_reviewer` in `CROSS_INTERFACE` mode",
+    "every section identifier and boundary",
+    "exact bounded interface diff and context",
+    "Do not create a global cumulative verdict until every recorded section",
+    "same current HEAD",
+    "missing, duplicate, stale-HEAD, wrong-mode, or input-error result blocks consolidation",
+    "Emit global `VERDICT: PASS` only when every section returned `SECTION_PASS`",
+    "cross-interface result is `CROSS_INTERFACE_PASS`",
+    "otherwise emit global `VERDICT: ISSUES`",
+    "No individual bounded reviewer may supply or imply the global verdict",
 )
 
 
@@ -355,6 +430,16 @@ def require_ordered_markers(
             break
         cursor = position + len(marker)
     return errors
+
+
+def text_between(text: str, start: str, end: str) -> str:
+    start_position = text.find(start)
+    if start_position < 0:
+        return ""
+    end_position = text.find(end, start_position + len(start))
+    if end_position < 0:
+        return ""
+    return text[start_position:end_position]
 
 
 def main() -> int:
@@ -482,10 +567,64 @@ def main() -> int:
                 "agents/task-orchestrator.toml implementer replan gate",
             )
         )
+        errors.extend(
+            require_ordered_markers(
+                instructions,
+                ORCHESTRATOR_SECTIONAL_REVIEW_GATE,
+                "agents/task-orchestrator.toml sectional review gate",
+            )
+        )
         if "plan review when configured" in instructions:
             errors.append(
                 "agents/task-orchestrator.toml: plan review must not be optional"
             )
+
+    feature_reviewer_path = AGENTS_DIR / "feature-reviewer.toml"
+    if feature_reviewer_path.exists():
+        with feature_reviewer_path.open("rb") as stream:
+            instructions = tomllib.load(stream).get("developer_instructions", "")
+        for markers, contract in (
+            (FEATURE_REVIEWER_FULL_MODE, "full mode"),
+            (FEATURE_REVIEWER_SECTION_MODE, "section mode"),
+            (FEATURE_REVIEWER_CROSS_INTERFACE_MODE, "cross-interface mode"),
+        ):
+            errors.extend(
+                require_ordered_markers(
+                    instructions,
+                    markers,
+                    f"agents/feature-reviewer.toml {contract}",
+                )
+            )
+
+        section_instructions = text_between(
+            instructions, "Mode `SECTION`:", "Mode `CROSS_INTERFACE`:"
+        )
+        cross_interface_instructions = text_between(
+            instructions,
+            "Mode `CROSS_INTERFACE`:",
+            "Pass timing and finding origins:",
+        )
+        contradictory_bounded_requirements = (
+            "require the complete `baseline..head` diff",
+            "inspect the full baseline-to-current change",
+            "review the complete change",
+            "inspect every feature and repair commit",
+        )
+        for mode, bounded_instructions in (
+            ("SECTION", section_instructions),
+            ("CROSS_INTERFACE", cross_interface_instructions),
+        ):
+            if not bounded_instructions:
+                errors.append(
+                    f"agents/feature-reviewer.toml: could not isolate {mode} instructions"
+                )
+                continue
+            for marker in contradictory_bounded_requirements:
+                if marker in bounded_instructions.lower():
+                    errors.append(
+                        "agents/feature-reviewer.toml: "
+                        f"{mode} must not contain whole-change requirement {marker!r}"
+                    )
 
     if errors:
         print("Agent configuration validation failed:", file=sys.stderr)
