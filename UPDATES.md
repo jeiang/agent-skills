@@ -154,3 +154,10 @@
 - Required the complete reviewed plan and every materially corrected replacement to receive explicit user approval before implementation or resumed implementation, with initial part-branch creation only after approval.
 - Added ordered semantic assertions for both initial and materially corrected plan gates and an explicit prohibition on the former optional-review wording.
 - `devenv test`: passed, including ordered orchestrator-contract validation and the complete repository suite.
+
+### Review repair 6: research-informed scope confirmation
+
+- Moved materially scope-affecting research before final user confirmation and required cited findings to return to the same prompt-validator thread for revised parts and acceptance criteria.
+- Added impact classification for research performed after confirmation; material findings reopen prompt validation and user confirmation before planning, while nonmaterial findings require recorded evidence and a no-impact classification.
+- Added ordered semantic assertions for both the pre-confirmation research path and the conditional post-confirmation revalidation path.
+- `devenv test` exposed and prompted correction of a stale loose research marker; a full rerun was blocked when the host approval service reached its usage limit. Focused ordered-gate validation and `git diff --check` passed after the correction.

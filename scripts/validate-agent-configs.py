@@ -94,7 +94,7 @@ ORCHESTRATOR_CONTRACT = (
     "Do not continue until the user confirms the scope",
     ".codex/start-task/<YYYY-MM-DD>_<task-slug>_PLAN.md",
     "never commit that control file",
-    "only when unresolved repository facts",
+    "Give the researcher only the unresolved repository facts",
     "Process only independently reviewable and shippable parts",
     "Process parts sequentially",
     "Count a completed review cycle only when a reviewer returns a verdict",
@@ -138,6 +138,26 @@ ORCHESTRATOR_CORRECTED_PLAN_GATE = (
     "run the complete corrected plan through the same mandatory `plan_reviewer` loop",
     "obtain explicit user approval again",
     "before implementation resumes",
+)
+
+ORCHESTRATOR_RESEARCH_BEFORE_CONFIRMATION = (
+    "spawn `prompt_validator`",
+    "If prompt validation signals material research",
+    "spawn `task_researcher` with a bounded question before final scope confirmation",
+    "return the cited findings to the same `prompt_validator` thread",
+    "Relay the final proposed interpretation",
+    "Do not continue until the user confirms the scope and the final proposed parts",
+    "Persist the exact confirmed parts and workflow state",
+)
+
+ORCHESTRATOR_POST_CONFIRMATION_RESEARCH = (
+    "If research occurs after scope confirmation",
+    "classify its impact against scope, acceptance criteria, dependencies, feasibility, and risk",
+    "If it changes any of them",
+    "rerun `prompt_validator`",
+    "obtain renewed user confirmation",
+    "before planning or resuming planning",
+    "Nonmaterial findings may proceed only after",
 )
 
 PROMPT_VALIDATOR_CONTRACT = (
@@ -333,6 +353,20 @@ def main() -> int:
                 instructions,
                 ORCHESTRATOR_CORRECTED_PLAN_GATE,
                 "agents/task-orchestrator.toml corrected plan gate",
+            )
+        )
+        errors.extend(
+            require_ordered_markers(
+                instructions,
+                ORCHESTRATOR_RESEARCH_BEFORE_CONFIRMATION,
+                "agents/task-orchestrator.toml pre-confirmation research gate",
+            )
+        )
+        errors.extend(
+            require_ordered_markers(
+                instructions,
+                ORCHESTRATOR_POST_CONFIRMATION_RESEARCH,
+                "agents/task-orchestrator.toml post-confirmation research gate",
             )
         )
         if "plan review when configured" in instructions:
