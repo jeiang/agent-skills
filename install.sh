@@ -7,6 +7,62 @@ config_file="$HOME/.codex/config.toml"
 backup_root="$HOME/.codex/skill-backups"
 legacy_start_task="$HOME/.agents/skills/start-task"
 
+workspace=''
+lock_dir=''
+workspace_owned=0
+lock_owned=0
+resource_transition=0
+pending_signal=0
+cleanup_active=0
+
+handle_termination() {
+  signal_status=$1
+  if [ "$resource_transition" -eq 1 ]; then
+    if [ "$pending_signal" -eq 0 ]; then
+      pending_signal=$signal_status
+    fi
+    return 0
+  fi
+  exit "$signal_status"
+}
+
+finish_resource_transition() {
+  resource_transition=0
+  if [ "$pending_signal" -ne 0 ]; then
+    signal_status=$pending_signal
+    pending_signal=0
+    exit "$signal_status"
+  fi
+}
+
+cleanup_workspace() {
+  original_status=$?
+  if [ "$cleanup_active" -eq 1 ]; then
+    exit "$original_status"
+  fi
+  cleanup_active=1
+  trap - EXIT
+  trap '' HUP INT TERM
+  if [ "$workspace_owned" -eq 1 ]; then
+    if ! rm -rf "$workspace"; then
+      echo "Warning: unable to remove installer workspace: $workspace" >&2
+    fi
+    workspace_owned=0
+  fi
+  if [ "$lock_owned" -eq 1 ]; then
+    if ! rmdir "$lock_dir" 2>/dev/null; then
+      echo "Warning: unable to remove installer lock: $lock_dir" >&2
+    fi
+    lock_owned=0
+  fi
+  exit "$original_status"
+}
+
+trap cleanup_workspace EXIT
+trap 'handle_termination 129' HUP
+trap 'handle_termination 130' INT
+trap 'handle_termination 143' TERM
+
 create_workspace() {
   temporary_root=${TMPDIR:-/tmp}
   case "$temporary_root/" in
@@ -15,39 +71,34 @@ create_workspace() {
 
   saved_umask=$(umask)
   umask 077
-  workspace=$(mktemp -d "$temporary_root/agent-skills-install.XXXXXX")
+  resource_transition=1
+  if ! workspace=$(mktemp -d "$temporary_root/agent-skills-install.XXXXXX"); then
+    umask "$saved_umask"
+    finish_resource_transition
+    echo "Unable to create installer workspace in: $temporary_root" >&2
+    exit 1
+  fi
+  workspace_owned=1
+  finish_resource_transition
   chmod 0700 "$workspace"
   lock_key=$(printf '%s' "$HOME" | cksum | awk '{ print $1 "-" $2 }')
   lock_dir="$temporary_root/agent-skills-install-lock.$lock_key"
+  resource_transition=1
   if ! mkdir -m 0700 "$lock_dir" 2>/dev/null; then
-    rm -rf "$workspace"
     umask "$saved_umask"
+    finish_resource_transition
     echo "Refusing concurrent agent-skills installation for HOME=$HOME. Wait for the cooperating installer to finish." >&2
     exit 1
   fi
+  lock_owned=1
+  finish_resource_transition
   umask "$saved_umask"
-  trap cleanup_workspace EXIT
-  trap 'exit 129' HUP
-  trap 'exit 130' INT
-  trap 'exit 143' TERM
 
   manifest="$workspace/manifest"
   mkdir "$manifest" "$workspace/reserved-backups" "$workspace/frozen-agents"
   planned_directories="$workspace/planned-directories"
   : >"$planned_directories"
   action_count=0
-}
-
-cleanup_workspace() {
-  original_status=$?
-  trap - EXIT HUP INT TERM
-  if ! rm -rf "$workspace"; then
-    echo "Warning: unable to remove installer workspace: $workspace" >&2
-  fi
-  if ! rmdir "$lock_dir" 2>/dev/null; then
-    echo "Warning: unable to remove installer lock: $lock_dir" >&2
-  fi
-  exit "$original_status"
 }
 
 snapshot_path() {

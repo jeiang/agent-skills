@@ -249,6 +249,56 @@ new_home() {
   printf '%s\n' "$home"
 }
 
+make_signal_installer() {
+  output=$1
+  allocation=$2
+  signal_name=$3
+  cleanup_signal=${4-}
+  awk -v source_repo="$repo_dir" -v allocation="$allocation" -v signal_name="$signal_name" -v cleanup_signal="$cleanup_signal" '
+    {
+      print
+      if ($0 ~ /^repo_dir=/) {
+        printf "repo_dir=%c%s%c\n", 39, source_repo, 39
+      }
+      if ((allocation == "workspace" && $0 == "  workspace_owned=1") ||
+          (allocation == "lock" && $0 == "  lock_owned=1")) {
+        print "  kill -" signal_name " \"$$\""
+      }
+      if (cleanup_signal != "" && $0 == "  trap '\'' '\'' HUP INT TERM") {
+        print "  kill -" cleanup_signal " \"$$\""
+      }
+    }
+  ' "$repo_dir/install.sh" >"$output"
+  chmod +x "$output"
+}
+
+assert_deferred_signal_cleanup() {
+  allocation=$1
+  signal_name=$2
+  expected_status=$3
+  cleanup_signal=${4-}
+  fixture="signal-${allocation}-${signal_name}-${cleanup_signal:-none}"
+  installer="$test_root/$fixture-install.sh"
+  make_signal_installer "$installer" "$allocation" "$signal_name" "$cleanup_signal"
+  home=$(new_home "$fixture")
+  printf '%s\n' '[identity]' "name = \"$fixture\"" >"$home/.codex/config.toml"
+  snapshot_home "$home" "$test_root/$fixture.home.before"
+
+  set +e
+  HOME="$home" "$installer" >"$test_root/$fixture.stdout" 2>"$test_root/$fixture.stderr"
+  status=$?
+  set -e
+  if [ "$status" -ne "$expected_status" ]; then
+    echo "Installer returned $status instead of $expected_status for $allocation $signal_name" >&2
+    exit 1
+  fi
+
+  snapshot_home "$home" "$test_root/$fixture.home.after"
+  cmp "$test_root/$fixture.home.before" "$test_root/$fixture.home.after"
+  assert_installer_temp_clean
+  run_installer "$home"
+}
+
 # Config symlinks are refused before any installation mutation.
 home=$(new_home relative_symlink)
 printf '%s\n' '[identity]' 'name = "relative"' >"$home/.codex/config-target.toml"
@@ -280,6 +330,17 @@ cmp "$test_root/cooperating_lock.home.before" "$test_root/cooperating_lock.home.
 grep -F 'Refusing concurrent agent-skills installation' "$test_root/cooperating_lock.stderr" >/dev/null
 rmdir "$lock_dir"
 assert_installer_temp_clean
+
+# Termination is deferred until newly allocated resources are owned, then cleaned.
+assert_deferred_signal_cleanup workspace HUP 129
+assert_deferred_signal_cleanup workspace INT 130
+assert_deferred_signal_cleanup workspace TERM 143
+assert_deferred_signal_cleanup lock HUP 129
+assert_deferred_signal_cleanup lock INT 130
+assert_deferred_signal_cleanup lock TERM 143
+
+# A second termination signal during cleanup cannot interrupt owned-resource removal.
+assert_deferred_signal_cleanup lock TERM 143 TERM
 
 # A late skill conflict refuses before earlier planned links or agents mutate HOME.
 home=$(new_home skill_conflict)
