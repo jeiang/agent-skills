@@ -155,6 +155,18 @@ PY
   [ "$count" -eq 1 ]
 }
 
+assert_permission_refusal() {
+  home=$1
+  expected_error=$2
+  control=$3
+  fixture=$(basename -- "$home")
+  if sh -c "$control" 2>/dev/null; then
+    echo "Skipping $fixture because the matching external operation bypassed the intended permission denial."
+    return 0
+  fi
+  assert_refused_unchanged "$home" "$expected_error"
+}
+
 new_home() {
   name=$1
   home="$test_root/$name"
@@ -215,6 +227,59 @@ printf '%s\n' '[identity]' 'name = "agent conflict"' >"$home/.codex/config.toml"
 mkdir -p "$home/.codex/agents/task-orchestrator.toml"
 assert_refused_unchanged "$home" 'Refusing agent destination that is a directory'
 
+# Destination ancestry must contain only real searchable directories.
+home=$(new_home destination_ancestry_symlink)
+printf '%s\n' '[identity]' 'name = "ancestry symlink"' >"$home/.codex/config.toml"
+mkdir "$home/skills-target"
+ln -s "$home/skills-target" "$home/.codex/skills"
+assert_refused_unchanged "$home" 'Refusing installer destination ancestry symlink'
+
+# Permission fixtures run only when the matching external operation is denied.
+home=$(new_home mkdir_permission)
+printf '%s\n' '[identity]' 'name = "mkdir permission"' >"$home/.codex/config.toml"
+chmod 0555 "$home/.codex"
+assert_permission_refusal "$home" 'Cannot create directory' "mkdir '$home/.codex/control-directory'"
+chmod 0755 "$home/.codex"
+
+home=$(new_home link_permission)
+run_installer "$home"
+rm "$home/.codex/skills/start-task"
+chmod 0555 "$home/.codex/skills"
+assert_permission_refusal "$home" 'Cannot link skill' "ln -s '$repo_dir/codex/start-task' '$home/.codex/skills/control-link'"
+chmod 0755 "$home/.codex/skills"
+
+home=$(new_home agent_permission)
+run_installer "$home"
+printf '%s\n' 'outdated agent' >"$home/.codex/agents/task-orchestrator.toml"
+chmod 0555 "$home/.codex/agents"
+assert_permission_refusal "$home" 'Cannot install agent' "install -m 0644 '$repo_dir/agents/task-orchestrator.toml' '$home/.codex/agents/control-agent.toml'"
+chmod 0755 "$home/.codex/agents"
+
+home=$(new_home config_permission)
+run_installer "$home"
+printf '%s\n' '[agents]' 'max_threads = 4' 'max_depth = 1' >"$home/.codex/config.toml"
+chmod 0555 "$home/.codex"
+assert_permission_refusal "$home" 'Cannot create temporary Codex config' "cp '$home/.codex/config.toml' '$home/.codex/control-config.tmp'"
+chmod 0755 "$home/.codex"
+
+home=$(new_home legacy_remove_permission)
+run_installer "$home"
+mkdir -p "$home/.agents/skills"
+ln -s missing-start-task "$home/.agents/skills/start-task"
+ln -s missing-control "$home/.agents/skills/control-link"
+chmod 0555 "$home/.agents/skills"
+assert_permission_refusal "$home" 'Cannot remove legacy link' "rm '$home/.agents/skills/control-link'"
+chmod 0755 "$home/.agents/skills"
+
+home=$(new_home migration_permission)
+run_installer "$home"
+rm "$home/.codex/skills/actual-budget-import"
+cp -R "$repo_dir/codex/actual-budget-import" "$home/.codex/skills/actual-budget-import"
+mkdir -p "$home/.codex/skill-backups"
+chmod 0555 "$home/.codex/skill-backups"
+assert_permission_refusal "$home" 'Cannot create migration backup' "mkdir '$home/.codex/skill-backups/control-backup'"
+chmod 0755 "$home/.codex/skill-backups"
+
 # A disposable source tree exercises generic installation and shared backup planning.
 fixture_repo="$test_root/source-repository"
 mkdir -p "$fixture_repo/codex" "$fixture_repo/generic" "$fixture_repo/agents"
@@ -243,6 +308,16 @@ printf '%s\n' '[identity]' 'name = "regular"' >"$home/.codex/config.toml"
 run_installer "$home"
 [ ! -L "$home/.codex/config.toml" ]
 assert_agents "$home/.codex/config.toml" 2 4
+
+# A feasible same-filesystem migration remains supported.
+home=$(new_home migration_success)
+printf '%s\n' '[identity]' 'name = "migration success"' >"$home/.codex/config.toml"
+mkdir -p "$home/.codex/skills"
+cp -R "$repo_dir/codex/actual-budget-import" "$home/.codex/skills/actual-budget-import"
+run_installer "$home"
+[ -L "$home/.codex/skills/actual-budget-import" ]
+[ -d "$home/.codex/skill-backups/actual-budget-import" ]
+diff -qr "$repo_dir/codex/actual-budget-import" "$home/.codex/skill-backups/actual-budget-import" >/dev/null
 
 # Fresh configuration receives both required settings.
 home=$(new_home fresh)

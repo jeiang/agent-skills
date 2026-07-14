@@ -30,6 +30,8 @@ create_workspace() {
 
   manifest="$workspace/manifest"
   mkdir "$manifest" "$workspace/reserved-backups" "$workspace/frozen-agents"
+  planned_directories="$workspace/planned-directories"
+  : >"$planned_directories"
   action_count=0
 }
 
@@ -67,20 +69,6 @@ snapshot_relevant_state() {
   } >"$output"
 }
 
-require_creatable_parent() {
-  target=$1
-  parent=$(dirname -- "$target")
-  while [ ! -e "$parent" ] && [ ! -L "$parent" ]; do
-    next_parent=$(dirname -- "$parent")
-    [ "$next_parent" != "$parent" ] || break
-    parent=$next_parent
-  done
-  if [ ! -d "$parent" ]; then
-    echo "Refusing installer target with a non-directory ancestor: $target" >&2
-    return 1
-  fi
-}
-
 add_action() {
   action_count=$((action_count + 1))
   record=$(printf '%s/%06d' "$manifest" "$action_count")
@@ -89,6 +77,155 @@ add_action() {
   printf '%s' "${2-}" >"$record/source"
   printf '%s' "${3-}" >"$record/target"
   printf '%s' "${4-}" >"$record/extra"
+}
+
+plan_directory() {
+  if [ -L "$1" ]; then
+    echo "Refusing installer destination ancestry symlink: $1. Replace it with a real directory." >&2
+    exit 1
+  fi
+  if [ -e "$1" ]; then
+    if [ ! -d "$1" ]; then
+      echo "Refusing installer destination with a non-directory ancestor: $1" >&2
+      exit 1
+    fi
+    return 0
+  fi
+  if grep -Fqx "$1" "$planned_directories"; then
+    return 0
+  fi
+  parent=$(dirname -- "$1")
+  if [ "$parent" = "$1" ]; then
+    echo "Unable to find an existing real directory ancestor for: $1" >&2
+    exit 1
+  fi
+  plan_directory "$parent"
+  if ! grep -Fqx "$1" "$planned_directories"; then
+    add_action mkdir '' "$1"
+    printf '%s\n' "$1" >>"$planned_directories"
+  fi
+}
+
+nearest_existing_directory() {
+  ancestor_candidate=$1
+  while [ ! -e "$ancestor_candidate" ] && [ ! -L "$ancestor_candidate" ]; do
+    ancestor_parent=$(dirname -- "$ancestor_candidate")
+    [ "$ancestor_parent" != "$ancestor_candidate" ] || break
+    ancestor_candidate=$ancestor_parent
+  done
+  if [ -L "$ancestor_candidate" ]; then
+    echo "Refusing installer destination ancestry symlink: $ancestor_candidate. Replace it with a real directory." >&2
+    return 1
+  fi
+  if [ ! -d "$ancestor_candidate" ]; then
+    echo "Refusing installer destination with a non-directory ancestor: $ancestor_candidate" >&2
+    return 1
+  fi
+  printf '%s\n' "$ancestor_candidate"
+}
+
+require_searchable_ancestry() {
+  ancestry_candidate=$(nearest_existing_directory "$1") || return 1
+  while :; do
+    if [ ! -x "$ancestry_candidate" ]; then
+      echo "Cannot $2: destination ancestry is not searchable: $ancestry_candidate" >&2
+      return 1
+    fi
+    ancestry_parent=$(dirname -- "$ancestry_candidate")
+    [ "$ancestry_parent" != "$ancestry_candidate" ] || break
+    ancestry_candidate=$ancestry_parent
+  done
+}
+
+require_mutable_parent() {
+  mutation_parent=$(dirname -- "$1")
+  require_searchable_ancestry "$mutation_parent" "$2" || return 1
+  existing_mutation_parent=$(nearest_existing_directory "$mutation_parent") || return 1
+  if [ ! -w "$existing_mutation_parent" ] || [ ! -x "$existing_mutation_parent" ]; then
+    echo "Cannot $2: nearest existing destination parent requires write and search access: $existing_mutation_parent" >&2
+    return 1
+  fi
+}
+
+require_readable_source() {
+  source=$1
+  operation=$2
+  if [ -d "$source" ] && [ ! -L "$source" ]; then
+    if ! tar -cf "$workspace/readability.tar" -C "$(dirname -- "$source")" "$(basename -- "$source")" 2>/dev/null; then
+      echo "Cannot $operation: source tree is not fully readable and searchable: $source" >&2
+      return 1
+    fi
+    rm -f "$workspace/readability.tar"
+  elif [ ! -f "$source" ] || [ ! -r "$source" ]; then
+    echo "Cannot $operation: source file is not readable: $source" >&2
+    return 1
+  fi
+}
+
+filesystem_id() {
+  df -P "$1" 2>/dev/null | awk 'NR == 2 { print $1 }'
+}
+
+validate_manifest_feasibility() {
+  for record in "$manifest"/*; do
+    [ -d "$record" ] || continue
+    action=$(cat "$record/type")
+    source=$(cat "$record/source")
+    target=$(cat "$record/target")
+    extra=$(cat "$record/extra")
+    case "$action" in
+      mkdir)
+        [ ! -e "$target" ] && [ ! -L "$target" ] || {
+          echo "Cannot create planned directory because the destination now exists: $target" >&2
+          return 1
+        }
+        require_mutable_parent "$target" "create directory $target" || return 1
+        ;;
+      link_skill)
+        require_readable_source "$source" "link skill $target" || return 1
+        require_mutable_parent "$target" "link skill $target" || return 1
+        ;;
+      replace_link)
+        require_readable_source "$source" "replace skill link $target" || return 1
+        require_mutable_parent "$target" "replace skill link $target" || return 1
+        ;;
+      migrate_skill)
+        require_readable_source "$source" "migrate skill $target" || return 1
+        require_mutable_parent "$target" "remove migration source $target" || return 1
+        require_mutable_parent "$extra" "create migration backup $extra" || return 1
+        destination_parent=$(nearest_existing_directory "$(dirname -- "$extra")") || return 1
+        source_filesystem=$(filesystem_id "$target")
+        destination_filesystem=$(filesystem_id "$destination_parent")
+        if [ -z "$source_filesystem" ] || [ "$source_filesystem" != "$destination_filesystem" ]; then
+          echo "Cannot migrate skill atomically across filesystems: $target -> $extra" >&2
+          return 1
+        fi
+        ;;
+      install_agent)
+        require_readable_source "$source" "install agent $target" || return 1
+        require_mutable_parent "$target" "install agent $target" || return 1
+        ;;
+      write_config)
+        require_readable_source "$source" "write Codex config $target" || return 1
+        if [ "$(dirname -- "$target")" != "$(dirname -- "$extra")" ]; then
+          echo "Cannot write Codex config: frozen temporary file is not a sibling of $target" >&2
+          return 1
+        fi
+        if [ -e "$extra" ] || [ -L "$extra" ]; then
+          echo "Cannot write Codex config: frozen temporary path already exists: $extra" >&2
+          return 1
+        fi
+        require_mutable_parent "$extra" "create temporary Codex config $extra" || return 1
+        ;;
+      remove_legacy)
+        require_mutable_parent "$target" "remove legacy link $target" || return 1
+        ;;
+      *)
+        echo "Invalid frozen installer action during feasibility validation: $action" >&2
+        return 1
+        ;;
+    esac
+  done
 }
 
 refuse_symlinked_config() {
@@ -333,7 +470,7 @@ plan_skill() {
   backup="$backup_root/$name"
 
   [ -f "$source/SKILL.md" ] || return 0
-  require_creatable_parent "$target"
+  plan_directory "$target_parent"
 
   if [ -L "$target" ]; then
     current_target=$(readlink "$target")
@@ -358,7 +495,7 @@ plan_skill() {
       echo "Refusing to overwrite existing migration backup: $backup" >&2
       exit 1
     fi
-    require_creatable_parent "$backup"
+    plan_directory "$backup_root"
     reservation="$workspace/reserved-backups/$name"
     if ! mkdir "$reservation" 2>/dev/null; then
       echo "Refusing multiple migrations to shared backup name: $name" >&2
@@ -383,7 +520,7 @@ plan_skill_tree() {
 }
 
 plan_agents() {
-  require_creatable_parent "$agent_target/placeholder"
+  plan_directory "$agent_target"
   for source in "$repo_dir"/agents/*.toml; do
     [ -f "$source" ] || continue
     name=$(basename -- "$source")
@@ -403,7 +540,7 @@ plan_agents() {
 
 plan_config() {
   refuse_symlinked_config
-  require_creatable_parent "$config_file"
+  plan_directory "$(dirname -- "$config_file")"
   input="$config_file"
   if [ ! -e "$config_file" ]; then
     input="$workspace/empty-config"
@@ -417,7 +554,12 @@ plan_config() {
   cp -p "$input" "$rendered"
   render_agents_config "$input" "$rendered"
   if [ ! -e "$config_file" ] || ! cmp -s "$rendered" "$config_file"; then
-    add_action write_config "$rendered" "$config_file"
+    temporary_config="$config_file.agent-skills-install.tmp"
+    if [ -e "$temporary_config" ] || [ -L "$temporary_config" ]; then
+      echo "Refusing existing Codex config temporary path: $temporary_config. Remove it before installing." >&2
+      exit 1
+    fi
+    add_action write_config "$rendered" "$config_file" "$temporary_config"
   fi
 }
 
@@ -437,8 +579,10 @@ execute_manifest() {
     source=$(cat "$record/source")
     target=$(cat "$record/target")
     extra=$(cat "$record/extra")
-    mkdir -p "$(dirname -- "$target")"
     case "$action" in
+      mkdir)
+        mkdir "$target"
+        ;;
       link_skill)
         ln -s "$source" "$target"
         echo "Linked skill: $target -> $source"
@@ -449,7 +593,6 @@ execute_manifest() {
         echo "Replaced broken skill symlink: $target -> $source"
         ;;
       migrate_skill)
-        mkdir -p "$(dirname -- "$extra")"
         mv "$target" "$extra"
         ln -s "$source" "$target"
         echo "Moved matching existing skill to migration backup: $extra"
@@ -459,9 +602,8 @@ execute_manifest() {
         install -m 0644 "$source" "$target"
         ;;
       write_config)
-        temporary_config="$target.tmp.$$"
-        cp -p "$source" "$temporary_config"
-        mv "$temporary_config" "$target"
+        cp -p "$source" "$extra"
+        mv "$extra" "$target"
         ;;
       remove_legacy)
         rm "$target"
@@ -486,6 +628,7 @@ plan_skill_tree "$repo_dir/generic" "$HOME/.agents/skills"
 plan_agents
 plan_config
 plan_legacy_cleanup
+validate_manifest_feasibility
 
 snapshot_relevant_state "$workspace/checkpoint-state"
 if ! cmp -s "$workspace/initial-state" "$workspace/checkpoint-state"; then

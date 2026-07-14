@@ -285,3 +285,12 @@
 - Added ordered validator coverage and 12 negative semantic fixtures for omitted baseline, multiple commits, committed failures, post-validation edits, broad staging, implementer documentation edits, omitted parent proof, committed-diff mismatch, user or cross-assignment content leakage, omitted user-patch proof, residual workflow changes, and continuation before control-state evidence.
 - Focused validation passed for all 9 agent configurations and all 26 negative semantic mutation fixtures.
 - `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including the complete repository suite.
+
+### Review repair 19: installer permission feasibility
+
+- Froze every missing destination directory as a deduplicated, parent-first manifest action and removed runtime recursive directory creation.
+- Added read-only destination-ancestry validation that rejects symlinks and non-directories and requires search access through existing ancestors.
+- Added action-specific feasibility checks for directory creation, skill links, agent installation, sibling-temp configuration replacement, legacy-link removal, and same-filesystem migration, including source readability and required parent access.
+- Ran feasibility after the complete ordered manifest is frozen and before the final relevant-state checkpoint; permission probes remain best-effort and noncooperating races after that checkpoint remain outside the atomic-refusal guarantee.
+- Added whole-HOME identity fixtures with operation-matched external permission controls, destination-ancestry symlink refusal, same-filesystem migration success, and existing installer regression coverage.
+- Focused installer fixtures, `devenv shell -- ./scripts/check.sh`, and `devenv test`: passed, including permission refusal identity, successful migration, and the complete repository suite.
