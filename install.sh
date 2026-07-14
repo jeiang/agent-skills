@@ -23,8 +23,59 @@ refuse_symlinked_config() {
 refuse_multiline_toml_strings() {
   config=$1
 
-  if grep -F '"""' "$config" >/dev/null 2>&1 || grep -F "'''" "$config" >/dev/null 2>&1; then
-    printf '%s\n' "Refusing Codex config with a TOML multiline string delimiter: $config. Replace multiline basic or literal strings with single-line strings before installing." >&2
+  if ! awk '
+    function refuse(reason) {
+      print "Refusing unsupported TOML string syntax in " FILENAME ":" FNR ": " reason ". Use closed single-line basic or literal strings before installing." > "/dev/stderr"
+      exit 1
+    }
+
+    {
+      state = "structural"
+      escaped = 0
+
+      for (position = 1; position <= length($0); position++) {
+        character = substr($0, position, 1)
+
+        if (state == "structural") {
+          if (character == "#") {
+            break
+          }
+          if (character == "\"") {
+            if (substr($0, position, 3) == "\"\"\"") {
+              refuse("multiline basic string delimiters are not supported")
+            }
+            state = "basic"
+          } else if (character == single_quote) {
+            if (substr($0, position, 3) == single_quote single_quote single_quote) {
+              refuse("multiline literal string delimiters are not supported")
+            }
+            state = "literal"
+          }
+        } else if (state == "basic") {
+          if (escaped) {
+            escaped = 0
+          } else if (character == "\\") {
+            escaped = 1
+          } else if (character == "\"") {
+            state = "structural"
+          }
+        } else if (character == single_quote) {
+          state = "structural"
+        }
+      }
+
+      if (state == "basic") {
+        refuse("unterminated ordinary basic string")
+      }
+      if (state == "literal") {
+        refuse("unterminated ordinary literal string")
+      }
+    }
+
+    BEGIN {
+      single_quote = sprintf("%c", 39)
+    }
+  ' "$config"; then
     return 1
   fi
 }

@@ -47,6 +47,23 @@ assert_refused_unchanged() {
   grep -F "$expected_error" "$error" >/dev/null
 }
 
+assert_lexical_refused_unchanged() {
+  home=$1
+  expected_error=$2
+  config="$home/.codex/config.toml"
+  fixture=$(basename -- "$home")
+  before="$test_root/$fixture.before"
+  error="$test_root/$fixture.stderr"
+
+  cp "$config" "$before"
+  if HOME="$home" "$repo_dir/install.sh" >"$test_root/$fixture.stdout" 2>"$error"; then
+    echo "Installer accepted unsupported TOML string syntax in $fixture" >&2
+    exit 1
+  fi
+  cmp "$before" "$config"
+  grep -F "$expected_error" "$error" >/dev/null
+}
+
 assert_symlink_refused() {
   home=$1
   expected_link_target=$2
@@ -229,7 +246,7 @@ printf '%s\n' \
   'max_threads = 1' \
   'max_depth = 1' \
   '"""' >"$home/.codex/config.toml"
-assert_refused_unchanged "$home" 'Refusing Codex config with a TOML multiline string delimiter'
+assert_refused_unchanged "$home" 'multiline basic string delimiters are not supported'
 
 home=$(new_home multiline_literal)
 printf '%s\n' \
@@ -239,7 +256,48 @@ printf '%s\n' \
   'max_threads = 1' \
   'max_depth = 1' \
   "'''" >"$home/.codex/config.toml"
-assert_refused_unchanged "$home" 'Refusing Codex config with a TOML multiline string delimiter'
+assert_refused_unchanged "$home" 'multiline literal string delimiters are not supported'
+
+# Delimiter text outside structural syntax remains supported.
+home=$(new_home multiline_delimiter_text)
+printf '%s\n' \
+  "# comment has \"\"\" and '''" \
+  '[notes]' \
+  "basic_opposite = \"'''\"" \
+  "literal_opposite = '\"\"\"'" \
+  'escaped_basic = "\"\"\""' \
+  'hash_basic = "# remains basic string data"' \
+  "hash_literal = '# remains literal string data'" \
+  "closed_basic = \"done\" # comment has \"\"\" and '''" \
+  "closed_literal = 'done' # comment has \"\"\" and '''" \
+  '' \
+  '[agents]' \
+  'max_threads = 1 # raise safely' \
+  'max_depth = 1 # raise safely' >"$home/.codex/config.toml"
+run_installer "$home"
+assert_agents "$home/.codex/config.toml" 2 4
+grep -Fqx "# comment has \"\"\" and '''" "$home/.codex/config.toml"
+grep -Fqx "basic_opposite = \"'''\"" "$home/.codex/config.toml"
+grep -Fqx "literal_opposite = '\"\"\"'" "$home/.codex/config.toml"
+grep -Fqx 'escaped_basic = "\"\"\""' "$home/.codex/config.toml"
+grep -Fqx 'hash_basic = "# remains basic string data"' "$home/.codex/config.toml"
+grep -Fqx "hash_literal = '# remains literal string data'" "$home/.codex/config.toml"
+grep -Fqx "closed_basic = \"done\" # comment has \"\"\" and '''" "$home/.codex/config.toml"
+grep -Fqx "closed_literal = 'done' # comment has \"\"\" and '''" "$home/.codex/config.toml"
+grep -Fqx 'max_threads = 4 # raise safely' "$home/.codex/config.toml"
+grep -Fqx 'max_depth = 2 # raise safely' "$home/.codex/config.toml"
+cp "$home/.codex/config.toml" "$test_root/multiline_delimiter_text.after"
+run_installer "$home"
+cmp "$test_root/multiline_delimiter_text.after" "$home/.codex/config.toml"
+
+# Unterminated ordinary strings are refused without modifying their invalid TOML.
+home=$(new_home unterminated_basic)
+printf '%s\n' '[notes]' 'content = "unterminated' >"$home/.codex/config.toml"
+assert_lexical_refused_unchanged "$home" 'unterminated ordinary basic string'
+
+home=$(new_home unterminated_literal)
+printf '%s\n' '[notes]' "content = 'unterminated" >"$home/.codex/config.toml"
+assert_lexical_refused_unchanged "$home" 'unterminated ordinary literal string'
 
 home=$(new_home nested_before_root)
 printf '%s\n' '[agents.roles]' 'enabled = true' >"$home/.codex/config.toml"

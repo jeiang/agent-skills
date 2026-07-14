@@ -240,3 +240,13 @@
 - Added valid multiline basic and literal TOML fixtures whose contents mimic `[agents]`, `max_threads`, and `max_depth` configuration.
 - Required both fixtures to exit nonzero while preserving byte-identical, parseable TOML through the existing atomic-refusal assertions.
 - `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including multiline basic and literal atomic-refusal fixtures and the complete repository suite.
+
+### Review repair 15: lexical multiline TOML detection
+
+- Replaced raw delimiter matching with a bounded line-oriented lexical preflight that distinguishes structural text, comments, ordinary basic strings, ordinary literal strings, and escaped characters in basic strings.
+- Treated `#` as a comment opener only in structural state and refused genuine triple delimiters only when they occur structurally.
+- Conservatively refused ordinary basic or literal strings that remain open at the end of a line, preserving the configuration byte-for-byte.
+- Retained valid multiline basic and literal rejection fixtures with deceptive agent text.
+- Added an accepted fixture covering delimiter text in comments and opposite-quote strings, escaped basic-string quotes, hashes inside strings, and comments after closed strings; verified correct agent limits, unrelated-line preservation, TOML validity, and repeated-run idempotency.
+- Added byte-preservation fixtures for unterminated ordinary basic and literal strings.
+- `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including lexical acceptance and refusal fixtures and the complete repository suite.
