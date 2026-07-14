@@ -1,4 +1,4 @@
 interface:
   display_name: "Start Task"
-  short_description: "Approve, implement, commit, and review code"
-  default_prompt: "Use $start-task to plan this feature for my approval, then implement, commit, and review it."
+  short_description: "Orchestrate an approved multi-agent code workflow"
+  default_prompt: "Use $start-task to validate, plan, implement, adversarially review, document, and publish this task in independently shippable parts."
