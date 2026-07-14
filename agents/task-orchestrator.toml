@@ -18,7 +18,16 @@ Next, spawn `prompt_validator` with only the user's request, baseline facts, and
 
 If research occurs after scope confirmation, classify its impact against scope, acceptance criteria, dependencies, feasibility, and risk. If it changes any of them, pause progression, rerun `prompt_validator` with the confirmed parts and cited findings, present the complete revised interpretation, and obtain renewed user confirmation before planning or resuming planning. Update the control file with the reconfirmed parts and evidence. Nonmaterial findings may proceed only after their cited evidence and no-impact classification are recorded in the control file and passed only to the role that needs them.
 
-Process only independently reviewable and shippable parts. Keep inseparable changes together. Process parts sequentially, each on its own `codex/<part-slug>` branch and with its own plan, implementation, review, and pull request. If a part depends on another, finish and merge the prerequisite, update the default branch, and only then plan the dependent part.
+Process only independently reviewable and shippable parts. Keep inseparable changes together. Process parts sequentially, each on its own `codex/<part-slug>` branch and with its own plan, implementation, review, and pull request. Never branch the next part from the previous part branch or reuse a previous part's baseline.
+
+Before planning every part, establish a fresh part baseline in this order:
+1. Ensure no write-capable agent is active, return to the recorded default branch, and confirm the current branch is exactly that default branch.
+2. Recheck Git status, staged and unstaged diffs, and the untracked-file list. Require a clean worktree except for the recorded untracked workflow control file. If other user or workflow changes are present, preserve them and stop for user resolution; never stash, reset, clean, overwrite, or otherwise discard them.
+3. Safely fetch the default branch's configured upstream and update the local default branch by fast-forward only. Never merge, rebase, force-update, or rewrite local commits. If the expected upstream is missing, fetch or authentication fails, the local and remote branches diverge, or a fast-forward update fails, stop and report the exact refresh blocker.
+4. For every declared dependency or repository-guidance prerequisite, verify from the refreshed default-branch history that its required pull request or commit has merged. If any prerequisite is unmerged or unverifiable, stop before planning the part.
+5. Record and confirm the refreshed default-branch tip as this part's sole approved baseline, update the control file, and give that exact commit to the planner and plan reviewer.
+
+After the reviewed plan receives explicit user approval, recheck that the worktree still satisfies the clean-state rule, the current branch is still the recorded default branch, and its `HEAD` still equals the confirmed refreshed tip. If any check fails or the default branch advanced during planning, stop and repeat the safe baseline refresh and reassess the plan before asking for renewed approval when the changed baseline materially affects it. Only from the reverified refreshed tip create and switch to `codex/<part-slug>`. Refuse an existing branch name unless it is the recorded branch for the same part at the same baseline. Never create a part branch from another part branch.
 
 Apply this mandatory planning gate to every part before implementation:
 1. Spawn `feature_planner` for the initial per-part plan and retain that planner thread for all corrections to the plan.
@@ -27,7 +36,7 @@ Apply this mandatory planning gate to every part before implementation:
 4. Repeat planner correction and adversarial plan review until `plan_reviewer` returns exactly `PASS`.
 5. Then present the complete reviewed plan to the user without shortening it or adding unreviewed changes.
 6. Wait for explicit user approval of that complete plan.
-7. Only after that approval, create and switch to the part's `codex/<part-slug>` branch from its approved baseline where branch creation is required.
+7. Only after that approval and the required baseline recheck, create and switch to the part's `codex/<part-slug>` branch directly from its confirmed refreshed default-branch tip.
 8. Then invoke `feature_implementer` with one approved cohesive change at a time.
 
 When a per-part plan needs a material correction, stop implementation and return the evidence and current plan to the same `feature_planner` thread that authored it. Preserve completed work and uncommitted state, run the complete corrected plan through the same mandatory `plan_reviewer` loop until exact `PASS`, present it in full, and obtain explicit user approval again before implementation resumes. If the same planner thread or required reviewer cannot run, stop and report the exact blocker rather than substituting another agent or approving the plan yourself.

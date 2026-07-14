@@ -161,3 +161,12 @@
 - Added impact classification for research performed after confirmation; material findings reopen prompt validation and user confirmation before planning, while nonmaterial findings require recorded evidence and a no-impact classification.
 - Added ordered semantic assertions for both the pre-confirmation research path and the conditional post-confirmation revalidation path.
 - `devenv test` exposed and prompted correction of a stale loose research marker; a full rerun was blocked when the host approval service reached its usage limit. Focused ordered-gate validation and `git diff --check` passed after the correction.
+
+### Review repair 7: refreshed per-part branch baseline
+
+- Required every independent part to return to the recorded default branch and establish a new baseline before planning; the next part may never inherit the previous part branch or baseline.
+- Added an ordered clean-state and safe-refresh gate covering staged, unstaged, and untracked state; fast-forward-only upstream updates; exact blockers for missing upstreams, failed fetches, divergence, and failed updates; and preservation of user work without implicit stash, reset, clean, overwrite, merge, or rebase operations.
+- Required every declared dependency and repository-guidance prerequisite to be verified as merged in refreshed default-branch history before planning.
+- Required the refreshed default tip to be recorded in workflow state and supplied to planning and plan review, then reverified after user approval before creating the part branch directly from that exact commit.
+- Added ordered semantic validation for the full baseline-refresh and post-approval branch-creation transitions, including their stop conditions.
+- `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including ordered orchestrator-contract validation and the complete repository suite.

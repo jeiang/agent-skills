@@ -97,6 +97,16 @@ ORCHESTRATOR_CONTRACT = (
     "Give the researcher only the unresolved repository facts",
     "Process only independently reviewable and shippable parts",
     "Process parts sequentially",
+    "Never branch the next part from the previous part branch",
+    "Before planning every part, establish a fresh part baseline in this order",
+    "return to the recorded default branch",
+    "Require a clean worktree except for the recorded untracked workflow control file",
+    "Safely fetch the default branch's configured upstream",
+    "fast-forward only",
+    "verify from the refreshed default-branch history",
+    "Record and confirm the refreshed default-branch tip",
+    "After the reviewed plan receives explicit user approval",
+    "Only from the reverified refreshed tip create and switch to `codex/<part-slug>`",
     "Count a completed review cycle only when a reviewer returns a verdict",
     "five reviewer verdicts",
     "repair each finding independently",
@@ -128,7 +138,8 @@ ORCHESTRATOR_INITIAL_PLAN_GATE = (
     "returns exactly `PASS`",
     "present the complete reviewed plan to the user",
     "Wait for explicit user approval",
-    "Only after that approval, create and switch to",
+    "Only after that approval and the required baseline recheck",
+    "directly from its confirmed refreshed default-branch tip",
     "invoke `feature_implementer`",
 )
 
@@ -158,6 +169,35 @@ ORCHESTRATOR_POST_CONFIRMATION_RESEARCH = (
     "obtain renewed user confirmation",
     "before planning or resuming planning",
     "Nonmaterial findings may proceed only after",
+)
+
+ORCHESTRATOR_PART_BASELINE_GATE = (
+    "Before planning every part, establish a fresh part baseline in this order",
+    "return to the recorded default branch",
+    "confirm the current branch is exactly that default branch",
+    "Recheck Git status, staged and unstaged diffs, and the untracked-file list",
+    "Require a clean worktree except for the recorded untracked workflow control file",
+    "preserve them and stop for user resolution",
+    "never stash, reset, clean, overwrite, or otherwise discard them",
+    "Safely fetch the default branch's configured upstream",
+    "fast-forward only",
+    "If the expected upstream is missing, fetch or authentication fails",
+    "stop and report the exact refresh blocker",
+    "verify from the refreshed default-branch history",
+    "If any prerequisite is unmerged or unverifiable, stop before planning the part",
+    "Record and confirm the refreshed default-branch tip",
+    "give that exact commit to the planner and plan reviewer",
+)
+
+ORCHESTRATOR_PART_BRANCH_GATE = (
+    "After the reviewed plan receives explicit user approval",
+    "recheck that the worktree still satisfies the clean-state rule",
+    "the current branch is still the recorded default branch",
+    "its `HEAD` still equals the confirmed refreshed tip",
+    "stop and repeat the safe baseline refresh",
+    "Only from the reverified refreshed tip create and switch to `codex/<part-slug>`",
+    "Refuse an existing branch name unless it is the recorded branch for the same part at the same baseline",
+    "Never create a part branch from another part branch",
 )
 
 PROMPT_VALIDATOR_CONTRACT = (
@@ -367,6 +407,20 @@ def main() -> int:
                 instructions,
                 ORCHESTRATOR_POST_CONFIRMATION_RESEARCH,
                 "agents/task-orchestrator.toml post-confirmation research gate",
+            )
+        )
+        errors.extend(
+            require_ordered_markers(
+                instructions,
+                ORCHESTRATOR_PART_BASELINE_GATE,
+                "agents/task-orchestrator.toml per-part baseline gate",
+            )
+        )
+        errors.extend(
+            require_ordered_markers(
+                instructions,
+                ORCHESTRATOR_PART_BRANCH_GATE,
+                "agents/task-orchestrator.toml per-part branch gate",
             )
         )
         if "plan review when configured" in instructions:
