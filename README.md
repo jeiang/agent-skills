@@ -16,9 +16,9 @@ The repository currently includes:
 
 - `codex/actual-budget-import/` — imports natural-language transactions through
   the configured Actual Budget CLI.
-- `codex/start-task/` — routes feature work through user-approved planning,
-  commit-sized implementation, and commit-range review until approval or five
-  review cycles.
+- `codex/start-task/` — runs a repository-aware, approval-gated workflow for
+  prompt validation, research, planning, implementation, adversarial review,
+  documentation maintenance, and per-part pull requests.
 
 System-managed skills under `~/.codex/skills/.system` and runtime-managed
 entries are intentionally excluded from this repository.
@@ -36,7 +36,9 @@ The installer:
 1. links every valid skill under `codex/` into `~/.codex/skills`;
 2. links future skills under `generic/` into `~/.agents/skills`;
 3. copies custom-agent definitions into `~/.codex/agents`; and
-4. adds a default `[agents]` section to `~/.codex/config.toml` when none exists.
+4. configures Codex for nested agent workflows with `agents.max_depth >= 2` and
+   `agents.max_threads >= 4` while preserving higher values and unrelated
+   configuration.
 
 If an existing skill directory exactly matches the repository copy, the
 installer moves it to `~/.codex/skill-backups` before replacing it with a
@@ -60,23 +62,46 @@ Run the feature workflow from a Git repository:
 $start-task Add pagination to the activity feed
 ```
 
-The feature workflow uses `gpt-5.6-sol` at high reasoning for planning,
-`gpt-5.6-terra` at medium reasoning for implementation, and `gpt-5.6-sol` at
-medium reasoning for review. Only the implementer may edit repository files.
+The parent launches a Luna-high orchestrator, which coordinates specialized
+agents with only the context needed for their assignments. The workflow checks
+repository guidance, validates and confirms the requested scope, performs
+bounded research when needed, and splits independently shippable work into
+separate branches and pull requests.
 
-Before implementation, the workflow records the Git baseline, presents a
-commit-sized plan, and waits for explicit approval. Requested plan edits are
-returned to the planner and presented again before work starts. When starting
-from the default branch, the workflow creates a `codex/` feature branch after
-approval.
+Each part receives a mid-level implementation plan from a Sol-high planner. An
+adversarial Sol-high plan reviewer must pass the plan before the user approves
+implementation. A Terra-medium implementer receives one focused change at a
+time, uses repository static tooling, reviews plan risks and its own diff, and
+stops for replanning when the change exceeds the workflow thresholds or exposes
+an invalid assumption.
 
-The implementer validates and commits each changed plan step separately. The
-first review covers every feature commit from the baseline; later reviews focus
-on new repair commits while verifying prior findings and the cumulative result.
-An invalid planning assumption stops implementation and returns the evidence to
-the planner for a revised plan and renewed approval. On completion, the workflow
-lists any manual follow-up and asks before pushing or opening a ready pull
-request.
+A Sol-medium adversarial reviewer checks correctness, security, regressions,
+compatibility, error handling, plan fulfillment, and validation. Findings are
+repaired independently. After product review passes, a Luna-high documentation
+agent updates only documentation required by the completed behavior. Large
+cumulative reviews are split by cohesive concern before publication.
+
+The workflow preserves unrelated work and requires explicit approval before
+creating each branch, resuming materially revised implementation, pushing, or
+opening a pull request. It never force-pushes as part of the workflow.
+
+## Development
+
+Enter the reproducible development shell:
+
+```sh
+devenv shell
+```
+
+Run the complete validation suite:
+
+```sh
+devenv test
+```
+
+The suite validates skills and agent contracts, parses YAML and TOML, checks
+shell syntax and formatting, exercises installer fixtures, and runs
+`git diff --check`.
 
 ## Updating
 

@@ -2,9 +2,9 @@
 
 ## Progress
 
-- Current step: 9. Rewrite the skill contract and public documentation; the thin skill interface is complete and public README work is pending the documentation-author stage.
-- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles; 5. Add adversarial plan review and simplify planner output; 6. Harden implementation behavior; 7. Strengthen code review and repair; 8. Add documentation generation and final cumulative review.
-- Blockers: None.
+- Current step: Complete. The workflow, installer, validation environment, public documentation, and progress record are synchronized.
+- Completed steps: 1. Add progress tracking and the development shell; 2. Update installer support for nested orchestration; 3. Add repository-guidance generation; 4. Add orchestration, research, and prompt validation roles; 5. Add adversarial plan review and simplify planner output; 6. Harden implementation behavior; 7. Strengthen code review and repair; 8. Add documentation generation and final cumulative review; 9. Rewrite the skill contract and public documentation; 10. Validate and forward-test.
+- Blockers: None. Further low-priority edge-case review was stopped at the user's direction after the complete validation suite passed.
 
 ## Implementation steps
 
@@ -114,7 +114,14 @@
 - Restricted the launcher to relaying orchestrator questions, approvals, blockers, progress, and results through the same orchestrator thread; specialist work cannot be performed or substituted by the parent.
 - Updated the skill trigger description and UI metadata to cover repository guidance, prompt validation and research, approved planning, focused implementation, adversarial review, documentation maintenance, and per-part publication.
 - Added semantic validation for the thin-launcher boundary, trigger description, and UI contract, and integrated it into `scripts/check.sh`.
-- Public README synchronization remains pending for the dedicated documentation-author stage.
+- Public README synchronization was completed during finalization.
+
+### Finalization
+
+- Updated the public README for the orchestrated agent set, approval gates, per-part workflow, adversarial review, documentation stage, and devenv commands.
+- Confirmed `.devenv/` is ignored by Git.
+- Stopped further edge-case review at the user's direction and retained the last fully validated implementation.
+- Final `devenv test`: passed, including agent contracts, skill validation, installer fixtures, shell checks, formatting checks, and `git diff --check`.
 
 ### Devenv Python environment repair
 
