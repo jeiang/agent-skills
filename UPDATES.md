@@ -250,3 +250,15 @@
 - Added an accepted fixture covering delimiter text in comments and opposite-quote strings, escaped basic-string quotes, hashes inside strings, and comments after closed strings; verified correct agent limits, unrelated-line preservation, TOML validity, and repeated-run idempotency.
 - Added byte-preservation fixtures for unterminated ordinary basic and literal strings.
 - `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including lexical acceptance and refusal fixtures and the complete repository suite.
+
+### Review repair 16: atomic installer simulation
+
+- Moved every deterministic installer policy decision into a read-only preflight before HOME mutation across Codex skills, generic skills, the shared migration-backup namespace, custom agents, configuration rendering, and legacy-link cleanup.
+- Added a secure external mode-0700 workspace and HOME-keyed cooperating-installer lock, with cleanup on success, refusal, interruption, or failure.
+- Added an ordered frozen action manifest and one configuration renderer for existing or explicit-empty input; execution consumes only planned records and introduces no new policy decisions.
+- Fingerprinted complete relevant source and HOME trees before simulation and immediately before mutation, refusing if either checkpoint differs. Noncooperating writes after the final checkpoint remain outside the cooperating lock guarantee.
+- Added whole-HOME atomic-refusal snapshots for existing deterministic failures plus lock, late skill conflict, backup collision, and agent-destination fixtures.
+- Added disposable generic-tree success and shared-backup collision coverage, frozen success checks for skills, agents, configuration, and legacy cleanup, external workspace/lock cleanup assertions, and whole-HOME repeated-run idempotency.
+- Kept the repair within the approved limit of 500 substantive lines, 10 files, and two independently testable components.
+- Focused POSIX syntax, ShellCheck, and installer fixtures passed.
+- `devenv shell -- ./scripts/check.sh` and `devenv test`: passed, including whole-HOME refusal snapshots, generic and shared-backup scenarios, frozen success, cleanup, and whole-HOME idempotency.

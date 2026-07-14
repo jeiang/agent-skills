@@ -4,17 +4,38 @@ set -eu
 repo_dir=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 test_root=$(mktemp -d "${TMPDIR:-/tmp}/agent-skills-install.XXXXXX")
 trap 'rm -rf "$test_root"' EXIT HUP INT TERM
+installer_tmp="$test_root/external-tmp"
+mkdir "$installer_tmp"
+TMPDIR="$installer_tmp"
+export TMPDIR
+
+assert_installer_temp_clean() {
+  if find "$installer_tmp" -mindepth 1 -maxdepth 1 -print | grep . >/dev/null; then
+    echo "Installer left external workspace or lock state behind" >&2
+    find "$installer_tmp" -mindepth 1 -maxdepth 1 -print >&2
+    exit 1
+  fi
+}
+
+snapshot_home() {
+  home=$1
+  output=$2
+  tar -cf "$output" -C "$home" .
+}
 
 run_installer() {
   home=$1
+  installer=${2:-$repo_dir/install.sh}
   config="$home/.codex/config.toml"
   if [ -e "$config" ]; then
     assert_toml "$config"
   fi
-  if ! HOME="$home" "$repo_dir/install.sh" >/dev/null; then
+  if ! HOME="$home" "$installer" >/dev/null; then
+    assert_installer_temp_clean
     return 1
   fi
   assert_toml "$config"
+  assert_installer_temp_clean
 }
 
 assert_toml() {
@@ -31,18 +52,24 @@ PY
 assert_refused_unchanged() {
   home=$1
   expected_error=$2
+  installer=${3:-$repo_dir/install.sh}
   config="$home/.codex/config.toml"
   fixture=$(basename -- "$home")
   before="$test_root/$fixture.before"
+  home_before="$test_root/$fixture.home.before"
+  home_after="$test_root/$fixture.home.after"
   error="$test_root/$fixture.stderr"
 
   assert_toml "$config"
   cp "$config" "$before"
-  if run_installer "$home" 2>"$error"; then
+  snapshot_home "$home" "$home_before"
+  if run_installer "$home" "$installer" 2>"$error"; then
     echo "Installer accepted unsupported agents TOML in $fixture" >&2
     exit 1
   fi
   cmp "$before" "$config"
+  snapshot_home "$home" "$home_after"
+  cmp "$home_before" "$home_after"
   assert_toml "$config"
   grep -F "$expected_error" "$error" >/dev/null
 }
@@ -53,15 +80,21 @@ assert_lexical_refused_unchanged() {
   config="$home/.codex/config.toml"
   fixture=$(basename -- "$home")
   before="$test_root/$fixture.before"
+  home_before="$test_root/$fixture.home.before"
+  home_after="$test_root/$fixture.home.after"
   error="$test_root/$fixture.stderr"
 
   cp "$config" "$before"
+  snapshot_home "$home" "$home_before"
   if HOME="$home" "$repo_dir/install.sh" >"$test_root/$fixture.stdout" 2>"$error"; then
     echo "Installer accepted unsupported TOML string syntax in $fixture" >&2
     exit 1
   fi
   cmp "$before" "$config"
+  snapshot_home "$home" "$home_after"
+  cmp "$home_before" "$home_after"
   grep -F "$expected_error" "$error" >/dev/null
+  assert_installer_temp_clean
 }
 
 assert_symlink_refused() {
@@ -96,6 +129,7 @@ assert_symlink_refused() {
     cmp "$test_root/$fixture.target.before" "$target_file"
     assert_toml "$target_file"
   fi
+  assert_installer_temp_clean
 }
 
 assert_agents() {
@@ -143,6 +177,66 @@ home=$(new_home dangling_symlink)
 ln -s 'missing-config.toml' "$home/.codex/config.toml"
 assert_symlink_refused "$home" 'missing-config.toml' '-'
 
+# A cooperating installer lock refuses before HOME mutation.
+home=$(new_home cooperating_lock)
+printf '%s\n' '[identity]' 'name = "locked"' >"$home/.codex/config.toml"
+snapshot_home "$home" "$test_root/cooperating_lock.home.before"
+lock_key=$(printf '%s' "$home" | cksum | awk '{ print $1 "-" $2 }')
+lock_dir="$installer_tmp/agent-skills-install-lock.$lock_key"
+mkdir -m 0700 "$lock_dir"
+if HOME="$home" "$repo_dir/install.sh" >"$test_root/cooperating_lock.stdout" 2>"$test_root/cooperating_lock.stderr"; then
+  echo "Installer ignored a cooperating lock" >&2
+  exit 1
+fi
+snapshot_home "$home" "$test_root/cooperating_lock.home.after"
+cmp "$test_root/cooperating_lock.home.before" "$test_root/cooperating_lock.home.after"
+grep -F 'Refusing concurrent agent-skills installation' "$test_root/cooperating_lock.stderr" >/dev/null
+rmdir "$lock_dir"
+assert_installer_temp_clean
+
+# A late skill conflict refuses before earlier planned links or agents mutate HOME.
+home=$(new_home skill_conflict)
+printf '%s\n' '[identity]' 'name = "skill conflict"' >"$home/.codex/config.toml"
+mkdir -p "$home/.codex/skills/start-task"
+printf '%s\n' 'different content' >"$home/.codex/skills/start-task/SKILL.md"
+assert_refused_unchanged "$home" 'Refusing to replace different existing skill'
+
+# A migration backup collision is detected during simulation.
+home=$(new_home backup_conflict)
+printf '%s\n' '[identity]' 'name = "backup conflict"' >"$home/.codex/config.toml"
+mkdir -p "$home/.codex/skills" "$home/.codex/skill-backups/actual-budget-import"
+cp -R "$repo_dir/codex/actual-budget-import" "$home/.codex/skills/actual-budget-import"
+printf '%s\n' 'reserved' >"$home/.codex/skill-backups/actual-budget-import/marker"
+assert_refused_unchanged "$home" 'Refusing to overwrite existing migration backup'
+
+# Agent destination conflicts are refused before any planned HOME changes execute.
+home=$(new_home agent_destination_directory)
+printf '%s\n' '[identity]' 'name = "agent conflict"' >"$home/.codex/config.toml"
+mkdir -p "$home/.codex/agents/task-orchestrator.toml"
+assert_refused_unchanged "$home" 'Refusing agent destination that is a directory'
+
+# A disposable source tree exercises generic installation and shared backup planning.
+fixture_repo="$test_root/source-repository"
+mkdir -p "$fixture_repo/codex" "$fixture_repo/generic" "$fixture_repo/agents"
+cp "$repo_dir/install.sh" "$fixture_repo/install.sh"
+cp -R "$repo_dir/codex/actual-budget-import" "$fixture_repo/codex/actual-budget-import"
+cp -R "$repo_dir/codex/start-task" "$fixture_repo/codex/start-task"
+cp "$repo_dir"/agents/*.toml "$fixture_repo/agents/"
+cp -R "$repo_dir/codex/start-task" "$fixture_repo/generic/portable-task"
+
+home=$(new_home generic_success)
+run_installer "$home" "$fixture_repo/install.sh"
+[ "$(readlink "$home/.agents/skills/portable-task")" = "$fixture_repo/generic/portable-task" ]
+assert_agents "$home/.codex/config.toml" 2 4
+
+cp -R "$repo_dir/codex/start-task" "$fixture_repo/generic/start-task"
+home=$(new_home shared_backup_collision)
+printf '%s\n' '[identity]' 'name = "shared backup"' >"$home/.codex/config.toml"
+mkdir -p "$home/.codex/skills" "$home/.agents/skills"
+cp -R "$fixture_repo/codex/start-task" "$home/.codex/skills/start-task"
+cp -R "$fixture_repo/generic/start-task" "$home/.agents/skills/start-task"
+assert_refused_unchanged "$home" 'Refusing multiple migrations to shared backup name' "$fixture_repo/install.sh"
+
 # A regular config remains supported.
 home=$(new_home regular_config)
 printf '%s\n' '[identity]' 'name = "regular"' >"$home/.codex/config.toml"
@@ -153,6 +247,16 @@ assert_agents "$home/.codex/config.toml" 2 4
 # Fresh configuration receives both required settings.
 home=$(new_home fresh)
 run_installer "$home"
+assert_agents "$home/.codex/config.toml" 2 4
+[ -L "$home/.codex/skills/start-task" ]
+[ -f "$home/.codex/agents/task-orchestrator.toml" ]
+
+# Successful frozen execution removes only the previously planned broken legacy link.
+home=$(new_home legacy_cleanup)
+mkdir -p "$home/.agents/skills"
+ln -s missing-start-task "$home/.agents/skills/start-task"
+run_installer "$home"
+[ ! -L "$home/.agents/skills/start-task" ]
 assert_agents "$home/.codex/config.toml" 2 4
 
 # Low limits are raised while inline comments and unrelated settings remain.
@@ -338,5 +442,8 @@ run_installer "$home"
 assert_agents "$home/.codex/config.toml" 3 4
 grep -Fqx 'max_threads = 4 # raise once' "$home/.codex/config.toml"
 cp "$home/.codex/config.toml" "$test_root/config.before"
+snapshot_home "$home" "$test_root/idempotent.home.before"
 run_installer "$home"
 cmp "$test_root/config.before" "$home/.codex/config.toml"
+snapshot_home "$home" "$test_root/idempotent.home.after"
+cmp "$test_root/idempotent.home.before" "$test_root/idempotent.home.after"
