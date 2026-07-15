@@ -17,6 +17,7 @@ The included skills are:
 - `kubernetes-diagnose` for investigating Kubernetes workload and platform failures.
 - `nixos-change-validation` for preparing and validating NixOS changes and safe activation instructions.
 - `azure-pipelines-maintenance` for Azure Pipelines YAML, templates, conditions, artifacts, and deployments.
+- `ponytail`, vendored from [DietrichGebert/ponytail v4.8.4](https://github.com/DietrichGebert/ponytail/tree/v4.8.4), for choosing the smallest correct implementation through YAGNI and reuse-first guidance.
 
 Use the installed `gh-fix-ci`, `gh-address-comments`, and `yeet` skills directly for failing GitHub Actions, pull request feedback, and publication instead of routing those tasks through `start-task`.
 
@@ -55,7 +56,7 @@ Each completed subtask updates the repository-root `CHANGELOG.md` under its exis
 
 Routine coordination, planning, implementation, and review use medium reasoning. Research and complex plan review remain high reasoning and run only when justified.
 
-The implementer makes the smallest practical change, avoids speculative abstractions and excessive comments, and does not add tests unless the approved plan requires them. It runs relevant existing validation, self-reviews against the acceptance criteria, and creates one conventional commit per cohesive change.
+The implementer automatically uses the bundled Ponytail skill in full mode. It makes the smallest practical change, avoids speculative abstractions and excessive comments, and does not add tests unless the approved plan requires them. Approved requirements and the start-task plan gate take precedence over Ponytail. It runs relevant existing validation, self-reviews against the acceptance criteria, and creates one conventional commit per cohesive change.
 
 Review has a fixed termination rule:
 

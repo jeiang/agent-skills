@@ -33,6 +33,9 @@ REQUIRED_BEHAVIOR = {
         "Ask before pushing",
     ),
     "feature-implementer.toml": (
+        "load and follow the ponytail skill in full mode",
+        "The approved requirements, acceptance criteria, and these developer instructions take precedence over Ponytail",
+        "This plan gate takes precedence over Ponytail's runnable-check rule",
         "Do not add or modify tests unless",
         "Avoid excessive comments",
         "possible future value",
