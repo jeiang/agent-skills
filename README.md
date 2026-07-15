@@ -51,7 +51,7 @@ Invoke the repository-change launcher from a Git repository:
 $start-task Add pagination to the activity feed
 ```
 
-The coordinator inspects the repository before asking questions, confirms observable acceptance criteria and scope, and proposes independently shippable subtasks when the request is too broad. Approved subtasks are handled sequentially with separate plans, branches, reviews, and pull requests.
+The coordinator inspects the repository, then uses `grill-with-docs` to validate the request one decision at a time before confirming observable acceptance criteria and scope. Resolved domain terminology and significant architectural decisions are documented lazily in the target repository. It proposes independently shippable subtasks when the request is too broad. Approved subtasks are handled sequentially with separate plans, branches, reviews, and pull requests.
 
 Each completed subtask updates the repository-root `CHANGELOG.md` under its existing unreleased section. The workflow creates a changelog with an `Unreleased` section when the repository does not have one.
 

@@ -10,6 +10,7 @@
 
 ### Changed
 
+- The start-task coordinator now validates each request through Grill with Docs before planning, while its feature implementer continues to load Ponytail in full mode.
 - Simplified the start-task agents around scoped clarification, practical implementation, one bounded review and repair pass, and required changelog maintenance.
 - Replaced the installer and validation matrix with focused symlink installation, configuration preservation, structural checks, and smoke tests.
 - Configured the feature implementer to use Ponytail in full mode while preserving approved requirements and test-plan precedence.

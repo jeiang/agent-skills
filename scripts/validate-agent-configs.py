@@ -20,6 +20,8 @@ EXPECTED = {
 REQUIRED_BEHAVIOR = {
     "task-orchestrator.toml": (
         "Resolve discoverable facts before asking questions",
+        "load and follow the grill-with-docs skill to validate the task request",
+        "Do not start planning until the user confirms a shared understanding",
         "Present a concise scope interpretation and obtain confirmation",
         "multiple independently shippable outcomes",
         "If the worktree has staged, unstaged, or untracked changes",
