@@ -8,6 +8,7 @@ import yaml
 
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 REQUIRED_FIELDS = {"name", "description"}
+OPTIONAL_FIELDS = {"argument-hint", "license"}
 
 
 class UniqueKeyLoader(yaml.SafeLoader):
@@ -71,7 +72,7 @@ def validate_skill(skill_dir: Path) -> list[str]:
     else:
         fields = set(frontmatter)
         missing = REQUIRED_FIELDS - fields
-        extra = fields - REQUIRED_FIELDS
+        extra = fields - REQUIRED_FIELDS - OPTIONAL_FIELDS
         if missing:
             errors.append(f"{skill_file}: missing fields: {', '.join(sorted(missing))}")
         if extra:

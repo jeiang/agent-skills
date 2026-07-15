@@ -23,6 +23,8 @@ HOME="$home" "$repo_dir/install.sh" >/dev/null
 
 [ -L "$home/.codex/skills/start-task" ]
 [ "$(readlink "$home/.codex/skills/start-task")" = "$repo_dir/codex/start-task" ]
+[ -L "$home/.codex/skills/ponytail" ]
+[ "$(readlink "$home/.codex/skills/ponytail")" = "$repo_dir/codex/ponytail" ]
 [ -L "$home/.codex/agents/feature-implementer.toml" ]
 [ "$(readlink "$home/.codex/agents/feature-implementer.toml")" = "$repo_dir/agents/feature-implementer.toml" ]
 [ ! -e "$home/.codex/agents/prompt-validator.toml" ]
