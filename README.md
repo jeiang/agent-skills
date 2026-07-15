@@ -18,6 +18,7 @@ The included skills are:
 - `nixos-change-validation` for preparing and validating NixOS changes and safe activation instructions.
 - `azure-pipelines-maintenance` for Azure Pipelines YAML, templates, conditions, artifacts, and deployments.
 - `ponytail`, vendored from [DietrichGebert/ponytail v4.8.4](https://github.com/DietrichGebert/ponytail/tree/v4.8.4), for choosing the smallest correct implementation through YAGNI and reuse-first guidance.
+- `grill-with-docs`, vendored from [mattpocock/skills](https://github.com/mattpocock/skills/tree/e9fcdf95b402d360f90f1db8d776d5dd450f9234), for a user-invoked design interview that records domain vocabulary and ADRs. Its `grilling` and `domain-modeling` dependencies are included as installed skills.
 
 Use the installed `gh-fix-ci`, `gh-address-comments`, and `yeet` skills directly for failing GitHub Actions, pull request feedback, and publication instead of routing those tasks through `start-task`.
 

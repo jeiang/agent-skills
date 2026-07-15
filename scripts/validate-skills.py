@@ -8,7 +8,7 @@ import yaml
 
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 REQUIRED_FIELDS = {"name", "description"}
-OPTIONAL_FIELDS = {"argument-hint", "license"}
+OPTIONAL_FIELDS = {"argument-hint", "disable-model-invocation", "license"}
 
 
 class UniqueKeyLoader(yaml.SafeLoader):
@@ -94,6 +94,14 @@ def validate_skill(skill_dir: Path) -> list[str]:
         description = frontmatter.get("description")
         if not isinstance(description, str) or not description.strip():
             errors.append(f"{skill_file}: description must be a nonempty string")
+
+        disable_model_invocation = frontmatter.get("disable-model-invocation")
+        if disable_model_invocation is not None and not isinstance(
+            disable_model_invocation, bool
+        ):
+            errors.append(
+                f"{skill_file}: disable-model-invocation must be a boolean when present"
+            )
 
     if not body.strip():
         errors.append(f"{skill_file}: body must be nonempty")
