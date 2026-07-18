@@ -1,6 +1,6 @@
 ---
 name: kubernetes-delivery
-description: Prepare and validate repository-managed Kubernetes delivery changes involving Helm charts, manifests, container images, GitHub Actions, Azure Pipelines, deployment configuration, or rollout instructions. Use when Codex needs to modify Kubernetes delivery files and provide exact deployment and post-deployment verification commands without performing the live deployment.
+description: Prepare and validate repository-managed Kubernetes delivery changes involving Helm charts, manifests, container images, GitHub Actions, Azure Pipelines, deployment configuration, or rollout instructions. Use when the agent needs to modify Kubernetes delivery files and provide exact deployment and post-deployment verification commands without performing the live deployment.
 ---
 
 # Kubernetes Delivery
