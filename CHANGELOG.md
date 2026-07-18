@@ -17,6 +17,10 @@
 - Replaced the installer and validation matrix with focused symlink installation, configuration preservation, structural checks, and smoke tests.
 - Configured the feature implementer to use Ponytail in full mode while preserving approved requirements and test-plan precedence.
 
+### Fixed
+
+- Added git to the devenv shell so the `check` command can run its final `git diff --check` step.
+
 ### Removed
 
 - The prompt-validator and AGENTS.md-author roles, repeated adversarial review loops, exact-prose validators, and stale workflow progress log.
