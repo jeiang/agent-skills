@@ -35,6 +35,11 @@ for skills_root in "$home/.codex/skills" "$home/.claude/skills"; do
   [ "$(readlink "$skills_root/domain-modeling")" = "$repo_dir/shared/domain-modeling" ]
 done
 [ ! -e "$home/.claude/skills/start-task" ]
+[ -L "$home/.claude/skills/start-feature" ]
+[ "$(readlink "$home/.claude/skills/start-feature")" = "$repo_dir/claude/start-feature" ]
+[ ! -e "$home/.codex/skills/start-feature" ]
+[ -L "$home/.claude/agents/feature-implementer.md" ]
+[ "$(readlink "$home/.claude/agents/feature-implementer.md")" = "$repo_dir/claude-agents/feature-implementer.md" ]
 [ -L "$home/.codex/agents/feature-implementer.toml" ]
 [ "$(readlink "$home/.codex/agents/feature-implementer.toml")" = "$repo_dir/agents/feature-implementer.toml" ]
 [ ! -e "$home/.codex/agents/prompt-validator.toml" ]

@@ -5,6 +5,8 @@
 ### Added
 
 - Claude Code skill support: a `claude/` directory linked into `~/.claude/skills` and a `shared/` directory linked into both `~/.codex/skills` and `~/.claude/skills`.
+- A Claude Code `start-feature` skill that establishes feature context through a grilling interview with domain-modeling documentation before planning, then delegates implementation to the Sonnet `feature-implementer` subagent, which loads Ponytail in full mode.
+- Installer links and structural validation for Claude Code subagent definitions in `claude-agents/`.
 - Focused Kubernetes delivery, Kubernetes diagnosis, NixOS validation, and Azure Pipelines maintenance skills.
 - A `check` command in the devenv shell for running repository validation.
 - Ponytail v4.8.4 as a vendored skill with its upstream MIT license and source metadata.

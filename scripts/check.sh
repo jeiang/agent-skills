@@ -14,12 +14,29 @@ python scripts/validate-agent-configs.py
 
 python - <<'PY'
 from pathlib import Path
+import re
+import sys
 import tomllib
 import yaml
 
 for path in sorted(Path("agents").glob("*.toml")):
     with path.open("rb") as stream:
         tomllib.load(stream)
+
+for path in sorted(Path("claude-agents").glob("*.md")):
+    text = path.read_text(encoding="utf-8")
+    match = re.match(r"---\n(.*?)\n---\n(.*)", text, re.DOTALL)
+    if match is None:
+        sys.exit(f"{path}: must start with YAML frontmatter")
+    frontmatter = yaml.safe_load(match.group(1))
+    for field in ("name", "description", "model"):
+        value = frontmatter.get(field)
+        if not isinstance(value, str) or not value.strip():
+            sys.exit(f"{path}: frontmatter field {field!r} must be a nonempty string")
+    if frontmatter["name"] != path.stem:
+        sys.exit(f"{path}: name {frontmatter['name']!r} must match filename")
+    if not match.group(2).strip():
+        sys.exit(f"{path}: body must be nonempty")
 
 for root in ("codex", "shared"):
     for path in sorted(Path(root).glob("*/agents/openai.yaml")):

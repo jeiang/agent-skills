@@ -9,12 +9,14 @@ A Git-managed collection of Codex and Claude Code skills and custom agents.
 - `shared/` contains skills used by both tools, linked into `~/.codex/skills` and `~/.claude/skills`.
 - `generic/` is reserved for portable skills linked into `~/.agents/skills`.
 - `agents/` contains custom-agent definitions linked into `~/.codex/agents`.
+- `claude-agents/` contains Claude Code subagent definitions linked into `~/.claude/agents`.
 - `install.sh` installs the links and required Codex agent limits.
 
 The included skills are:
 
 - `actual-budget-import` for importing natural-language transactions through the Actual Budget CLI.
 - `start-task` for a repository change with confirmed scope, approved planning, focused implementation, bounded review, and optional publication.
+- `start-feature` (Claude Code) for establishing feature context through a grilling interview with domain-modeling documentation before planning, then delegating implementation to the Sonnet `feature-implementer` subagent, which loads Ponytail in full mode.
 - `kubernetes-delivery` for preparing and validating Helm, Kubernetes, container, and delivery configuration without deploying it.
 - `kubernetes-diagnose` for investigating Kubernetes workload and platform failures.
 - `nixos-change-validation` for preparing and validating NixOS changes and safe activation instructions.
@@ -22,7 +24,7 @@ The included skills are:
 - `ponytail`, vendored from [DietrichGebert/ponytail v4.8.4](https://github.com/DietrichGebert/ponytail/tree/v4.8.4), for choosing the smallest correct implementation through YAGNI and reuse-first guidance.
 - `grill-with-docs`, vendored from [mattpocock/skills](https://github.com/mattpocock/skills/tree/e9fcdf95b402d360f90f1db8d776d5dd450f9234), for a user-invoked design interview that records domain vocabulary and ADRs. Its `grilling` and `domain-modeling` dependencies are included as installed skills.
 
-All of these live in `shared/` and are installed for both Codex and Claude Code, except `start-task`, which stays in `codex/` because it drives the custom agents in `agents/`.
+All of these live in `shared/` and are installed for both Codex and Claude Code, except `start-task`, which stays in `codex/` because it drives the custom agents in `agents/`, and `start-feature`, which stays in `claude/` because it drives the subagents in `claude-agents/`.
 
 Use the installed `gh-fix-ci`, `gh-address-comments`, and `yeet` skills directly for failing GitHub Actions, pull request feedback, and publication instead of routing those tasks through `start-task`.
 
@@ -37,7 +39,7 @@ Run:
 The installer:
 
 1. links skills under `codex/`, `claude/`, `shared/`, and `generic/` into their discovery directories;
-2. links agent TOML files into `~/.codex/agents` so repository edits take effect without reinstalling;
+2. links agent definitions into `~/.codex/agents` and `~/.claude/agents` so repository edits take effect without reinstalling;
 3. backs up `~/.codex/config.toml` before changing it; and
 4. sets `agents.max_threads` to at least 4 and `agents.max_depth` to at least 2 while preserving unrelated configuration.
 
