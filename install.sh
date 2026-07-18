@@ -6,6 +6,7 @@ codex_skills="$HOME/.codex/skills"
 claude_skills="$HOME/.claude/skills"
 generic_skills="$HOME/.agents/skills"
 agent_target="$HOME/.codex/agents"
+claude_agent_target="$HOME/.claude/agents"
 config_file="$HOME/.codex/config.toml"
 backup_root="$HOME/.codex/skill-backups"
 
@@ -194,7 +195,7 @@ update_config() {
   trap - EXIT HUP INT TERM
 }
 
-mkdir -p "$agent_target"
+mkdir -p "$agent_target" "$claude_agent_target"
 link_skills "$repo_dir/codex" "$codex_skills"
 link_skills "$repo_dir/claude" "$claude_skills"
 link_skills "$repo_dir/shared" "$codex_skills"
@@ -204,6 +205,11 @@ link_skills "$repo_dir/generic" "$generic_skills"
 for source in "$repo_dir"/agents/*.toml; do
   [ -f "$source" ] || continue
   link_file "$source" "$agent_target/$(basename -- "$source")"
+done
+
+for source in "$repo_dir"/claude-agents/*.md; do
+  [ -f "$source" ] || continue
+  link_file "$source" "$claude_agent_target/$(basename -- "$source")"
 done
 
 remove_retired_agent "$agent_target/agents-md-author.toml"
