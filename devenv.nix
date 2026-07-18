@@ -2,6 +2,7 @@
 
 {
   packages = with pkgs; [
+    git
     jq
     (python3.withPackages (pythonPackages: [ pythonPackages.pyyaml ]))
     shellcheck
