@@ -6,7 +6,8 @@ test_root=$(mktemp -d "${TMPDIR:-/tmp}/agent-skills-install.XXXXXX")
 trap 'rm -rf "$test_root"' EXIT HUP INT TERM
 
 home="$test_root/home"
-mkdir -p "$home/.codex/agents"
+mkdir -p "$home/.codex/agents" "$home/.codex/skills"
+ln -s "$repo_dir/codex/ponytail" "$home/.codex/skills/ponytail"
 printf '%s\n' 'retired' >"$home/.codex/agents/prompt-validator.toml"
 cat >"$home/.codex/config.toml" <<'EOF'
 [ui]
@@ -23,14 +24,17 @@ HOME="$home" "$repo_dir/install.sh" >/dev/null
 
 [ -L "$home/.codex/skills/start-task" ]
 [ "$(readlink "$home/.codex/skills/start-task")" = "$repo_dir/codex/start-task" ]
-[ -L "$home/.codex/skills/ponytail" ]
-[ "$(readlink "$home/.codex/skills/ponytail")" = "$repo_dir/codex/ponytail" ]
-[ -L "$home/.codex/skills/grill-with-docs" ]
-[ "$(readlink "$home/.codex/skills/grill-with-docs")" = "$repo_dir/codex/grill-with-docs" ]
-[ -L "$home/.codex/skills/grilling" ]
-[ "$(readlink "$home/.codex/skills/grilling")" = "$repo_dir/codex/grilling" ]
-[ -L "$home/.codex/skills/domain-modeling" ]
-[ "$(readlink "$home/.codex/skills/domain-modeling")" = "$repo_dir/codex/domain-modeling" ]
+for skills_root in "$home/.codex/skills" "$home/.claude/skills"; do
+  [ -L "$skills_root/ponytail" ]
+  [ "$(readlink "$skills_root/ponytail")" = "$repo_dir/shared/ponytail" ]
+  [ -L "$skills_root/grill-with-docs" ]
+  [ "$(readlink "$skills_root/grill-with-docs")" = "$repo_dir/shared/grill-with-docs" ]
+  [ -L "$skills_root/grilling" ]
+  [ "$(readlink "$skills_root/grilling")" = "$repo_dir/shared/grilling" ]
+  [ -L "$skills_root/domain-modeling" ]
+  [ "$(readlink "$skills_root/domain-modeling")" = "$repo_dir/shared/domain-modeling" ]
+done
+[ ! -e "$home/.claude/skills/start-task" ]
 [ -L "$home/.codex/agents/feature-implementer.toml" ]
 [ "$(readlink "$home/.codex/agents/feature-implementer.toml")" = "$repo_dir/agents/feature-implementer.toml" ]
 [ ! -e "$home/.codex/agents/prompt-validator.toml" ]

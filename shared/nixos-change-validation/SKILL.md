@@ -1,6 +1,6 @@
 ---
 name: nixos-change-validation
-description: Prepare and validate NixOS flake, module, package, host, home-manager, impermanence, and deploy-rs changes. Use when Codex needs to modify Nix configuration, evaluate or build affected outputs, or provide safe activation and rollback instructions for a NixOS host.
+description: Prepare and validate NixOS flake, module, package, host, home-manager, impermanence, and deploy-rs changes. Use when the agent needs to modify Nix configuration, evaluate or build affected outputs, or provide safe activation and rollback instructions for a NixOS host.
 ---
 
 # NixOS Change Validation

@@ -3,6 +3,7 @@ set -eu
 
 repo_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 codex_skills="$HOME/.codex/skills"
+claude_skills="$HOME/.claude/skills"
 generic_skills="$HOME/.agents/skills"
 agent_target="$HOME/.codex/agents"
 config_file="$HOME/.codex/config.toml"
@@ -13,11 +14,18 @@ link_directory() {
   target=$2
 
   if [ -L "$target" ]; then
-    [ "$(readlink "$target")" = "$source" ] || {
-      echo "Refusing conflicting symlink: $target" >&2
-      return 1
-    }
-    return 0
+    current=$(readlink "$target")
+    [ "$current" = "$source" ] && return 0
+    case $current in
+      "$repo_dir"/*)
+        rm "$target"
+        echo "Removed link to moved skill: $target -> $current"
+        ;;
+      *)
+        echo "Refusing conflicting symlink: $target" >&2
+        return 1
+        ;;
+    esac
   fi
 
   if [ -e "$target" ]; then
@@ -188,6 +196,9 @@ update_config() {
 
 mkdir -p "$agent_target"
 link_skills "$repo_dir/codex" "$codex_skills"
+link_skills "$repo_dir/claude" "$claude_skills"
+link_skills "$repo_dir/shared" "$codex_skills"
+link_skills "$repo_dir/shared" "$claude_skills"
 link_skills "$repo_dir/generic" "$generic_skills"
 
 for source in "$repo_dir"/agents/*.toml; do
