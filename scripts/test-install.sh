@@ -27,6 +27,8 @@ HOME="$home" "$repo_dir/install.sh" >/dev/null
 for skills_root in "$home/.codex/skills" "$home/.claude/skills"; do
   [ -L "$skills_root/ponytail" ]
   [ "$(readlink "$skills_root/ponytail")" = "$repo_dir/shared/ponytail" ]
+  [ -L "$skills_root/i-have-adhd" ]
+  [ "$(readlink "$skills_root/i-have-adhd")" = "$repo_dir/shared/i-have-adhd" ]
   [ -L "$skills_root/grill-with-docs" ]
   [ "$(readlink "$skills_root/grill-with-docs")" = "$repo_dir/shared/grill-with-docs" ]
   [ -L "$skills_root/grilling" ]

@@ -22,6 +22,7 @@ The included skills are:
 - `nixos-change-validation` for preparing and validating NixOS changes and safe activation instructions.
 - `azure-pipelines-maintenance` for Azure Pipelines YAML, templates, conditions, artifacts, and deployments.
 - `ponytail`, vendored from [DietrichGebert/ponytail v4.8.4](https://github.com/DietrichGebert/ponytail/tree/v4.8.4), for choosing the smallest correct implementation through YAGNI and reuse-first guidance.
+- `i-have-adhd`, vendored from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd/tree/0241185d6c7f2d0763a988ce52eceb13ea9f5c1f), for explicit action-first output that is easier for ADHD readers to follow.
 - `grill-with-docs`, vendored from [mattpocock/skills](https://github.com/mattpocock/skills/tree/e9fcdf95b402d360f90f1db8d776d5dd450f9234), for a user-invoked design interview that records domain vocabulary and ADRs. Its `grilling` and `domain-modeling` dependencies are included as installed skills.
 
 All of these live in `shared/` and are installed for both Codex and Claude Code, except `start-task`, which stays in `codex/` because it drives the custom agents in `agents/`, and `start-feature`, which stays in `claude/` because it drives the subagents in `claude-agents/`.

@@ -10,6 +10,7 @@
 - Focused Kubernetes delivery, Kubernetes diagnosis, NixOS validation, and Azure Pipelines maintenance skills.
 - A `check` command in the devenv shell for running repository validation.
 - Ponytail v4.8.4 as a vendored skill with its upstream MIT license and source metadata.
+- `i-have-adhd` as a vendored skill with its upstream MIT license, Codex display metadata, and source metadata.
 
 ### Changed
 
