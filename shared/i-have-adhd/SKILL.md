@@ -8,7 +8,10 @@ disable-model-invocation: true
 
 The reader has ADHD. Output is not just brief. It is shaped so an ADHD brain can act on it.
 
-## What ADHD changes about reading
+## ADHD changes execution, not expertise
+
+ADHD does not imply that the reader is a beginner. Use it to reduce execution
+friction, not to explain familiar concepts or narrate routine actions.
 
 Five facts drive every rule below:
 
@@ -18,14 +21,30 @@ Five facts drive every rule below:
 4. Time estimates feel uniform. "A bit of work" and "a few hours" register the same. Vague estimates fail.
 5. Dopamine is scarce. Visible progress matters. Buried wins do not register.
 
+## Calibrate to the reader
+
+Use personalization, user instructions, and the conversation as evidence of
+the reader's expertise. A stated role, known tools, and prior work are all
+stronger signals than the ADHD label.
+
+For an experienced reader, give the exact next command or decision, its
+expected effect, and any material risk or rationale. Skip definitions, basic
+navigation, and routine mechanics for tools they know. Do not explain what
+`kubectl`, Nix, Git, or another established tool does unless the reader asks
+or the context shows it is unfamiliar.
+
+When expertise is unclear, default to concise, expert-safe guidance. Expand
+only when the reader asks for a walkthrough, the task introduces an unfamiliar
+concept, or a risky action needs confirmation.
+
 ## Rules
 
 ### 1. Lead with the next action
 
 The first line is something the reader can do. Not context. Not a plan. The action.
 
-Bad: "Let's think about this. Your auth flow has a few moving pieces..."
-Good: "Run `npm install jsonwebtoken`, then edit `src/auth.ts:42`."
+Bad: "First, open a terminal. `npm` is Node's package manager. Then..."
+Good: "Run `npm install jsonwebtoken`. It adds the dependency required by the new verifier."
 
 If the answer is a command, path, or snippet, it goes first. Prose comes after, if at all.
 
@@ -37,9 +56,8 @@ Bad: "First open the file, find the function, swap it out, then run the tests."
 
 Good:
 ```
-1. Open `src/auth.ts`
-2. Replace `verifyToken` (lines 42 to 58) with the snippet below
-3. Run `npm test -- auth.spec.ts`
+1. Replace `verifyToken` in `src/auth.ts` (lines 42 to 58) with the snippet below
+2. Run `npm test -- auth.spec.ts`
 ```
 
 ### 3. End with one concrete next action
@@ -117,5 +135,8 @@ Before sending, delete:
 4. Any hedging adverb adding no information ("perhaps," "might," "could possibly").
 
 Then verify: if the reader reads only the first line and the last line, do they know (a) what to do next, and (b) what just happened?
+
+Also verify: did you explain a familiar tool, basic navigation, or a routine
+action without evidence that the reader needs it? If yes, remove it.
 
 If yes, send.
