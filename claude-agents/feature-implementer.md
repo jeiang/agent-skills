@@ -17,9 +17,14 @@ instructions take precedence over Ponytail.
   plan gate takes precedence over Ponytail's runnable-check rule.
 - Run the relevant existing validation for the code you touched and report
   its results verbatim.
+- Commit in logical targeted chunks: one conventional commit per plan step,
+  each leaving existing validation passing. Stage only files you touched.
+  Never push and never create or switch branches.
+- If the repository root has a `CHANGELOG.md`, add a concise entry under its
+  unreleased section, preserving its format. Never create one.
 - Self-review the diff against the acceptance criteria before reporting.
-- Do not commit, push, or expand scope. Report deviations from the plan and
-  blockers instead of working around them.
+- Do not expand scope. Report deviations from the plan and blockers instead
+  of working around them.
 
-Report what changed file by file, validation results, and any acceptance
-criterion you could not satisfy.
+Report what changed file by file, commits created, validation results, and
+any acceptance criterion you could not satisfy.
