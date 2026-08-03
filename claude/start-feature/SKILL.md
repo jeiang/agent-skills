@@ -16,9 +16,11 @@ Treat the request as a feature request for the current repository.
 1. Inspect the repository first. Resolve every discoverable fact — structure,
    existing patterns, related code, validation commands — before asking
    anything. Never ask the user for a fact the environment can answer.
-2. Run the `grill-with-docs` skill to interview the user: walk the decision
-   tree one question at a time and provide a recommended answer for each
-   question.
+2. Ask the user, as the first interview question, whether to create docs
+   (ADRs, glossary) during the interview — recommend yes when the repository
+   already keeps ADRs, default no. Then run the `grill-with-docs` skill (yes)
+   or the `grilling` skill (no) to interview the user: walk the decision tree
+   one question at a time and provide a recommended answer for each question.
 3. Confirm a concise scope interpretation and observable acceptance criteria.
    If the request contains multiple independently shippable outcomes, say so
    and propose narrowing to one; the rest become follow-ups. Do not start
@@ -33,7 +35,11 @@ Treat the request as a feature request for the current repository.
    default branch.
 6. Spawn the `feature-implementer` agent with the approved plan, the
    acceptance criteria, and the repository facts it needs. All implementation
-   happens in that subagent; do not edit files from this context.
+   happens in that subagent; do not edit files from this context. Never
+   instruct the implementer to skip, defer, or batch commits. The
+   implementer's commits are final history: do not commit, amend, squash,
+   rebase, or reset them. Repairs go back to the same implementer, which
+   commits them under its own rules.
 7. Review the cumulative diff against the plan and acceptance criteria. Send
    at most one cohesive repair assignment back to the same implementer;
    report unresolved findings to the user.
