@@ -33,17 +33,26 @@ Treat the request as a feature request for the current repository.
    stash, reset, or discard user work. Stay on the current branch when it is
    not the default branch; otherwise create `claude/<feature-slug>` from the
    default branch.
-6. Spawn the `feature-implementer` agent with the approved plan, the
-   acceptance criteria, and the repository facts it needs. All implementation
-   happens in that subagent; do not edit files from this context. Never
-   instruct the implementer to skip, defer, or batch commits. The
-   implementer's commits are final history: do not commit, amend, squash,
-   rebase, or reset them. Repairs go back to the same implementer, which
-   commits them under its own rules.
-7. Review the cumulative diff against the plan and acceptance criteria. Send
-   at most one cohesive repair assignment back to the same implementer;
+6. Split the approved plan into implementation parts before spawning
+   anything. A small changeset (roughly one coherent change a reviewer can
+   hold in their head) is a single part containing the whole plan; a larger
+   one becomes an ordered list of parts, each a coherent, independently
+   verifiable unit that leaves validation passing. State the split to the
+   user before dispatching.
+7. For each part in order, spawn a `feature-implementer` agent with only
+   that part, the acceptance criteria it covers, and the repository facts it
+   needs. Never hand the implementer more than one part at a time. After
+   each part returns, review its diff against the plan and confirm it is
+   correct before dispatching the next part. All implementation happens in
+   the subagents; do not edit files from this context. Never instruct an
+   implementer to skip, defer, or batch commits. Implementer commits are
+   final history: do not commit, amend, squash, rebase, or reset them.
+   Repairs go back to an implementer, which commits them under its own
+   rules.
+8. Review the cumulative diff against the plan and acceptance criteria. Send
+   at most one cohesive repair assignment back to an implementer;
    report unresolved findings to the user.
-8. Verify the reported result against the acceptance criteria and relay the
+9. Verify the reported result against the acceptance criteria and relay the
    outcome, including any deviations or blockers, without changing their
    meaning.
 
