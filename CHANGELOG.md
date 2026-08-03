@@ -20,6 +20,8 @@
 - Simplified the start-task agents around scoped clarification, practical implementation, one bounded review and repair pass, and required changelog maintenance.
 - Replaced the installer and validation matrix with focused symlink installation, configuration preservation, structural checks, and smoke tests.
 - Configured the feature implementer to use Ponytail in full mode while preserving approved requirements and test-plan precedence.
+- The start-feature skill now invokes `grill-with-docs` by name (model invocation enabled on that skill), flags multi-outcome requests during scope confirmation, prepares branch and dirty-worktree state before spawning the implementer, and reviews the cumulative diff with at most one repair assignment.
+- The Claude `feature-implementer` subagent now commits in logical targeted chunks — one conventional commit per plan step with validation passing — stages only touched files, and keeps an existing repository-root `CHANGELOG.md` current, while still never pushing or switching branches.
 
 ### Fixed
 
