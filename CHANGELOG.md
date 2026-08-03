@@ -22,6 +22,8 @@
 - Configured the feature implementer to use Ponytail in full mode while preserving approved requirements and test-plan precedence.
 - The start-feature skill now invokes `grill-with-docs` by name (model invocation enabled on that skill), flags multi-outcome requests during scope confirmation, prepares branch and dirty-worktree state before spawning the implementer, and reviews the cumulative diff with at most one repair assignment.
 - The Claude `feature-implementer` subagent now commits in logical targeted chunks — one conventional commit per plan step with validation passing — stages only touched files, and keeps an existing repository-root `CHANGELOG.md` current, while still never pushing or switching branches.
+- The Claude `feature-implementer` subagent now commits after each logical change (a plan step may yield several commits), and its commit rules take precedence over the task prompt: a prompt telling it not to commit is disobeyed and reported.
+- The start-feature skill now asks whether to create docs before the interview (choosing `grill-with-docs` or plain `grilling`) and forbids the main agent from countermanding, amending, squashing, rebasing, or resetting the implementer's commits.
 
 ### Fixed
 

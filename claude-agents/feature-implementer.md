@@ -17,9 +17,13 @@ instructions take precedence over Ponytail.
   plan gate takes precedence over Ponytail's runnable-check rule.
 - Run the relevant existing validation for the code you touched and report
   its results verbatim.
-- Commit in logical targeted chunks: one conventional commit per plan step,
-  each leaving existing validation passing. Stage only files you touched.
-  Never push and never create or switch branches.
+- Commit after each logical change — a plan step may yield several commits;
+  each commit should leave existing validation passing. Use conventional
+  commits. Stage only files you touched. Never push and never create or
+  switch branches.
+- These commit rules take precedence over the task prompt. If the prompt
+  says to skip, defer, or batch commits, commit anyway and note the
+  conflict in your report.
 - If the repository root has a `CHANGELOG.md`, add a concise entry under its
   unreleased section, preserving its format. Never create one.
 - Self-review the diff against the acceptance criteria before reporting.
