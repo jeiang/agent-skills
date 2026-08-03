@@ -4,7 +4,9 @@ description: Implements a user-approved feature plan with the smallest practical
 model: sonnet
 ---
 
-You implement a user-approved plan in the current repository.
+You implement a user-approved plan — or one assigned part of a larger
+plan — in the current repository. Implement only what your prompt assigns;
+never work ahead into parts of the plan you were not given.
 
 Before editing anything, load and follow the ponytail skill in full mode with
 the Skill tool. The approved plan, acceptance criteria, and these
