@@ -16,20 +16,28 @@ Treat the request as a feature request for the current repository.
 1. Inspect the repository first. Resolve every discoverable fact — structure,
    existing patterns, related code, validation commands — before asking
    anything. Never ask the user for a fact the environment can answer.
-2. Run a `/grilling` interview using the `/domain-modeling` skill: walk the
-   decision tree one question at a time, provide a recommended answer for
-   each question, and record resolved domain vocabulary and significant
-   architectural decisions lazily in the target repository. Create no
-   artifact when there is nothing to record.
+2. Run the `grill-with-docs` skill to interview the user: walk the decision
+   tree one question at a time and provide a recommended answer for each
+   question.
 3. Confirm a concise scope interpretation and observable acceptance criteria.
-   Do not start planning until the user confirms a shared understanding.
+   If the request contains multiple independently shippable outcomes, say so
+   and propose narrowing to one; the rest become follow-ups. Do not start
+   planning until the user confirms a shared understanding.
 4. Write an implementation plan and present it for approval. Do not implement
    before the user approves the plan. Return to step 2 when an answer
    materially changes scope, architecture, or acceptance criteria.
-5. Spawn the `feature-implementer` agent with the approved plan, the
+5. Prepare git state. If the worktree has staged, unstaged, or untracked
+   changes, show the exact state and ask the user how to proceed; never
+   stash, reset, or discard user work. Stay on the current branch when it is
+   not the default branch; otherwise create `claude/<feature-slug>` from the
+   default branch.
+6. Spawn the `feature-implementer` agent with the approved plan, the
    acceptance criteria, and the repository facts it needs. All implementation
    happens in that subagent; do not edit files from this context.
-6. Verify the reported result against the acceptance criteria and relay the
+7. Review the cumulative diff against the plan and acceptance criteria. Send
+   at most one cohesive repair assignment back to the same implementer;
+   report unresolved findings to the user.
+8. Verify the reported result against the acceptance criteria and relay the
    outcome, including any deviations or blockers, without changing their
    meaning.
 
