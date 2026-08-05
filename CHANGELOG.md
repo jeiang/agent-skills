@@ -11,6 +11,7 @@
 - A `check` command in the devenv shell for running repository validation.
 - Ponytail v4.8.4 as a vendored skill with its upstream MIT license and source metadata.
 - `i-have-adhd` as a vendored skill with its upstream MIT license, Codex display metadata, and source metadata.
+- `wayfinder` as a vendored skill from mattpocock/skills, with its `research` and `prototype` dependencies vendored alongside and the upstream issue-tracker docs bundled in its `trackers/` directory in place of the un-vendored `setup-matt-pocock-skills` skill.
 
 ### Changed
 
