@@ -6,11 +6,11 @@ A Git-managed collection of Codex and Claude Code skills and custom agents.
 
 - `codex/` contains Codex-specific skills linked into `~/.codex/skills`.
 - `claude/` contains Claude Code-specific skills linked into `~/.claude/skills`.
-- `shared/` contains skills used by both tools, linked into `~/.codex/skills` and `~/.claude/skills`.
-- `generic/` is reserved for portable skills linked into `~/.agents/skills`.
+- `shared/` contains skills used by every tool, linked into `~/.codex/skills`, `~/.claude/skills`, and `~/.copilot/skills` (GitHub Copilot CLI's personal skills directory).
+- `generic/` is reserved for portable skills linked into `~/.agents/skills`, which GitHub Copilot CLI also reads.
 - `agents/` contains custom-agent definitions linked into `~/.codex/agents`.
 - `claude-agents/` contains Claude Code subagent definitions linked into `~/.claude/agents`.
-- `install.sh` installs the links and required Codex agent limits.
+- `install.sh` installs the links and required Codex agent limits; `install.ps1` is the PowerShell equivalent for Windows.
 
 The included skills are:
 
@@ -38,6 +38,12 @@ Run:
 ./install.sh
 ```
 
+On Windows, run the PowerShell equivalent instead (symlink creation requires Developer Mode or an administrator shell):
+
+```powershell
+./install.ps1
+```
+
 The installer:
 
 1. links skills under `codex/`, `claude/`, `shared/`, and `generic/` into their discovery directories;
@@ -45,7 +51,7 @@ The installer:
 3. backs up `~/.codex/config.toml` before changing it; and
 4. sets `agents.max_threads` to at least 4 and `agents.max_depth` to at least 2 while preserving unrelated configuration.
 
-Matching copied agents and skills from an older installation are migrated to links, and skill links pointing at former locations inside this repository are relinked. A matching skill directory is moved to `~/.codex/skill-backups`. The installer refuses conflicting destinations or symlinks pointing outside the repository.
+Matching copied agents and skills from an older installation are migrated to links, and skill links pointing at former locations inside this repository are relinked. A matching skill directory is moved to `~/.codex/skill-backups`. The installer refuses conflicting destinations or symlinks pointing outside the repository. The PowerShell installer skips the copied-install migration, which only ever applied to Unix installations.
 
 The installer also removes the retired `prompt-validator` and `agents-md-author` configurations from `~/.codex/agents`.
 
