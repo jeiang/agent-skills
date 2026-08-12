@@ -24,7 +24,7 @@ HOME="$home" "$repo_dir/install.sh" >/dev/null
 
 [ -L "$home/.codex/skills/start-task" ]
 [ "$(readlink "$home/.codex/skills/start-task")" = "$repo_dir/codex/start-task" ]
-for skills_root in "$home/.codex/skills" "$home/.claude/skills"; do
+for skills_root in "$home/.codex/skills" "$home/.claude/skills" "$home/.copilot/skills"; do
   [ -L "$skills_root/ponytail" ]
   [ "$(readlink "$skills_root/ponytail")" = "$repo_dir/shared/ponytail" ]
   [ -L "$skills_root/i-have-adhd" ]
@@ -37,6 +37,8 @@ for skills_root in "$home/.codex/skills" "$home/.claude/skills"; do
   [ "$(readlink "$skills_root/domain-modeling")" = "$repo_dir/shared/domain-modeling" ]
 done
 [ ! -e "$home/.claude/skills/start-task" ]
+[ ! -e "$home/.copilot/skills/start-task" ]
+[ ! -e "$home/.copilot/skills/start-feature" ]
 [ -L "$home/.claude/skills/start-feature" ]
 [ "$(readlink "$home/.claude/skills/start-feature")" = "$repo_dir/claude/start-feature" ]
 [ ! -e "$home/.codex/skills/start-feature" ]

@@ -4,6 +4,7 @@ set -eu
 repo_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 codex_skills="$HOME/.codex/skills"
 claude_skills="$HOME/.claude/skills"
+copilot_skills="$HOME/.copilot/skills"
 generic_skills="$HOME/.agents/skills"
 agent_target="$HOME/.codex/agents"
 claude_agent_target="$HOME/.claude/agents"
@@ -200,6 +201,7 @@ link_skills "$repo_dir/codex" "$codex_skills"
 link_skills "$repo_dir/claude" "$claude_skills"
 link_skills "$repo_dir/shared" "$codex_skills"
 link_skills "$repo_dir/shared" "$claude_skills"
+link_skills "$repo_dir/shared" "$copilot_skills"
 link_skills "$repo_dir/generic" "$generic_skills"
 
 for source in "$repo_dir"/agents/*.toml; do

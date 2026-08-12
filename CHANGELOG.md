@@ -4,6 +4,8 @@
 
 ### Added
 
+- GitHub Copilot CLI skill support: `shared/` skills are now also linked into `~/.copilot/skills`, and Copilot reads `generic/` skills from `~/.agents/skills` natively.
+- A PowerShell installer (`install.ps1`) for Windows, with a `pwsh` smoke test that `check` runs when PowerShell is available.
 - Claude Code skill support: a `claude/` directory linked into `~/.claude/skills` and a `shared/` directory linked into both `~/.codex/skills` and `~/.claude/skills`.
 - A Claude Code `start-feature` skill that establishes feature context through a grilling interview with domain-modeling documentation before planning, then delegates implementation to the Sonnet `feature-implementer` subagent, which loads Ponytail in full mode.
 - Installer links and structural validation for Claude Code subagent definitions in `claude-agents/`.
