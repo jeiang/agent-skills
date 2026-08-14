@@ -28,6 +28,8 @@ The included skills are:
 
 All of these live in `shared/` and are installed for both Codex and Claude Code, except `start-task`, which stays in `codex/` because it drives the custom agents in `agents/`, and `start-feature`, which stays in `claude/` because it drives the subagents in `claude-agents/`.
 
+`claude-agents/` also provides `researcher`, a read-only Sonnet (high effort) subagent that Claude Code uses automatically for information gathering — repository facts, code lookups, web searches. Deep research is split across parallel researchers (at most 4 unless the user sets a different limit), and the agent cannot spawn subagents of its own.
+
 Use the installed `gh-fix-ci`, `gh-address-comments`, and `yeet` skills directly for failing GitHub Actions, pull request feedback, and publication instead of routing those tasks through `start-task`.
 
 ## Installation
