@@ -14,6 +14,7 @@
 - Ponytail v4.8.4 as a vendored skill with its upstream MIT license and source metadata.
 - `i-have-adhd` as a vendored skill with its upstream MIT license, Codex display metadata, and source metadata.
 - A Claude Code `researcher` subagent: read-only information gathering (repo facts, code lookups, web searches) on Sonnet at high effort, used automatically, fanned out in parallel (capped at 4 unless the user sets a limit) for deep research, and unable to spawn subagents.
+- `audit-your-codebase` as a vendored skill from aarondfrancis's gist, for a read-only, agent-orchestrated audit of a whole repository for simplifications in data structures, state representation, and ownership.
 - `wayfinder` as a vendored skill from mattpocock/skills, with its `research` and `prototype` dependencies vendored alongside and the upstream issue-tracker docs bundled in its `trackers/` directory in place of the un-vendored `setup-matt-pocock-skills` skill.
 
 ### Changed
