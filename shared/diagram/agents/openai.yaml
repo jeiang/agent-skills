@@ -1,0 +1,4 @@
+interface:
+  display_name: "Diagram"
+  short_description: "Draw a Mermaid diagram from the repository"
+  default_prompt: "Use $diagram to visualize this."
