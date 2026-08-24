@@ -70,13 +70,13 @@ Invoke the repository-change launcher from a Git repository:
 $start-task Add pagination to the activity feed
 ```
 
-The coordinator inspects the repository, then uses `grill-with-docs` to validate the request one decision at a time before confirming observable acceptance criteria and scope. Resolved domain terminology and significant architectural decisions are documented lazily in the target repository. It proposes independently shippable subtasks when the request is too broad. Approved subtasks are handled sequentially with separate plans, branches, reviews, and pull requests.
+The coordinator inspects the repository, asks first whether to record docs during the interview, then uses `grill-with-docs` (yes) or plain `grilling` (no) to validate the request one decision at a time before confirming observable acceptance criteria and scope. Resolved domain terminology and significant architectural decisions are documented lazily in the target repository. It proposes independently shippable subtasks when the request is too broad. Approved subtasks are handled sequentially with separate plans, branches, reviews, and pull requests.
 
 Each completed subtask updates the repository-root `CHANGELOG.md` under its existing unreleased section. The workflow creates a changelog with an `Unreleased` section when the repository does not have one.
 
 Routine coordination, planning, implementation, and review use medium reasoning. Research and complex plan review remain high reasoning and run only when justified.
 
-The implementer automatically uses the bundled Ponytail skill in full mode. It makes the smallest practical change, avoids speculative abstractions and excessive comments, and does not add tests unless the approved plan requires them. Approved requirements and the start-task plan gate take precedence over Ponytail. It runs relevant existing validation, self-reviews against the acceptance criteria, and creates one conventional commit per cohesive change.
+The implementer automatically uses the bundled Ponytail skill in full mode. It makes the smallest practical change, avoids speculative abstractions and excessive comments, and does not add tests unless the approved plan requires them. Approved requirements and the start-task plan gate take precedence over Ponytail. It runs relevant existing validation, self-reviews against the acceptance criteria, and commits after each logical change — a part may yield several commits, and a single commit never carries an entire feature. Its commit rules take precedence over the task prompt: an assignment telling it to skip, defer, or batch commits is disobeyed and reported. The coordinator splits each approved plan into ordered implementation parts and dispatches one part at a time. Implementer commits are final history; the coordinator never amends, squashes, rebases, or resets them.
 
 Review has a fixed termination rule:
 

@@ -20,6 +20,8 @@
 
 ### Changed
 
+- The start-task coordinator now asks whether to record docs before the interview (choosing `grill-with-docs` or plain `grilling`), splits each approved plan into ordered implementation parts dispatched one at a time, and treats implementer commits as final history it never amends, squashes, rebases, or resets.
+- The Codex `feature_implementer` agent now commits after each logical change rather than once per assignment, stages only touched files, and its commit rules take precedence over the task prompt — matching the Claude `feature-implementer` subagent.
 - Calibrated `i-have-adhd` to the reader's stated expertise and context while preserving its action-first, command-by-command guidance.
 - Moved every skill except the Codex-specific `start-task` from `codex/` to `shared/` so Codex and Claude Code reuse them, and reworded skill descriptions to be agent-neutral. The installer relinks existing skill links that point at former locations inside the repository.
 - The start-task coordinator now validates each request through Grill with Docs before planning, while its feature implementer continues to load Ponytail in full mode.
