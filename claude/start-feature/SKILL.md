@@ -49,9 +49,18 @@ Treat the request as a feature request for the current repository.
    final history: do not commit, amend, squash, rebase, or reset them.
    Repairs go back to an implementer, which commits them under its own
    rules.
-8. Review the cumulative diff against the plan and acceptance criteria. Send
-   at most one cohesive repair assignment back to an implementer;
-   report unresolved findings to the user.
+8. Spawn a `change-reviewer` agent in INITIAL mode with the baseline, the
+   approved plan, the acceptance criteria, the cumulative diff, and the
+   validation evidence. Do not review the diff yourself; you wrote the plan
+   and approved each part, so you are the wrong context to judge the result.
+   Accept only `PASS`, `CHANGES_REQUIRED`, or `BLOCKED`. Resolve a `BLOCKED`
+   verdict by supplying the missing input, not by treating it as a finding.
+   For `CHANGES_REQUIRED`, send all confirmed findings to an implementer as
+   one cohesive repair assignment, then spawn `change-reviewer` in VERIFY
+   mode with only those findings, the repair diff, and the relevant
+   validation. Accept only `FIXES_VERIFIED` or `FIXES_NOT_VERIFIED`. Never
+   start a second general review or another repair cycle; report unresolved
+   findings to the user.
 9. Verify the reported result against the acceptance criteria and relay the
    outcome, including any deviations or blockers, without changing their
    meaning.

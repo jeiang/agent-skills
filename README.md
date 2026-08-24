@@ -31,6 +31,8 @@ All of these live in `shared/` and are installed for both Codex and Claude Code,
 
 `claude-agents/` also provides `researcher`, a read-only Sonnet (high effort) subagent that Claude Code uses automatically for information gathering — repository facts, code lookups, web searches. Deep research is split across parallel researchers (at most 4 unless the user sets a different limit), and the agent cannot spawn subagents of its own.
 
+It also provides `change-reviewer`, a read-only Sonnet (high effort) subagent that reviews a completed change once for demonstrable merge-blocking defects and verifies one repair pass. `start-feature` delegates its review step to this agent rather than reviewing its own plan's output in the context that wrote it. It mirrors the Codex `feature_reviewer` agent: fixed `PASS`/`CHANGES_REQUIRED`/`BLOCKED` and `FIXES_VERIFIED`/`FIXES_NOT_VERIFIED` verdicts, and no second general review or automatic repair cycle.
+
 Use the installed `gh-fix-ci`, `gh-address-comments`, and `yeet` skills directly for failing GitHub Actions, pull request feedback, and publication instead of routing those tasks through `start-task`.
 
 ## Installation
