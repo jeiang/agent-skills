@@ -21,6 +21,7 @@ The included skills are:
 - `kubernetes-diagnose` for investigating Kubernetes workload and platform failures.
 - `nixos-change-validation` for preparing and validating NixOS changes and safe activation instructions.
 - `azure-pipelines-maintenance` for Azure Pipelines YAML, templates, conditions, artifacts, and deployments.
+- `eli5` for explaining code, systems, errors, or concepts at the altitude the reader is actually standing at, grounded in the real implementation rather than the general pattern. Takes an optional `eli5`, `colleague`, or `expert` level.
 - `ponytail`, vendored from [DietrichGebert/ponytail v4.8.4](https://github.com/DietrichGebert/ponytail/tree/v4.8.4), for choosing the smallest correct implementation through YAGNI and reuse-first guidance.
 - `audit-your-codebase`, vendored from [aarondfrancis's gist](https://gist.github.com/aarondfrancis/8735edbe48532f97ee5ea818db4dbd47), for a read-only, agent-orchestrated audit of a whole repository for simplifications in data structures, state representation, and ownership.
 - `i-have-adhd`, vendored from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd/tree/0241185d6c7f2d0763a988ce52eceb13ea9f5c1f), for explicit action-first output that is easier for ADHD readers to follow.
