@@ -4,6 +4,7 @@
 
 ### Added
 
+- An `expressions-and-variables.md` reference for `azure-pipelines-maintenance` covering the three expression syntaxes, output-variable reference forms per producer/consumer distance, the deployment-job double-name quirk, and condition semantics for skipped and canceled upstreams.
 - Codex display metadata for `ponytail` and `audit-your-codebase`, the only shared skills that were missing an `agents/openai.yaml`.
 - An `eli5` skill for explaining something at the reader's actual level, grounded in the real implementation, with optional `eli5`, `colleague`, and `expert` altitudes.
 - A `diagram` skill for deriving Mermaid diagrams from repository evidence and committing them beside their subject, including the Azure DevOps wiki's Mermaid limitations.

@@ -5,6 +5,8 @@ description: Maintain and validate Azure Pipelines YAML, templates, variables, c
 
 # Azure Pipelines Maintenance
 
+Read `references/expressions-and-variables.md` before writing or diagnosing any expression, condition, or output variable. Its evaluation-context and dependency-syntax rules are the ones that are wrong most often.
+
 Inspect the entry pipeline, template graph, parameter and variable flow, service connections, environments, branch and path triggers, artifact contracts, deployment ownership, and applicable AGENTS.md files before editing.
 
 ## Maintain the pipeline
