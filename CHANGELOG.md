@@ -4,6 +4,7 @@
 
 ### Added
 
+- An `activation-and-state.md` reference for `nixos-change-validation` covering what `nixos-rebuild test` cannot validate, impermanence and secret-decryption failures that appear only at activation, evaluation scope, and deploy-rs magic-rollback behavior.
 - An `immutability-and-rollout.md` reference for `kubernetes-delivery` covering in-place-immutable fields, verified image pull policy defaults, rollout and probe semantics, and the Helm rendering and upgrade behavior that local validation cannot prove.
 - A `failure-signatures.md` reference for `kubernetes-diagnose` mapping pod, traffic, and rollout failure signatures to the check that discriminates between their plausible causes.
 - An `expressions-and-variables.md` reference for `azure-pipelines-maintenance` covering the three expression syntaxes, output-variable reference forms per producer/consumer distance, the deployment-job double-name quirk, and condition semantics for skipped and canceled upstreams.
