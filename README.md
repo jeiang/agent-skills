@@ -21,8 +21,10 @@ The included skills are:
 - `kubernetes-diagnose` for investigating Kubernetes workload and platform failures.
 - `nixos-change-validation` for preparing and validating NixOS changes and safe activation instructions.
 - `azure-pipelines-maintenance` for Azure Pipelines YAML, templates, conditions, artifacts, and deployments.
+- `eli5` for explaining code, systems, errors, or concepts at the altitude the reader is actually standing at, grounded in the real implementation rather than the general pattern. Takes an optional `eli5`, `colleague`, or `expert` level.
+- `diagram` for deriving a Mermaid diagram from the repository and committing it beside what it describes, with the Azure DevOps wiki's reduced Mermaid dialect accounted for.
 - `ponytail`, vendored from [DietrichGebert/ponytail v4.8.4](https://github.com/DietrichGebert/ponytail/tree/v4.8.4), for choosing the smallest correct implementation through YAGNI and reuse-first guidance.
-- `audit-your-codebase`, vendored from [aarondfrancis's gist](https://gist.github.com/aarondfrancis/8735edbe48532f97ee5ea818db4dbd47), for a read-only, agent-orchestrated audit of a whole repository for simplifications in data structures, state representation, and ownership.
+- `audit-your-codebase`, vendored from [aarondfrancis's gist](https://gist.github.com/aarondfrancis/8735edbe48532f97ee5ea818db4dbd47), for a read-only, agent-orchestrated audit of a whole repository for simplifications in data structures, state representation, and ownership. Unlike every other vendored skill here, its upstream states no license, so it is redistributed in this public repository without an express grant. Remove it or seek permission from the author if that matters to you.
 - `i-have-adhd`, vendored from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd/tree/0241185d6c7f2d0763a988ce52eceb13ea9f5c1f), for explicit action-first output that is easier for ADHD readers to follow.
 - `grill-with-docs`, vendored from [mattpocock/skills](https://github.com/mattpocock/skills/tree/e9fcdf95b402d360f90f1db8d776d5dd450f9234), for a user-invoked design interview that records domain vocabulary and ADRs. Its `grilling` and `domain-modeling` dependencies are included as installed skills.
 - `wayfinder`, vendored from [mattpocock/skills](https://github.com/mattpocock/skills/tree/8b36d4fb2635b3c21998dcd8144439c9e5ba7302), for planning work too big for one agent session as a shared map of decision tickets on the repo's issue tracker, resolved one at a time. Its `research` and `prototype` dependencies are included as installed skills, and it reuses the installed `grilling` and `domain-modeling` skills. Tracker conventions for GitHub, GitLab, and local markdown are bundled in its `trackers/` directory.
@@ -30,6 +32,8 @@ The included skills are:
 All of these live in `shared/` and are installed for both Codex and Claude Code, except `start-task`, which stays in `codex/` because it drives the custom agents in `agents/`, and `start-feature`, which stays in `claude/` because it drives the subagents in `claude-agents/`.
 
 `claude-agents/` also provides `researcher`, a read-only Sonnet (high effort) subagent that Claude Code uses automatically for information gathering — repository facts, code lookups, web searches. Deep research is split across parallel researchers (at most 4 unless the user sets a different limit), and the agent cannot spawn subagents of its own.
+
+It also provides `change-reviewer`, a read-only Sonnet (high effort) subagent that reviews a completed change once for demonstrable merge-blocking defects and verifies one repair pass. `start-feature` delegates its review step to this agent rather than reviewing its own plan's output in the context that wrote it. It mirrors the Codex `feature_reviewer` agent: fixed `PASS`/`CHANGES_REQUIRED`/`BLOCKED` and `FIXES_VERIFIED`/`FIXES_NOT_VERIFIED` verdicts, and no second general review or automatic repair cycle.
 
 Use the installed `gh-fix-ci`, `gh-address-comments`, and `yeet` skills directly for failing GitHub Actions, pull request feedback, and publication instead of routing those tasks through `start-task`.
 
@@ -68,13 +72,13 @@ Invoke the repository-change launcher from a Git repository:
 $start-task Add pagination to the activity feed
 ```
 
-The coordinator inspects the repository, then uses `grill-with-docs` to validate the request one decision at a time before confirming observable acceptance criteria and scope. Resolved domain terminology and significant architectural decisions are documented lazily in the target repository. It proposes independently shippable subtasks when the request is too broad. Approved subtasks are handled sequentially with separate plans, branches, reviews, and pull requests.
+The coordinator inspects the repository, asks first whether to record docs during the interview, then uses `grill-with-docs` (yes) or plain `grilling` (no) to validate the request one decision at a time before confirming observable acceptance criteria and scope. Resolved domain terminology and significant architectural decisions are documented lazily in the target repository. It proposes independently shippable subtasks when the request is too broad. Approved subtasks are handled sequentially with separate plans, branches, reviews, and pull requests.
 
 Each completed subtask updates the repository-root `CHANGELOG.md` under its existing unreleased section. The workflow creates a changelog with an `Unreleased` section when the repository does not have one.
 
 Routine coordination, planning, implementation, and review use medium reasoning. Research and complex plan review remain high reasoning and run only when justified.
 
-The implementer automatically uses the bundled Ponytail skill in full mode. It makes the smallest practical change, avoids speculative abstractions and excessive comments, and does not add tests unless the approved plan requires them. Approved requirements and the start-task plan gate take precedence over Ponytail. It runs relevant existing validation, self-reviews against the acceptance criteria, and creates one conventional commit per cohesive change.
+The implementer automatically uses the bundled Ponytail skill in full mode. It makes the smallest practical change, avoids speculative abstractions and excessive comments, and does not add tests unless the approved plan requires them. Approved requirements and the start-task plan gate take precedence over Ponytail. It runs relevant existing validation, self-reviews against the acceptance criteria, and commits after each logical change — a part may yield several commits, and a single commit never carries an entire feature. Its commit rules take precedence over the task prompt: an assignment telling it to skip, defer, or batch commits is disobeyed and reported. The coordinator splits each approved plan into ordered implementation parts and dispatches one part at a time. Implementer commits are final history; the coordinator never amends, squashes, rebases, or resets them.
 
 Review has a fixed termination rule:
 

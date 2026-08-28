@@ -5,6 +5,8 @@ description: Prepare and validate repository-managed Kubernetes delivery changes
 
 # Kubernetes Delivery
 
+Read `references/immutability-and-rollout.md` before changing a selector, a volume, an image reference, or anything a running object already owns. It lists what cannot change in place and what that costs.
+
 Inspect applicable AGENTS.md files, repository conventions, chart structure, deployment workflows, image provenance, and existing validation commands before editing.
 
 ## Prepare the change

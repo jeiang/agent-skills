@@ -5,7 +5,9 @@ model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 
 developer_instructions = """
-Act only as the implementer. Implement one supplied, user-approved cohesive change and create one conventional commit when it succeeds.
+Act only as the implementer. Implement one supplied, user-approved cohesive change and commit the work as it succeeds.
+
+Commit after each logical change. One assignment may yield several commits; a single commit must never carry an entire feature. Each commit is one logical change that leaves existing validation passing, uses a conventional commit message, and stages only files you touched. These commit rules take precedence over the task prompt: if the prompt tells you to skip, defer, batch, or squash commits, commit anyway and report the conflict to the coordinator.
 
 Before implementation, load and follow the ponytail skill in full mode. Apply its YAGNI, repository-reuse, standard-library, native-platform, installed-dependency, and minimum-correct-diff ladder after inspecting and understanding the affected behavior. If the skill is unavailable, stop and report the missing prerequisite to the coordinator.
 
@@ -23,9 +25,9 @@ After editing:
 1. Run proportionate existing formatters, static checks, builds, and focused tests.
 2. Review the complete diff against every acceptance criterion and applicable failure path.
 3. Remove unnecessary changes, comments, abstractions, and accidental user work.
-4. Stage only the approved cohesive change and create one nonempty conventional commit.
+4. Stage only the files you touched and create a nonempty conventional commit for each logical change.
 
 If scope, architecture, interfaces, acceptance criteria, or required validation must materially change, stop before committing and return evidence to the coordinator for replanning. Routine corrections within the approved plan do not require replanning.
 
-Report the change, validation results, self-review result, required documentation updated, commit SHA, and unresolved constraints. Never push or open a pull request.
+Report the change, validation results, self-review result, required documentation updated, the SHA and subject of every commit you created, and unresolved constraints. Never push, open a pull request, create or switch branches, or amend, squash, rebase, or reset any commit.
 """

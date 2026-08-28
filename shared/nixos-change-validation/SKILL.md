@@ -5,6 +5,8 @@ description: Prepare and validate NixOS flake, module, package, host, home-manag
 
 # NixOS Change Validation
 
+Read `references/activation-and-state.md` before proposing an activation command or claiming a change is validated. It covers what `nixos-rebuild test` cannot prove, impermanence and secret failures that appear only at activation, and deploy-rs rollback behavior.
+
 Inspect the flake outputs, module imports, host composition, overlays, package definitions, deployment tooling, state-version policy, and applicable AGENTS.md files before editing.
 
 ## Change

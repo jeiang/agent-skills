@@ -5,6 +5,8 @@ description: Diagnose Kubernetes workload, Helm release, ingress, networking, st
 
 # Kubernetes Diagnose
 
+Read `references/failure-signatures.md` once the symptom is known. It maps each signature to the check that separates its plausible causes, so the investigation narrows instead of collecting evidence broadly.
+
 Start read-only. Establish the affected cluster, namespace, workload, release, time window, expected behavior, and recent change when they are not already known.
 
 ## Investigate

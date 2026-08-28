@@ -1,0 +1,4 @@
+interface:
+  display_name: "Audit Your Codebase"
+  short_description: "Read-only whole-repository simplification audit"
+  default_prompt: "Use $audit-your-codebase to audit this repository."
