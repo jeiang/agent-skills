@@ -4,6 +4,7 @@
 
 ### Added
 
+- Codex display metadata for `ponytail` and `audit-your-codebase`, the only shared skills that were missing an `agents/openai.yaml`.
 - An `eli5` skill for explaining something at the reader's actual level, grounded in the real implementation, with optional `eli5`, `colleague`, and `expert` altitudes.
 - A `diagram` skill for deriving Mermaid diagrams from repository evidence and committing them beside their subject, including the Azure DevOps wiki's Mermaid limitations.
 - A Claude Code `change-reviewer` subagent: read-only review of a completed change for demonstrable merge-blocking defects on Sonnet at high effort, with fixed verdicts and one bounded verification pass. `start-feature` now delegates its review step to this agent instead of reviewing its own plan's output.

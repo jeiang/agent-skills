@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ponytail"
+  short_description: "Force the smallest solution that works"
+  default_prompt: "Use $ponytail on this."
