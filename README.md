@@ -22,6 +22,7 @@ The included skills are:
 - `nixos-change-validation` for preparing and validating NixOS changes and safe activation instructions.
 - `azure-pipelines-maintenance` for Azure Pipelines YAML, templates, conditions, artifacts, and deployments.
 - `eli5` for explaining code, systems, errors, or concepts at the altitude the reader is actually standing at, grounded in the real implementation rather than the general pattern. Takes an optional `eli5`, `colleague`, or `expert` level.
+- `devshell-preflight` for resolving how a repository's own commands are run (direnv, devenv, flake, or `shell.nix`) before the first one is invoked, instead of discovering it from a `command not found`.
 - `diagram` for deriving a Mermaid diagram from the repository and committing it beside what it describes, with the Azure DevOps wiki's reduced Mermaid dialect accounted for.
 - `ponytail`, vendored from [DietrichGebert/ponytail v4.8.4](https://github.com/DietrichGebert/ponytail/tree/v4.8.4), for choosing the smallest correct implementation through YAGNI and reuse-first guidance.
 - `audit-your-codebase`, vendored from [aarondfrancis's gist](https://gist.github.com/aarondfrancis/8735edbe48532f97ee5ea818db4dbd47), for a read-only, agent-orchestrated audit of a whole repository for simplifications in data structures, state representation, and ownership. Unlike every other vendored skill here, its upstream states no license, so it is redistributed in this public repository without an express grant. Remove it or seek permission from the author if that matters to you.

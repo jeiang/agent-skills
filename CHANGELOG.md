@@ -4,6 +4,7 @@
 
 ### Added
 
+- A `devshell-preflight` skill for resolving a repository's command entry point (direnv, `devenv.nix`, `flake.nix`, `shell.nix`) before running its commands, including the `devenv.nix`-without-`flake.nix` case where `nix develop` is the wrong entry point, git worktrees that are not part of the flake, and the `python3.withPackages` wrapper needed to put a library on the interpreter's path.
 - An `activation-and-state.md` reference for `nixos-change-validation` covering what `nixos-rebuild test` cannot validate, impermanence and secret-decryption failures that appear only at activation, evaluation scope, and deploy-rs magic-rollback behavior.
 - An `immutability-and-rollout.md` reference for `kubernetes-delivery` covering in-place-immutable fields, verified image pull policy defaults, rollout and probe semantics, and the Helm rendering and upgrade behavior that local validation cannot prove.
 - A `failure-signatures.md` reference for `kubernetes-diagnose` mapping pod, traffic, and rollout failure signatures to the check that discriminates between their plausible causes.

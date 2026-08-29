@@ -1,0 +1,4 @@
+interface:
+  display_name: "Devshell Preflight"
+  short_description: "Resolve how to run a repo's own commands"
+  default_prompt: "Use $devshell-preflight before running this repository's commands."
