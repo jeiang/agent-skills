@@ -4,6 +4,7 @@
 
 ### Added
 
+- A `devshell-preflight` skill for resolving a repository's command entry point (direnv, `devenv.nix`, `flake.nix`, `shell.nix`) before running its commands, including the `devenv.nix`-without-`flake.nix` case where `nix develop` is the wrong entry point, git worktrees that are not part of the flake, and the `python3.withPackages` wrapper needed to put a library on the interpreter's path.
 - An `activation-and-state.md` reference for `nixos-change-validation` covering what `nixos-rebuild test` cannot validate, impermanence and secret-decryption failures that appear only at activation, evaluation scope, and deploy-rs magic-rollback behavior.
 - An `immutability-and-rollout.md` reference for `kubernetes-delivery` covering in-place-immutable fields, verified image pull policy defaults, rollout and probe semantics, and the Helm rendering and upgrade behavior that local validation cannot prove.
 - A `failure-signatures.md` reference for `kubernetes-diagnose` mapping pod, traffic, and rollout failure signatures to the check that discriminates between their plausible causes.
@@ -28,6 +29,9 @@
 
 ### Changed
 
+- `nixos-change-validation` now triggers on repo-wide mechanical `.nix` edits such as formatting, comment, or refactor sweeps; requires resolving the repository's development shell before running its commands; requires proving a behavior-preserving change by comparing derivation paths rather than asserting it; and warns that piping a long check through `tail` discards the error that made it fail.
+- `grilling` now extends its look-up-the-fact rule to facts the interview asserts, not only ones it would otherwise ask about, and requires naming the source checked before closing a branch as impossible or infeasible.
+- `wayfinder`'s ticket-resolution step now says to read a map's research fact sheets with the harness's file-reading tool rather than a shell `cat`, and to change tools rather than re-issue a read that came back truncated.
 - The README now states that `audit-your-codebase` is vendored from a gist with no stated license, unlike the other vendored skills.
 - The start-task coordinator now asks whether to record docs before the interview (choosing `grill-with-docs` or plain `grilling`), splits each approved plan into ordered implementation parts dispatched one at a time, and treats implementer commits as final history it never amends, squashes, rebases, or resets.
 - The Codex `feature_implementer` agent now commits after each logical change rather than once per assignment, stages only touched files, and its commit rules take precedence over the task prompt — matching the Claude `feature-implementer` subagent.
