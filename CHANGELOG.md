@@ -31,6 +31,7 @@
 
 - `nixos-change-validation` now triggers on repo-wide mechanical `.nix` edits such as formatting, comment, or refactor sweeps; requires resolving the repository's development shell before running its commands; requires proving a behavior-preserving change by comparing derivation paths rather than asserting it; and warns that piping a long check through `tail` discards the error that made it fail.
 - `grilling` now extends its look-up-the-fact rule to facts the interview asserts, not only ones it would otherwise ask about, and requires naming the source checked before closing a branch as impossible or infeasible.
+- `wayfinder`'s ticket-resolution step now says to read a map's research fact sheets with the harness's file-reading tool rather than a shell `cat`, and to change tools rather than re-issue a read that came back truncated.
 - The README now states that `audit-your-codebase` is vendored from a gist with no stated license, unlike the other vendored skills.
 - The start-task coordinator now asks whether to record docs before the interview (choosing `grill-with-docs` or plain `grilling`), splits each approved plan into ordered implementation parts dispatched one at a time, and treats implementer commits as final history it never amends, squashes, rebases, or resets.
 - The Codex `feature_implementer` agent now commits after each logical change rather than once per assignment, stages only touched files, and its commit rules take precedence over the task prompt — matching the Claude `feature-implementer` subagent.
