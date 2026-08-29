@@ -23,7 +23,7 @@
 - `i-have-adhd` as a vendored skill with its upstream MIT license, Codex display metadata, and source metadata.
 - A Claude Code `researcher` subagent: read-only information gathering (repo facts, code lookups, web searches) on Sonnet at high effort, used automatically, fanned out in parallel (capped at 4 unless the user sets a limit) for deep research, and unable to spawn subagents.
 - `audit-your-codebase` as a vendored skill from aarondfrancis's gist, for a read-only, agent-orchestrated audit of a whole repository for simplifications in data structures, state representation, and ownership.
-- `skill-doctor` as a vendored skill from warpdotdev/common-skills, with its upstream MIT license, Codex display metadata, and source metadata, for grading installed skills against recent local Warp, Claude Code, and Codex conversations.
+- `warp-skill-doctor` as a vendored skill from warpdotdev/common-skills, renamed from upstream's `skill-doctor` to avoid clashing with Claude Code's built-in `/skill-doctor` command, with its upstream MIT license, Codex display metadata, and source metadata, for grading installed skills against recent local Warp, Claude Code, and Codex conversations.
 - `wayfinder` as a vendored skill from mattpocock/skills, with its `research` and `prototype` dependencies vendored alongside and the upstream issue-tracker docs bundled in its `trackers/` directory in place of the un-vendored `setup-matt-pocock-skills` skill.
 
 ### Changed

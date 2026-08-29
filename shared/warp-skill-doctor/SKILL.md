@@ -1,8 +1,8 @@
 ---
-name: "skill-doctor"
+name: "warp-skill-doctor"
 description: "Grades agent skills by scoring agent conversations against efficiency and code-quality rubrics, then drafts concrete skill edits and a shareable report. Use when the user wants their agent setup graded from real conversation history, or asks which of their installed skills are actually working."
 ---
-# skill-doctor
+# warp-skill-doctor
 
 Grade the user's agent setup by scoring recent local agent conversations, then propose concrete skill edits and render one shareable report page.
 
@@ -53,7 +53,7 @@ For an all-conversations run, “Project skills” means skills from local git r
 Never write artifacts into the user's repo. Create one fresh, collision-free scratch directory per run and use it as `REPORT_DIR` for every artifact:
 
 ```bash
-REPORT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/skill-doctor-XXXXXXXX")"
+REPORT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/warp-skill-doctor-XXXXXXXX")"
 ```
 
 ## Step 1: Collect

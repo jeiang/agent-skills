@@ -1,6 +1,6 @@
 # Supported harnesses
 
-This file is the single source of truth for harness support in `skill-doctor`. Reference it instead of repeating harness lists in `SKILL.md`.
+This file is the single source of truth for harness support in `warp-skill-doctor`. Reference it instead of repeating harness lists in `SKILL.md`.
 
 ## Startup gate
 
@@ -14,7 +14,7 @@ At startup, identify the harness executing the skill from the runtime context. D
 
 If the executing harness is not listed above, or cannot be identified confidently, stop before creating a report directory or reading conversation history. Tell the user:
 
-> skill-doctor currently supports Warp, Claude Code, and Codex. This run appears to be using an unsupported harness, so no conversations were read.
+> warp-skill-doctor currently supports Warp, Claude Code, and Codex. This run appears to be using an unsupported harness, so no conversations were read.
 
 ## Collector source selection
 
