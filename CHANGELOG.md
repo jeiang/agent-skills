@@ -29,6 +29,7 @@
 
 ### Changed
 
+- `nixos-change-validation` now triggers on repo-wide mechanical `.nix` edits such as formatting, comment, or refactor sweeps; requires resolving the repository's development shell before running its commands; requires proving a behavior-preserving change by comparing derivation paths rather than asserting it; and warns that piping a long check through `tail` discards the error that made it fail.
 - The README now states that `audit-your-codebase` is vendored from a gist with no stated license, unlike the other vendored skills.
 - The start-task coordinator now asks whether to record docs before the interview (choosing `grill-with-docs` or plain `grilling`), splits each approved plan into ordered implementation parts dispatched one at a time, and treats implementer commits as final history it never amends, squashes, rebases, or resets.
 - The Codex `feature_implementer` agent now commits after each logical change rather than once per assignment, stages only touched files, and its commit rules take precedence over the task prompt — matching the Claude `feature-implementer` subagent.
