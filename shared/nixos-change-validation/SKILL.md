@@ -15,7 +15,7 @@ Inspect the flake outputs, module imports, host composition, overlays, package d
 - Keep evaluation pure where the repository expects it and avoid unnecessary input or lock-file churn.
 - Preserve bootability, remote access, persistent state, secret delivery, and rollback capability for host-affecting changes.
 - Prefer standard NixOS options and small module composition over custom abstractions.
-- Do not add tests, helpers, generalized modules, or comments unless the approved task requires them or a non-obvious invariant needs explanation.
+- Add tests only when they provide useful evidence for changed behavior, using existing conventions. Avoid new helpers, generalized modules, or comments that do not explain a relevant invariant.
 
 ## Validate
 

@@ -70,8 +70,5 @@ limits, and an undisclosed limit becomes their next bug.
 - Restate the code in prose line by line. That is transcription, not
   explanation.
 
-## Close
-
-End by naming what the reader should now be able to do or predict — the
-change they can now make safely, the next failure they will recognize. If you
-cannot name one, the explanation has not landed yet.
+Stop when the explanation answers the question. Include a next action only
+when it helps the reader use the answer; do not add a compulsory closing recap.

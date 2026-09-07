@@ -10,3 +10,4 @@
 This copy adds adaptive expertise calibration: use personalization and prior
 context to preserve action-first ADHD guidance without explaining familiar
 tools or routine mechanics to experienced readers.
+- Invocation alignment: Codex now uses the same explicit-only setting as Claude and Copilot.

@@ -1,223 +1,179 @@
 #!/bin/sh
 set -eu
 
+usage() {
+  echo "Usage: $0 codex|claude|copilot [--home DIR] [--replace-instructions]" >&2
+  exit 2
+}
+
+[ "$#" -gt 0 ] || usage
+agent=$1
+shift
+home_dir=$HOME
+home_override=false
+replace_instructions=false
+while [ "$#" -gt 0 ]; do
+  case $1 in
+    --home)
+      [ "$#" -ge 2 ] && [ -n "$2" ] || usage
+      home_dir=$2
+      home_override=true
+      shift 2
+      ;;
+    --replace-instructions)
+      replace_instructions=true
+      shift
+      ;;
+    *) usage ;;
+  esac
+done
+
 repo_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
-codex_skills="$HOME/.codex/skills"
-claude_skills="$HOME/.claude/skills"
-copilot_skills="$HOME/.copilot/skills"
-generic_skills="$HOME/.agents/skills"
-agent_target="$HOME/.codex/agents"
-claude_agent_target="$HOME/.claude/agents"
-config_file="$HOME/.codex/config.toml"
-backup_root="$HOME/.codex/skill-backups"
+case $agent in
+  codex)
+    agent_root="$home_dir/.codex"
+    if [ "$home_override" = false ] && [ -n "${CODEX_HOME:-}" ]; then
+      agent_root=$CODEX_HOME
+    fi
+    profile=personal
+    instruction_file="$agent_root/AGENTS.md"
+    agent_source="$repo_dir/agents"
+    ;;
+  claude)
+    agent_root="$home_dir/.claude"
+    profile=personal
+    instruction_file="$agent_root/CLAUDE.md"
+    agent_source="$repo_dir/claude-agents"
+    ;;
+  copilot)
+    agent_root="$home_dir/.copilot"
+    profile=work
+    instruction_file="$agent_root/instructions/agent-skills.instructions.md"
+    agent_source=
+    ;;
+  *) usage ;;
+esac
 
-link_directory() {
-  source=$1
-  target=$2
+scratch=$(mktemp -d)
+trap 'rm -rf "$scratch"' EXIT HUP INT TERM
+marker='<!-- Managed by agent-skills; rerun the installer to update. -->'
+{
+  if [ "$agent" = copilot ]; then
+    printf '%s\n' '---' 'applyTo: "**"' '---'
+  fi
+  printf '%s\n\n' "$marker"
+  cat "$repo_dir/instructions/common.md"
+  printf '\n'
+  cat "$repo_dir/instructions/$profile.md"
+} >"$scratch/instructions"
 
-  if [ -L "$target" ]; then
-    current=$(readlink "$target")
-    [ "$current" = "$source" ] && return 0
-    case $current in
+# Check the instruction destination before changing any installation links.
+if [ -e "$instruction_file" ] || [ -L "$instruction_file" ]; then
+  [ -f "$instruction_file" ] || {
+    echo "Refusing non-file instructions: $instruction_file" >&2
+    exit 1
+  }
+  if [ "$replace_instructions" = false ]; then
+    if [ -L "$instruction_file" ] || ! grep -Fqx "$marker" "$instruction_file"; then
+      echo "Refusing unmanaged instructions: $instruction_file. Use --replace-instructions to back up and replace them." >&2
+      exit 1
+    fi
+  fi
+fi
+
+remove_owned_link() {
+  retired=$1
+  [ -e "$retired" ] || [ -L "$retired" ] || return 0
+  if [ -L "$retired" ]; then
+    case $(readlink "$retired") in
       "$repo_dir"/*)
-        rm "$target"
-        echo "Removed link to moved skill: $target -> $current"
-        ;;
-      *)
-        echo "Refusing conflicting symlink: $target" >&2
-        return 1
+        rm "$retired"
+        echo "Removed retired link: $retired"
+        return 0
         ;;
     esac
   fi
+  echo "Refusing unmanaged retired entry: $retired. Review and remove it manually." >&2
+  exit 1
+}
 
-  if [ -e "$target" ]; then
-    if [ ! -d "$target" ] || ! diff -qr "$source" "$target" >/dev/null 2>&1; then
-      echo "Refusing conflicting skill destination: $target" >&2
-      return 1
+link_path() {
+  source_path=$1
+  target_path=$2
+  if [ -L "$target_path" ]; then
+    existing_link=$(readlink "$target_path")
+    [ "$existing_link" = "$source_path" ] && return 0
+    case $existing_link in
+      "$repo_dir"/*) rm "$target_path" ;;
+      *)
+        echo "Refusing conflicting symlink: $target_path" >&2
+        exit 1
+        ;;
+    esac
+  fi
+  if [ -e "$target_path" ]; then
+    if [ -d "$source_path" ] && [ -d "$target_path" ] && diff -qr "$source_path" "$target_path" >/dev/null 2>&1; then
+      mkdir -p "$agent_root/backups"
+      backup_dir=$(mktemp -d "$agent_root/backups/skill.XXXXXX")
+      mv "$target_path" "$backup_dir/original"
+      echo "Backed up copied skill: $backup_dir/original"
+    elif [ -f "$source_path" ] && [ -f "$target_path" ] && cmp -s "$source_path" "$target_path"; then
+      rm "$target_path"
+    else
+      echo "Refusing conflicting destination: $target_path" >&2
+      exit 1
     fi
-    mkdir -p "$backup_root"
-    backup="$backup_root/$(basename -- "$target").$(date +%Y%m%d%H%M%S)"
-    [ ! -e "$backup" ] || backup="$backup.$$"
-    mv "$target" "$backup"
-    echo "Backed up existing skill: $backup"
   fi
-
-  ln -s "$source" "$target"
-  echo "Linked skill: $target -> $source"
+  ln -s "$source_path" "$target_path"
+  echo "Linked: $target_path -> $source_path"
 }
 
-link_file() {
-  source=$1
-  target=$2
+mkdir -p "$agent_root/skills"
+remove_owned_link "$agent_root/skills/start-task"
+remove_owned_link "$agent_root/skills/start-feature"
+if [ "$profile" = work ]; then
+  while IFS= read -r personal_skill; do
+    [ -n "$personal_skill" ] || continue
+    remove_owned_link "$agent_root/skills/$personal_skill"
+  done <"$repo_dir/instructions/personal-skills.txt"
+fi
 
-  if [ -L "$target" ]; then
-    [ "$(readlink "$target")" = "$source" ] || {
-      echo "Refusing conflicting symlink: $target" >&2
-      return 1
-    }
-    return 0
-  fi
-
-  if [ -e "$target" ]; then
-    if [ ! -f "$target" ] || ! cmp -s "$source" "$target"; then
-      echo "Refusing conflicting agent destination: $target" >&2
-      return 1
+for source_root in "$repo_dir/shared" "$repo_dir/generic" "$repo_dir/$agent"; do
+  [ -d "$source_root" ] || continue
+  for source_path in "$source_root"/*; do
+    [ -f "$source_path/SKILL.md" ] || continue
+    skill_name=$(basename -- "$source_path")
+    if [ "$profile" = work ] && grep -Fxq "$skill_name" "$repo_dir/instructions/personal-skills.txt"; then
+      continue
     fi
-    rm -f "$target"
-  fi
-
-  ln -s "$source" "$target"
-  echo "Linked agent: $target -> $source"
-}
-
-remove_retired_agent() {
-  target=$1
-  [ -e "$target" ] || [ -L "$target" ] || return 0
-  if [ -d "$target" ] && [ ! -L "$target" ]; then
-    echo "Refusing retired agent destination that is a directory: $target" >&2
-    return 1
-  fi
-  rm -f "$target"
-  echo "Removed retired agent: $target"
-}
-
-link_skills() {
-  source_root=$1
-  target_root=$2
-
-  [ -d "$source_root" ] || return 0
-  mkdir -p "$target_root"
-  for source in "$source_root"/*; do
-    [ -f "$source/SKILL.md" ] || continue
-    link_directory "$source" "$target_root/$(basename -- "$source")"
+    link_path "$source_path" "$agent_root/skills/$skill_name"
   done
-}
-
-render_config() {
-  input=$1
-  output=$2
-
-  awk '
-    function add_missing() {
-      if (!threads) print "max_threads = 4"
-      if (!depth) print "max_depth = 2"
-    }
-    /^\[agents\][[:space:]]*(#.*)?$/ {
-      if (seen_agents) {
-        print "Duplicate [agents] table is unsupported" > "/dev/stderr"
-        failed = 1
-      }
-      seen_agents = 1
-      in_agents = 1
-      print
-      next
-    }
-    /^[[:space:]]*\[\[.*\]\][[:space:]]*(#.*)?$/ {
-      if (in_agents) add_missing()
-      in_agents = 0
-      print
-      next
-    }
-    /^[[:space:]]*\[[^]]+\][[:space:]]*(#.*)?$/ {
-      if (in_agents) add_missing()
-      in_agents = 0
-      print
-      next
-    }
-    in_agents && /^[[:space:]]*max_threads[[:space:]]*=/ {
-      if (threads || $0 !~ /^[[:space:]]*max_threads[[:space:]]*=[[:space:]]*[0-9]+[[:space:]]*(#.*)?$/) {
-        print "Unsupported agents.max_threads definition" > "/dev/stderr"
-        failed = 1
-        print
-        next
-      }
-      threads = 1
-      match($0, /[0-9]+/)
-      if ((substr($0, RSTART, RLENGTH) + 0) < 4)
-        $0 = substr($0, 1, RSTART - 1) "4" substr($0, RSTART + RLENGTH)
-      print
-      next
-    }
-    in_agents && /^[[:space:]]*max_depth[[:space:]]*=/ {
-      if (depth || $0 !~ /^[[:space:]]*max_depth[[:space:]]*=[[:space:]]*[0-9]+[[:space:]]*(#.*)?$/) {
-        print "Unsupported agents.max_depth definition" > "/dev/stderr"
-        failed = 1
-        print
-        next
-      }
-      depth = 1
-      match($0, /[0-9]+/)
-      if ((substr($0, RSTART, RLENGTH) + 0) < 2)
-        $0 = substr($0, 1, RSTART - 1) "2" substr($0, RSTART + RLENGTH)
-      print
-      next
-    }
-    { print }
-    END {
-      if (in_agents) add_missing()
-      if (!seen_agents) {
-        if (NR) print ""
-        print "[agents]"
-        print "max_threads = 4"
-        print "max_depth = 2"
-      }
-      if (failed) exit 1
-    }
-  ' "$input" >"$output"
-}
-
-update_config() {
-  mkdir -p "$(dirname -- "$config_file")"
-  temporary=$(mktemp "${TMPDIR:-/tmp}/agent-skills-config.XXXXXX")
-  trap 'rm -f "$temporary"' EXIT HUP INT TERM
-
-  if [ -e "$config_file" ]; then
-    [ -f "$config_file" ] && [ ! -L "$config_file" ] || {
-      echo "Refusing non-regular Codex config: $config_file" >&2
-      return 1
-    }
-    render_config "$config_file" "$temporary"
-  else
-    render_config /dev/null "$temporary"
-  fi
-
-  if [ ! -e "$config_file" ] || ! cmp -s "$temporary" "$config_file"; then
-    if [ -e "$config_file" ]; then
-      backup="$config_file.bak.$(date +%Y%m%d%H%M%S)"
-      [ ! -e "$backup" ] || backup="$backup.$$"
-      cp -p "$config_file" "$backup"
-      echo "Backed up Codex config: $backup"
-    fi
-    install -m 0600 "$temporary" "$config_file"
-    echo "Updated Codex agent limits: $config_file"
-  fi
-
-  rm -f "$temporary"
-  trap - EXIT HUP INT TERM
-}
-
-mkdir -p "$agent_target" "$claude_agent_target"
-link_skills "$repo_dir/codex" "$codex_skills"
-link_skills "$repo_dir/claude" "$claude_skills"
-link_skills "$repo_dir/shared" "$codex_skills"
-link_skills "$repo_dir/shared" "$claude_skills"
-link_skills "$repo_dir/shared" "$copilot_skills"
-link_skills "$repo_dir/generic" "$generic_skills"
-
-for source in "$repo_dir"/agents/*.toml; do
-  [ -f "$source" ] || continue
-  link_file "$source" "$agent_target/$(basename -- "$source")"
 done
 
-for source in "$repo_dir"/claude-agents/*.md; do
-  [ -f "$source" ] || continue
-  link_file "$source" "$claude_agent_target/$(basename -- "$source")"
-done
+if [ -n "$agent_source" ]; then
+  mkdir -p "$agent_root/agents"
+  if [ "$agent" = codex ]; then
+    for retired_name in task-orchestrator.toml prompt-validator.toml agents-md-author.toml; do
+      remove_owned_link "$agent_root/agents/$retired_name"
+    done
+  fi
+  for source_path in "$agent_source"/*; do
+    [ -f "$source_path" ] || continue
+    link_path "$source_path" "$agent_root/agents/$(basename -- "$source_path")"
+  done
+fi
 
-remove_retired_agent "$agent_target/agents-md-author.toml"
-remove_retired_agent "$agent_target/prompt-validator.toml"
+mkdir -p "$(dirname -- "$instruction_file")"
+if [ -L "$instruction_file" ] || ! cmp -s "$scratch/instructions" "$instruction_file"; then
+  if [ -e "$instruction_file" ] || [ -L "$instruction_file" ]; then
+    backup_file=$(mktemp "$instruction_file.bak.XXXXXX")
+    rm "$backup_file"
+    cp -Pp "$instruction_file" "$backup_file"
+    rm "$instruction_file"
+    echo "Backed up instructions: $backup_file"
+  fi
+  install -m 0600 "$scratch/instructions" "$instruction_file"
+fi
 
-update_config
-
-echo "Installed skills and agents from: $repo_dir"
-echo "Restart Codex if updated configuration is not detected immediately."
+echo "Installed $agent with common + $profile instructions: $instruction_file"
+echo "Restart the agent or open a new chat to reload instructions."

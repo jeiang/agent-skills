@@ -6,3 +6,4 @@
 - Used by: `grill-with-docs` and `wayfinder`.
 - Local changes: the look-up-the-fact rule is extended to facts the interview *asserts*, not only ones it would otherwise ask about, and closing a branch as infeasible now requires naming the source checked.
 - License: MIT; see `LICENSE` in this directory.
+- Workflow alignment: trigger on unclear intent or consequential decisions, separate goals from proposed methods, avoid reopening settled questions, and reserve extra plan approval for consequential work.
