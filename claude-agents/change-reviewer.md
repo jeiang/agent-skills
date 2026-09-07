@@ -14,9 +14,10 @@ You run in exactly one of two modes, named in your prompt.
 
 ## INITIAL mode
 
-Review the approved plan, acceptance criteria, baseline-to-current diff,
-relevant surrounding behavior, and validation evidence — once. Return exactly
-one verdict: `PASS`, `CHANGES_REQUIRED`, or `BLOCKED`.
+Review the request, any approved plan, acceptance criteria,
+baseline-to-current diff, relevant surrounding behavior, and validation
+evidence once. A clear task does not need a separate plan artifact. Return
+exactly one verdict: `PASS`, `CHANGES_REQUIRED`, or `BLOCKED`.
 
 Report only demonstrable merge-blocking defects introduced by this change:
 incorrect behavior, a security exposure, a regression, a compatibility break,

@@ -4,6 +4,8 @@
 
 ### Added
 
+- Common working instructions with separate personal and work policies, a dated platform research report, and reproducible workflow scenarios.
+
 - A `devshell-preflight` skill for resolving a repository's command entry point (direnv, `devenv.nix`, `flake.nix`, `shell.nix`) before running its commands, including the `devenv.nix`-without-`flake.nix` case where `nix develop` is the wrong entry point, git worktrees that are not part of the flake, and the `python3.withPackages` wrapper needed to put a library on the interpreter's path.
 - An `activation-and-state.md` reference for `nixos-change-validation` covering what `nixos-rebuild test` cannot validate, impermanence and secret-decryption failures that appear only at activation, evaluation scope, and deploy-rs magic-rollback behavior.
 - An `immutability-and-rollout.md` reference for `kubernetes-delivery` covering in-place-immutable fields, verified image pull policy defaults, rollout and probe semantics, and the Helm rendering and upgrade behavior that local validation cannot prove.
@@ -28,6 +30,8 @@
 - `wayfinder` as a vendored skill from mattpocock/skills, with its `research` and `prototype` dependencies vendored alongside and the upstream issue-tracker docs bundled in its `trackers/` directory in place of the un-vendored `setup-matt-pocock-skills` skill.
 
 ### Changed
+
+- Install one selected agent at a time, with self-contained common plus environment instructions, explicit backup-and-replace migration for unmanaged instructions, and preserved unrelated configuration. Copilot Chat in VS Code receives only work-compatible skills and policy.
 
 - Aligned Ponytail, Grilling, domain validation skills, and optional agents with selective clarification, environment restrictions, useful testing, and dependency-ordered working commits.
 - Replaced exact prompt-wording validation with structural agent checks and cross-platform skill invocation consistency checks.
@@ -54,5 +58,7 @@
 - Added git to the devenv shell so the `check` command can run its final `git diff --check` step.
 
 ### Removed
+
+- The `start-task` and `start-feature` launchers, mandatory task coordinator, and automatic Codex concurrency configuration. Ordinary requests use the shared dynamic workflow.
 
 - The prompt-validator and AGENTS.md-author roles, repeated adversarial review loops, exact-prose validators, and stale workflow progress log.

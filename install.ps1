@@ -1,163 +1,144 @@
 #!/usr/bin/env pwsh
 #Requires -Version 7
-# PowerShell installer for platforms without a POSIX shell (mainly Windows).
-# ponytail: no copied-install migration or backup logic here — legacy copied
-# installs only ever existed on Unix, where install.sh handles them.
+param(
+  [Parameter(Mandatory, Position = 0)]
+  [ValidateSet('codex', 'claude', 'copilot')]
+  [string] $Agent,
+  [ValidateNotNullOrEmpty()]
+  [string] $InstallHome,
+  [switch] $ReplaceInstructions
+)
 $ErrorActionPreference = 'Stop'
-
+$Agent = $Agent.ToLowerInvariant()
 $repoDir = $PSScriptRoot
-$homeDir = if ($env:USERPROFILE) { $env:USERPROFILE } else { $env:HOME }
+$repoPrefix = $repoDir + [IO.Path]::DirectorySeparatorChar
+$customHome = $PSBoundParameters.ContainsKey('InstallHome')
+if (-not $customHome) {
+  $InstallHome = if ($env:USERPROFILE) { $env:USERPROFILE } else { $env:HOME }
+}
+$agentRoot = Join-Path $InstallHome ".$Agent"
+$profile = 'personal'
+$agentSource = $null
+switch ($Agent) {
+  'codex' {
+    if (-not $customHome -and $env:CODEX_HOME) { $agentRoot = $env:CODEX_HOME }
+    $instructionFile = Join-Path $agentRoot 'AGENTS.md'
+    $agentSource = Join-Path $repoDir 'agents'
+  }
+  'claude' {
+    $instructionFile = Join-Path $agentRoot 'CLAUDE.md'
+    $agentSource = Join-Path $repoDir 'claude-agents'
+  }
+  'copilot' {
+    $profile = 'work'
+    $instructionFile = Join-Path $agentRoot 'instructions/agent-skills.instructions.md'
+  }
+}
 
-$codexSkills = Join-Path $homeDir '.codex/skills'
-$claudeSkills = Join-Path $homeDir '.claude/skills'
-$copilotSkills = Join-Path $homeDir '.copilot/skills'
-$genericSkills = Join-Path $homeDir '.agents/skills'
-$agentTarget = Join-Path $homeDir '.codex/agents'
-$claudeAgentTarget = Join-Path $homeDir '.claude/agents'
-$configFile = Join-Path $homeDir '.codex/config.toml'
+$lf = [string][char]10
+$marker = '<!-- Managed by agent-skills; rerun the installer to update. -->'
+$rendered = $marker + $lf + $lf
+if ($Agent -eq 'copilot') {
+  $rendered = (@('---', 'applyTo: "**"', '---') -join $lf) + $lf + $rendered
+}
+$rendered += [IO.File]::ReadAllText((Join-Path $repoDir 'instructions/common.md')) + $lf
+$rendered += [IO.File]::ReadAllText((Join-Path $repoDir "instructions/$profile.md"))
+# Normalize source checkout line endings, including Windows Git checkouts.
+$rendered = $rendered.Replace(([string][char]13 + $lf), $lf)
 
-function New-Link {
+# Check instructions before changing installation links.
+$instructionItem = Get-Item -LiteralPath $instructionFile -Force -ErrorAction SilentlyContinue
+if ($instructionItem) {
+  if ($instructionItem.PSIsContainer -or -not (Test-Path -LiteralPath $instructionFile -PathType Leaf)) {
+    throw "Refusing non-file instructions: $instructionFile"
+  }
+  $managed = @(Get-Content -LiteralPath $instructionFile) -contains $marker
+  if (-not $ReplaceInstructions -and ($instructionItem.LinkType -or -not $managed)) {
+    throw "Refusing unmanaged instructions: $instructionFile. Use -ReplaceInstructions to back up and replace them."
+  }
+}
+
+function Remove-OwnedLink {
+  param([string] $Path)
+  $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+  if (-not $item) { return }
+  if ($item.LinkType -and $item.LinkTarget.StartsWith($repoPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+    Remove-Item -LiteralPath $Path
+    Write-Host "Removed retired link: $Path"
+    return
+  }
+  throw "Refusing unmanaged retired entry: $Path. Review and remove it manually."
+}
+
+function New-AgentLink {
   param([string] $Source, [string] $Target)
-
   $item = Get-Item -LiteralPath $Target -Force -ErrorAction SilentlyContinue
   if ($item) {
-    if (-not $item.LinkType) {
-      throw "Refusing conflicting destination: $Target"
-    }
-    if ($item.LinkTarget -eq $Source) { return }
-    if ($item.LinkTarget -like "$repoDir*") {
+    if ($item.LinkType) {
+      if ($item.LinkTarget -eq $Source) { return }
+      if (-not $item.LinkTarget.StartsWith($repoPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing conflicting symlink: $Target"
+      }
       Remove-Item -LiteralPath $Target
-      Write-Host "Removed link to moved skill: $Target -> $($item.LinkTarget)"
+    }
+    elseif (-not $item.PSIsContainer -and (Test-Path -LiteralPath $Source -PathType Leaf) -and
+      (Get-FileHash -LiteralPath $Target).Hash -eq (Get-FileHash -LiteralPath $Source).Hash) {
+      Remove-Item -LiteralPath $Target
     }
     else {
-      throw "Refusing conflicting symlink: $Target"
+      throw "Refusing conflicting destination: $Target"
     }
   }
-
   try {
     New-Item -ItemType SymbolicLink -Path $Target -Target $Source | Out-Null
   }
   catch {
-    throw "Failed to create symlink: $Target. On Windows, enable Developer Mode or run as Administrator. ($_)"
+    throw "Failed to create symlink: $Target. On Windows, enable Developer Mode or use an authorized administrator shell. ($_)"
   }
   Write-Host "Linked: $Target -> $Source"
 }
 
-function Install-Skills {
-  param([string] $SourceRoot, [string] $TargetRoot)
-
-  if (-not (Test-Path -LiteralPath $SourceRoot)) { return }
-  New-Item -ItemType Directory -Force -Path $TargetRoot | Out-Null
-  foreach ($source in Get-ChildItem -LiteralPath $SourceRoot -Directory) {
-    if (Test-Path -LiteralPath (Join-Path $source.FullName 'SKILL.md')) {
-      New-Link $source.FullName (Join-Path $TargetRoot $source.Name)
+$skillsRoot = Join-Path $agentRoot 'skills'
+New-Item -ItemType Directory -Force -Path $skillsRoot | Out-Null
+Remove-OwnedLink (Join-Path $skillsRoot 'start-task')
+Remove-OwnedLink (Join-Path $skillsRoot 'start-feature')
+$personalSkills = @(Get-Content -LiteralPath (Join-Path $repoDir 'instructions/personal-skills.txt'))
+if ($profile -eq 'work') {
+  foreach ($skill in $personalSkills) {
+    if ($skill) { Remove-OwnedLink (Join-Path $skillsRoot $skill) }
+  }
+}
+foreach ($root in 'shared', 'generic', $Agent) {
+  $sourceRoot = Join-Path $repoDir $root
+  if (-not (Test-Path -LiteralPath $sourceRoot -PathType Container)) { continue }
+  foreach ($source in Get-ChildItem -LiteralPath $sourceRoot -Directory) {
+    if (-not (Test-Path -LiteralPath (Join-Path $source.FullName 'SKILL.md'))) { continue }
+    if ($profile -eq 'work' -and $source.Name -in $personalSkills) { continue }
+    New-AgentLink $source.FullName (Join-Path $skillsRoot $source.Name)
+  }
+}
+if ($agentSource) {
+  $agentsRoot = Join-Path $agentRoot 'agents'
+  New-Item -ItemType Directory -Force -Path $agentsRoot | Out-Null
+  if ($Agent -eq 'codex') {
+    foreach ($name in 'task-orchestrator.toml', 'prompt-validator.toml', 'agents-md-author.toml') {
+      Remove-OwnedLink (Join-Path $agentsRoot $name)
     }
+  }
+  foreach ($source in Get-ChildItem -LiteralPath $agentSource -File) {
+    New-AgentLink $source.FullName (Join-Path $agentsRoot $source.Name)
   }
 }
 
-# Port of install.sh render_config: ensure [agents] max_threads >= 4 and
-# max_depth >= 2 while preserving every other line.
-function Get-RenderedConfig {
-  param([string[]] $Lines)
-
-  $out = [System.Collections.Generic.List[string]]::new()
-  $seenAgents = $false
-  $inAgents = $false
-  $threads = $false
-  $depth = $false
-
-  foreach ($line in $Lines) {
-    if ($line -match '^\[agents\]\s*(#.*)?$') {
-      if ($seenAgents) { throw 'Duplicate [agents] table is unsupported' }
-      $seenAgents = $true
-      $inAgents = $true
-      $out.Add($line)
-      continue
-    }
-    if ($line -match '^\s*(\[\[.*\]\]|\[[^\]]+\])\s*(#.*)?$') {
-      if ($inAgents) {
-        if (-not $threads) { $out.Add('max_threads = 4') }
-        if (-not $depth) { $out.Add('max_depth = 2') }
-      }
-      $inAgents = $false
-      $out.Add($line)
-      continue
-    }
-    if ($inAgents -and $line -match '^\s*max_threads\s*=') {
-      if ($threads -or $line -notmatch '^\s*max_threads\s*=\s*(\d+)\s*(#.*)?$') {
-        throw 'Unsupported agents.max_threads definition'
-      }
-      $threads = $true
-      if ([int]$Matches[1] -lt 4) { $line = [regex]::new('\d+').Replace($line, '4', 1) }
-      $out.Add($line)
-      continue
-    }
-    if ($inAgents -and $line -match '^\s*max_depth\s*=') {
-      if ($depth -or $line -notmatch '^\s*max_depth\s*=\s*(\d+)\s*(#.*)?$') {
-        throw 'Unsupported agents.max_depth definition'
-      }
-      $depth = $true
-      if ([int]$Matches[1] -lt 2) { $line = [regex]::new('\d+').Replace($line, '2', 1) }
-      $out.Add($line)
-      continue
-    }
-    $out.Add($line)
+New-Item -ItemType Directory -Force -Path (Split-Path -Parent $instructionFile) | Out-Null
+if ($instructionItem.LinkType -or -not (Test-Path -LiteralPath $instructionFile) -or [IO.File]::ReadAllText($instructionFile) -cne $rendered) {
+  if ($instructionItem) {
+    $backup = "$instructionFile.bak.$([guid]::NewGuid().ToString('N'))"
+    Copy-Item -LiteralPath $instructionFile -Destination $backup
+    Remove-Item -LiteralPath $instructionFile
+    Write-Host "Backed up instructions: $backup"
   }
-
-  if ($inAgents) {
-    if (-not $threads) { $out.Add('max_threads = 4') }
-    if (-not $depth) { $out.Add('max_depth = 2') }
-  }
-  if (-not $seenAgents) {
-    if ($out.Count -gt 0) { $out.Add('') }
-    $out.Add('[agents]')
-    $out.Add('max_threads = 4')
-    $out.Add('max_depth = 2')
-  }
-  return $out
+  [IO.File]::WriteAllText($instructionFile, $rendered, [Text.UTF8Encoding]::new($false))
 }
-
-function Update-CodexConfig {
-  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $configFile) | Out-Null
-
-  $existing = @()
-  if (Test-Path -LiteralPath $configFile) {
-    $item = Get-Item -LiteralPath $configFile -Force
-    if ($item.PSIsContainer -or $item.LinkType) {
-      throw "Refusing non-regular Codex config: $configFile"
-    }
-    $existing = @(Get-Content -LiteralPath $configFile)
-  }
-
-  $rendered = @(Get-RenderedConfig $existing)
-  if (($rendered -join "`n") -eq ($existing -join "`n")) { return }
-
-  if (Test-Path -LiteralPath $configFile) {
-    $backup = "$configFile.bak.$(Get-Date -Format yyyyMMddHHmmss)"
-    if (Test-Path -LiteralPath $backup) { $backup = "$backup.$PID" }
-    Copy-Item -LiteralPath $configFile -Destination $backup
-    Write-Host "Backed up Codex config: $backup"
-  }
-  Set-Content -LiteralPath $configFile -Value ($rendered -join "`n")
-  Write-Host "Updated Codex agent limits: $configFile"
-}
-
-New-Item -ItemType Directory -Force -Path $agentTarget, $claudeAgentTarget | Out-Null
-Install-Skills (Join-Path $repoDir 'codex') $codexSkills
-Install-Skills (Join-Path $repoDir 'claude') $claudeSkills
-Install-Skills (Join-Path $repoDir 'shared') $codexSkills
-Install-Skills (Join-Path $repoDir 'shared') $claudeSkills
-Install-Skills (Join-Path $repoDir 'shared') $copilotSkills
-Install-Skills (Join-Path $repoDir 'generic') $genericSkills
-
-foreach ($source in Get-ChildItem -Path (Join-Path $repoDir 'agents') -Filter '*.toml' -File) {
-  New-Link $source.FullName (Join-Path $agentTarget $source.Name)
-}
-foreach ($source in Get-ChildItem -Path (Join-Path $repoDir 'claude-agents') -Filter '*.md' -File) {
-  New-Link $source.FullName (Join-Path $claudeAgentTarget $source.Name)
-}
-
-Update-CodexConfig
-
-Write-Host "Installed skills and agents from: $repoDir"
-Write-Host 'Restart Codex if updated configuration is not detected immediately.'
+Write-Host "Installed $Agent with common + $profile instructions: $instructionFile"
+Write-Host 'Restart the agent or open a new chat to reload instructions.'

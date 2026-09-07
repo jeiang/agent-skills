@@ -4,10 +4,10 @@ set -eu
 repo_dir=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$repo_dir"
 
-set -- codex/* shared/*
-for skill_dir in claude/*/ generic/*/; do
-  [ -d "$skill_dir" ] || continue
-  set -- "$@" "${skill_dir%/}"
+set --
+for skill_dir in codex/* shared/* claude/* generic/*; do
+  [ -f "$skill_dir/SKILL.md" ] || continue
+  set -- "$@" "$skill_dir"
 done
 python scripts/validate-skills.py "$@"
 python scripts/test-validate-skills.py

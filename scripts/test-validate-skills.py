@@ -18,6 +18,8 @@ class SkillValidationTests(unittest.TestCase):
             (True, False, True),
             (False, False, False),
             (True, True, False),
+            (False, None, True),
+            (True, None, False),
         ):
             with self.subTest(manual=manual, implicit=implicit):
                 with tempfile.TemporaryDirectory() as root:
@@ -28,10 +30,11 @@ class SkillValidationTests(unittest.TestCase):
                         f"disable-model-invocation: {str(manual).lower()}\n"
                         "---\nDo the example task.\n"
                     )
-                    (skill / "agents/openai.yaml").write_text(
-                        "policy:\n"
-                        f"  allow_implicit_invocation: {str(implicit).lower()}\n"
-                    )
+                    if implicit is not None:
+                        (skill / "agents/openai.yaml").write_text(
+                            "policy:\n"
+                            f"  allow_implicit_invocation: {str(implicit).lower()}\n"
+                        )
                     self.assertEqual(not validate(skill), valid)
 
     def test_description_limit(self):

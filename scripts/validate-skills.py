@@ -123,6 +123,10 @@ def validate_skill(skill_dir: Path) -> list[str]:
                     raise ValueError("automatic invocation differs between Codex and Claude/Copilot")
             except (OSError, UnicodeError, yaml.YAMLError, ValueError) as error:
                 errors.append(f"{metadata_file}: {error}")
+        elif disable_model_invocation is True:
+            errors.append(
+                f"{skill_file}: explicit-only invocation needs agents/openai.yaml for Codex"
+            )
 
     if not body.strip():
         errors.append(f"{skill_file}: body must be nonempty")

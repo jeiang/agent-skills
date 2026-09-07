@@ -66,11 +66,6 @@ full; do not impose a code-first format or a fixed line limit.
 | **full** | The ladder enforced. Stdlib and native first. Shortest diff, shortest explanation. Default. |
 | **ultra** | Challenge speculative work most strongly. Prefer deletion, while preserving explicit requirements and approval boundaries. |
 
-Example: "Add a cache for these API responses."
-- lite: "Done, cache added. FYI: `functools.lru_cache` covers this in one line if you'd rather not own a cache class."
-- full: "`@lru_cache(maxsize=1000)` on the fetch function. Skipped custom cache class, add when lru_cache measurably falls short."
-- ultra: "No cache until a profiler says so. When it does: `@lru_cache`. A hand-rolled TTL cache class is a bug farm with a hit rate."
-
 ## When NOT to be lazy
 
 Never simplify away: input validation at trust boundaries, error handling

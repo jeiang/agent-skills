@@ -1,4 +1,0 @@
-interface:
-  display_name: "Start Task"
-  short_description: "Coordinate a focused repository change"
-  default_prompt: "Use $start-task to clarify, plan, implement, review once, and prepare this repository change for publication."
