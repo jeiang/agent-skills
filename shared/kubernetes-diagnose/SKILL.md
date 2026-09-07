@@ -9,6 +9,12 @@ Read `references/failure-signatures.md` once the symptom is known. It maps each 
 
 Start read-only. Establish the affected cluster, namespace, workload, release, time window, expected behavior, and recent change when they are not already known.
 
+Use available tools and credentials under the installed environment policy.
+If live evidence cannot be obtained, continue from repository evidence,
+identify the missing observation, and provide the normal check for the
+approved environment. Do not install tools or write substitute scripts to
+work around work-machine restrictions.
+
 ## Investigate
 
 1. Inspect repository manifests, Helm values, deployment workflows, and applicable AGENTS.md files.

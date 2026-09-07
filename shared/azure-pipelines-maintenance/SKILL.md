@@ -20,6 +20,6 @@ Inspect the entry pipeline, template graph, parameter and variable flow, service
 
 ## Validate
 
-Run repository-provided YAML, template, shell, PowerShell, container, or application checks. Trace each changed parameter, output variable, dependency, artifact, and condition from producer to consumer. Where local tooling cannot compile Azure templates, state that limitation and provide the exact pipeline run or preview needed for validation.
+Run available repository-provided YAML, template, shell, PowerShell, container, or application checks. Trace each changed parameter, output variable, dependency, artifact, and condition from producer to consumer. Follow the installed environment policy: on the work machine, do not install tools or create substitute validators. Where local tooling cannot compile Azure templates, continue preparing the change, state that limitation, and provide the exact testing, pipeline run, or preview needed for validation. Do not report that future testing as completed.
 
 Do not queue a pipeline or deploy automatically. Provide the exact pipeline, parameters, branch or commit, expected stages, approval points, verification checks, and rollback or redeploy path.

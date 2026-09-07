@@ -29,6 +29,9 @@
 
 ### Changed
 
+- Aligned Ponytail, Grilling, domain validation skills, and optional agents with selective clarification, environment restrictions, useful testing, and dependency-ordered working commits.
+- Replaced exact prompt-wording validation with structural agent checks and cross-platform skill invocation consistency checks.
+
 - `nixos-change-validation` now triggers on repo-wide mechanical `.nix` edits such as formatting, comment, or refactor sweeps; requires resolving the repository's development shell before running its commands; requires proving a behavior-preserving change by comparing derivation paths rather than asserting it; and warns that piping a long check through `tail` discards the error that made it fail.
 - `grilling` now extends its look-up-the-fact rule to facts the interview asserts, not only ones it would otherwise ask about, and requires naming the source checked before closing a branch as impossible or infeasible.
 - `wayfinder`'s ticket-resolution step now says to read a map's research fact sheets with the harness's file-reading tool rather than a shell `cat`, and to change tools rather than re-issue a read that came back truncated.

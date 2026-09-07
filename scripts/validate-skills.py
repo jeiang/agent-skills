@@ -82,9 +82,9 @@ def validate_skill(skill_dir: Path) -> list[str]:
         if not isinstance(name, str) or not name:
             errors.append(f"{skill_file}: name must be a nonempty string")
         else:
-            if len(name) >= 64 or not NAME_PATTERN.fullmatch(name):
+            if len(name) > 64 or not NAME_PATTERN.fullmatch(name):
                 errors.append(
-                    f"{skill_file}: name must be fewer than 64 lowercase letters, digits, and single hyphens"
+                    f"{skill_file}: name must be at most 64 lowercase letters, digits, and single hyphens"
                 )
             if name != skill_dir.name:
                 errors.append(
@@ -94,6 +94,8 @@ def validate_skill(skill_dir: Path) -> list[str]:
         description = frontmatter.get("description")
         if not isinstance(description, str) or not description.strip():
             errors.append(f"{skill_file}: description must be a nonempty string")
+        elif len(description) > 1024:
+            errors.append(f"{skill_file}: description exceeds 1024 characters")
 
         disable_model_invocation = frontmatter.get("disable-model-invocation")
         if disable_model_invocation is not None and not isinstance(
@@ -102,6 +104,25 @@ def validate_skill(skill_dir: Path) -> list[str]:
             errors.append(
                 f"{skill_file}: disable-model-invocation must be a boolean when present"
             )
+
+        metadata_file = skill_dir / "agents" / "openai.yaml"
+        if metadata_file.exists():
+            try:
+                metadata = yaml.load(
+                    metadata_file.read_text(encoding="utf-8"), Loader=UniqueKeyLoader
+                )
+                if not isinstance(metadata, dict):
+                    raise ValueError("metadata must be a mapping")
+                policy = metadata.get("policy", {})
+                if not isinstance(policy, dict):
+                    raise ValueError("policy must be a mapping")
+                implicit = policy.get("allow_implicit_invocation", True)
+                if not isinstance(implicit, bool):
+                    raise ValueError("allow_implicit_invocation must be a boolean")
+                if implicit != (not frontmatter.get("disable-model-invocation", False)):
+                    raise ValueError("automatic invocation differs between Codex and Claude/Copilot")
+            except (OSError, UnicodeError, yaml.YAMLError, ValueError) as error:
+                errors.append(f"{metadata_file}: {error}")
 
     if not body.strip():
         errors.append(f"{skill_file}: body must be nonempty")

@@ -15,7 +15,7 @@ Inspect applicable AGENTS.md files, repository conventions, chart structure, dep
 - Prefer native Helm and Kubernetes mechanisms over custom wrappers.
 - Preserve immutable selectors, stateful workload strategy, storage ownership, security context, and upgrade compatibility unless the request explicitly changes them.
 - Update deployment workflows and operator documentation only when required by the requested behavior.
-- Do not add tests, helper scripts, abstractions, or comments unless the approved task requires them or a non-obvious safety constraint needs explanation.
+- Add tests only when they give useful evidence for the changed behavior. Use existing test conventions and tools. Avoid new wrappers, abstractions, and comments that do not explain a relevant constraint.
 
 ## Validate
 
@@ -26,7 +26,7 @@ Use the repository's commands first. When applicable, run focused checks such as
 - schema, YAML, Kustomize, policy, or container build checks already provided by the repository
 - `git diff --check`
 
-Do not claim cluster validation from local rendering. If required tooling or credentials are unavailable, report the exact limitation.
+Follow the installed environment policy. Do not install missing tools or create substitute validators on the work machine. Continue preparing the change with available tests and inspection, and identify the normal testing or pipeline step needed for any remaining check. Do not claim cluster validation from local rendering or claim that future testing has run. Report missing tooling or credentials precisely.
 
 ## Hand off deployment
 

@@ -1,9 +1,11 @@
 ---
 name: grilling
-description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
+description: Resolve unclear intent or decisions that materially affect scope, design, compatibility, or risk through one question at a time. Use when a goal is confused with a proposed method, consequential choices remain open, or the user asks to grill or stress-test an idea. Do not interview clear, reversible tasks or reopen settled decisions.
 ---
 
-Interview me relentlessly about every aspect of this until we reach a shared understanding. Walk down each branch of the decision tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
+Resolve the decisions needed for a shared understanding. Walk the relevant branches of the decision tree in dependency order. Match the interview depth to uncertainty and consequences; do not invent decisions to extend it. For each decision question, provide your recommended answer and the material trade-off.
+
+Separate the desired outcome from a proposed tool or method. If the user says "I want X using Y" and the intent is unclear, establish what success means and whether Y is required. Challenge Y when it does not serve X, while preserving an explicitly required method.
 
 Ask the questions one at a time, waiting for feedback on each question before continuing. Asking multiple questions at once is bewildering.
 
@@ -13,4 +15,6 @@ Closing a branch as impossible or infeasible is itself an assertion. Name the fi
 
 The *decisions*, though, are mine — put each one to me and wait for my answer.
 
-Do not act on it until I confirm we have reached a shared understanding.
+Summarize the resolved intent and material constraints, then wait for confirmation of shared understanding before implementing the decision. Keep independent, authorized investigation moving while an answer is pending. Confirmation releases clear, reversible implementation; use a separate approved plan only when the consequences warrant it. Reopen a decision only when new evidence materially changes it.
+
+An interview does not require documentation artifacts. Use domain-modeling when the task calls for maintaining domain terminology or architectural decisions, or when the user requests it.

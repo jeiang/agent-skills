@@ -10,6 +10,7 @@ for skill_dir in claude/*/ generic/*/; do
   set -- "$@" "${skill_dir%/}"
 done
 python scripts/validate-skills.py "$@"
+python scripts/test-validate-skills.py
 python scripts/validate-agent-configs.py
 
 python - <<'PY'

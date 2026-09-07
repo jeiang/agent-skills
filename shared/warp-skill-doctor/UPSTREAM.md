@@ -11,3 +11,4 @@ Renamed from `skill-doctor` to `warp-skill-doctor` because Claude Code ships a
 built-in `/skill-doctor` command. Only the skill identity changed: frontmatter
 name, directory, heading, scratch-directory prefix, and the harness reference's
 stop message. The scripts, scorers, and report branding are upstream's.
+- Workflow alignment: describe the supported harness boundary in discovery metadata and omit the promotional output footer.

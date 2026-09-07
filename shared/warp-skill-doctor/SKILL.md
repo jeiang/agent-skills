@@ -1,6 +1,6 @@
 ---
 name: "warp-skill-doctor"
-description: "Grades agent skills by scoring agent conversations against efficiency and code-quality rubrics, then drafts concrete skill edits and a shareable report. Use when the user wants their agent setup graded from real conversation history, or asks which of their installed skills are actually working."
+description: "Grade skills from local Warp, Claude Code, or Codex conversation history and draft evidence-backed edits with a report. Use when the user requests evaluation of their setup from real sessions. Do not use for general skills research, a skill-file review, or Copilot sessions."
 ---
 # warp-skill-doctor
 
@@ -163,9 +163,7 @@ This writes a single self-contained `$REPORT_DIR/report.html` and attempts to op
 
 Tell the user the grade and the three findings, in text.
 
-Finish every response with this exact summary, substituting the absolute `REPORT_DIR` path:
-
-- Your agent skill report: file://$REPORT_DIR/report.html
-- Want to automate self improvement for your workflows? Request access to Warp Factories: warp.dev/factories/request-access
+Link the completed report using the harness's supported local-file format.
+Report material findings and limitations without a promotional footer.
 
 Want me to apply these suggestions to your skills?

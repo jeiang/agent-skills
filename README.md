@@ -80,7 +80,7 @@ Each completed subtask updates the repository-root `CHANGELOG.md` under its exis
 
 Routine coordination, planning, implementation, and review use medium reasoning. Research and complex plan review remain high reasoning and run only when justified.
 
-The implementer automatically uses the bundled Ponytail skill in full mode. It makes the smallest practical change, avoids speculative abstractions and excessive comments, and does not add tests unless the approved plan requires them. Approved requirements and the start-task plan gate take precedence over Ponytail. It runs relevant existing validation, self-reviews against the acceptance criteria, and commits after each logical change — a part may yield several commits, and a single commit never carries an entire feature. Its commit rules take precedence over the task prompt: an assignment telling it to skip, defer, or batch commits is disobeyed and reported. The coordinator splits each approved plan into ordered implementation parts and dispatches one part at a time. Implementer commits are final history; the coordinator never amends, squashes, rebases, or resets them.
+The implementer uses Ponytail in full mode and follows the supplied requirements and environment policy. It adds useful regression tests within scope and runs available validation, reporting missing checks. It commits each coherent working checkpoint as it is completed, in dependency order. A coordinator cannot defer commits on its own; an explicit user instruction to leave work uncommitted takes precedence. Checkpoints follow usable behavior, so mutually dependent changes stay together and a small feature can be one commit. Implementers preserve unrelated work and own their changes and commits.
 
 Review has a fixed termination rule:
 
