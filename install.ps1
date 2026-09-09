@@ -62,6 +62,11 @@ function Remove-OwnedLink {
   param([string] $Path)
   $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
   if (-not $item) { return }
+  if ($item.LinkType -eq 'HardLink') {
+    Remove-Item -LiteralPath $Path
+    Write-Host "Removed retired link: $Path"
+    return
+  }
   if ($item.LinkType -and $item.LinkTarget.StartsWith($repoPrefix, [StringComparison]::OrdinalIgnoreCase)) {
     Remove-Item -LiteralPath $Path
     Write-Host "Removed retired link: $Path"
@@ -72,9 +77,14 @@ function Remove-OwnedLink {
 
 function New-AgentLink {
   param([string] $Source, [string] $Target)
+  $isContainer = Test-Path -LiteralPath $Source -PathType Container
   $item = Get-Item -LiteralPath $Target -Force -ErrorAction SilentlyContinue
   if ($item) {
-    if ($item.LinkType) {
+    if ($item.LinkType -eq 'HardLink') {
+      if ((Get-FileHash -LiteralPath $Target).Hash -eq (Get-FileHash -LiteralPath $Source).Hash) { return }
+      Remove-Item -LiteralPath $Target
+    }
+    elseif ($item.LinkType) {
       if ($item.LinkTarget -eq $Source) { return }
       if (-not $item.LinkTarget.StartsWith($repoPrefix, [StringComparison]::OrdinalIgnoreCase)) {
         throw "Refusing conflicting symlink: $Target"
@@ -90,10 +100,24 @@ function New-AgentLink {
     }
   }
   try {
-    New-Item -ItemType SymbolicLink -Path $Target -Target $Source | Out-Null
+    New-Item -ItemType SymbolicLink -Path $Target -Target $Source -ErrorAction Stop | Out-Null
+    Write-Host "Linked: $Target -> $Source"
+    return
   }
   catch {
-    throw "Failed to create symlink: $Target. On Windows, enable Developer Mode or use an authorized administrator shell. ($_)"
+    # Unprivileged Windows accounts can't create symlinks without Developer Mode.
+    # Junctions (dirs) and hard links (files) need no privilege and work on the same volume.
+  }
+  try {
+    if ($isContainer) {
+      New-Item -ItemType Junction -Path $Target -Target $Source -ErrorAction Stop | Out-Null
+    }
+    else {
+      New-Item -ItemType HardLink -Path $Target -Target $Source -ErrorAction Stop | Out-Null
+    }
+  }
+  catch {
+    throw "Failed to link: $Target. On Windows, enable Developer Mode, use an authorized administrator shell, or ensure $InstallHome is on the same volume as $repoDir (required for the junction/hard-link fallback). ($_)"
   }
   Write-Host "Linked: $Target -> $Source"
 }
