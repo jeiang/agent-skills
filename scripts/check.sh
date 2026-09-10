@@ -12,6 +12,7 @@ done
 python scripts/validate-skills.py "$@"
 python scripts/test-validate-skills.py
 python scripts/validate-agent-configs.py
+python scripts/render.py --check
 
 python - <<'PY'
 from pathlib import Path

@@ -17,16 +17,9 @@ already given for the same scope instead of asking again.
 
 ## Choose the work needed
 
-{% if profile == "work" %}
-For ordinary coding, design, debugging, and review requests, load `ponytail`
-in full mode. Ponytail is always active in this environment. Do not turn it
-off or lower its level when asked; `ultra` may still be selected. Its purpose
-is the smallest correct solution after understanding the problem.
-{% else %}
 For ordinary coding, design, debugging, and review requests, load `ponytail`
 in full mode unless the user selected another level or turned it off. Its
 purpose is the smallest correct solution after understanding the problem.
-{% endif %}
 
 Load `grilling` when intent is unclear or an unresolved decision materially
 affects scope, design, compatibility, or risk. Ask one decision at a time,
@@ -119,3 +112,21 @@ Avoid: actually, certainly, absolutely, of course, it's worth noting, that
 being said, needless to say, to be clear, at the end of the day, dive into,
 delve, unlock, leverage, seamless, game-changer, robust, comprehensive,
 cutting-edge, transformative, innovative, in today's fast-paced world.
+
+# Generic environment
+
+No operating system, language stack, or tool availability is assumed. Inspect
+the repository and the shell before relying on a tool or a convention.
+
+When the repository declares a development environment, such as a Nix shell,
+a container definition, or a version manager file, resolve that environment
+before running its commands. Use the tools it provides.
+
+Before fetching tools outside the declared environment or creating an ad hoc
+substitute for a missing validator, obtain the user's approval unless that use
+is already authorized in this task. Prefer temporary use to permanent
+installation. Explain what the tool or substitute will establish and what it
+cannot verify.
+
+Checks must exercise the changed files. If the environment cannot run them,
+report the limitation and the exact command or test still needed.

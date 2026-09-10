@@ -4,7 +4,10 @@
   packages = with pkgs; [
     git
     jq
-    (python3.withPackages (pythonPackages: [ pythonPackages.pyyaml ]))
+    (python3.withPackages (pythonPackages: [
+      pythonPackages.jinja2
+      pythonPackages.pyyaml
+    ]))
     shellcheck
     shfmt
     taplo

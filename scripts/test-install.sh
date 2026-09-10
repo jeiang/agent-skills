@@ -11,16 +11,19 @@ assert_link() {
 }
 
 assert_payload() {
-  {
-    cat "$repo_dir/instructions/common.md"
-    printf '\n'
-    cat "$repo_dir/instructions/$2.md"
-  } >"$test_root/expected"
   tail -n "+$3" "$1" >"$test_root/payload"
-  cmp "$test_root/expected" "$test_root/payload"
+  cmp "$repo_dir/dist/instructions/$2.md" "$test_root/payload"
+}
+
+excluded() {
+  grep -Fxq "$2" "$repo_dir/profiles/$1/excluded-skills.txt"
 }
 
 for agent in codex claude copilot; do
+  case $agent in
+    copilot) profile=work ;;
+    *) profile=personal ;;
+  esac
   test_home="$test_root/$agent"
   agent_root="$test_home/.$agent"
   mkdir -p "$agent_root/skills"
@@ -35,13 +38,13 @@ for agent in codex claude copilot; do
   elif [ "$agent" = copilot ]; then
     while IFS= read -r skill; do
       ln -s "$repo_dir/shared/$skill" "$agent_root/skills/$skill"
-    done <"$repo_dir/instructions/personal-skills.txt"
+    done <"$repo_dir/profiles/work/excluded-skills.txt"
   fi
 
-  "$repo_dir/install.sh" "$agent" --home "$test_home" >/dev/null
+  "$repo_dir/install.sh" "$agent" "$profile" --home "$test_home" >/dev/null
   for skill_path in "$repo_dir/shared"/*; do
     skill=$(basename "$skill_path")
-    if [ "$agent" = copilot ] && grep -Fxq "$skill" "$repo_dir/instructions/personal-skills.txt"; then
+    if excluded "$profile" "$skill"; then
       [ ! -e "$agent_root/skills/$skill" ] && [ ! -L "$agent_root/skills/$skill" ]
     else
       assert_link "$agent_root/skills/$skill" "$skill_path"
@@ -78,7 +81,7 @@ for agent in codex claude copilot; do
   esac
 
   cp "$instruction_file" "$test_root/first-install"
-  "$repo_dir/install.sh" "$agent" --home "$test_home" >/dev/null
+  "$repo_dir/install.sh" "$agent" "$profile" --home "$test_home" >/dev/null
   cmp "$instruction_file" "$test_root/first-install"
   for backup in "$instruction_file".bak.*; do
     [ ! -e "$backup" ]
@@ -87,16 +90,38 @@ done
 
 # Unknown or missing targets must not default to installing every agent.
 if "$repo_dir/install.sh" >/dev/null 2>&1; then exit 1; fi
-if "$repo_dir/install.sh" other --home "$test_root/invalid" >/dev/null 2>&1; then exit 1; fi
+if "$repo_dir/install.sh" claude --home "$test_root/invalid" >/dev/null 2>&1; then exit 1; fi
+if "$repo_dir/install.sh" other personal --home "$test_root/invalid" >/dev/null 2>&1; then exit 1; fi
+if "$repo_dir/install.sh" claude other --home "$test_root/invalid" >/dev/null 2>&1; then exit 1; fi
+if "$repo_dir/install.sh" claude ../shared --home "$test_root/invalid" >/dev/null 2>&1; then exit 1; fi
 [ ! -e "$test_root/invalid" ]
+
+# Any harness accepts any profile; switching profiles retires excluded skills.
+test_home="$test_root/generic"
+"$repo_dir/install.sh" claude personal --home "$test_home" >/dev/null
+assert_link "$test_home/.claude/skills/devshell-preflight" "$repo_dir/shared/devshell-preflight"
+"$repo_dir/install.sh" claude generic --home "$test_home" >/dev/null
+assert_payload "$test_home/.claude/CLAUDE.md" generic 3
+for skill_path in "$repo_dir/shared"/*; do
+  skill=$(basename "$skill_path")
+  if excluded generic "$skill"; then
+    [ ! -e "$test_home/.claude/skills/$skill" ] && [ ! -L "$test_home/.claude/skills/$skill" ]
+  else
+    assert_link "$test_home/.claude/skills/$skill" "$skill_path"
+  fi
+done
+assert_link "$test_home/.claude/skills/warp-skill-doctor" "$repo_dir/shared/warp-skill-doctor"
+"$repo_dir/install.sh" copilot generic --home "$test_home" >/dev/null
+assert_payload "$test_home/.copilot/instructions/agent-skills.instructions.md" generic 6
+assert_link "$test_home/.copilot/skills/warp-skill-doctor" "$repo_dir/shared/warp-skill-doctor"
 
 # Existing user instructions require an explicit replacement and a backup.
 test_home="$test_root/user-instructions"
 mkdir -p "$test_home/.claude"
 printf '%s\n' 'User-owned instructions.' >"$test_home/.claude/CLAUDE.md"
-if "$repo_dir/install.sh" claude --home "$test_home" >/dev/null 2>&1; then exit 1; fi
+if "$repo_dir/install.sh" claude personal --home "$test_home" >/dev/null 2>&1; then exit 1; fi
 [ ! -e "$test_home/.claude/skills" ]
-"$repo_dir/install.sh" claude --home "$test_home" --replace-instructions >/dev/null
+"$repo_dir/install.sh" claude personal --home "$test_home" --replace-instructions >/dev/null
 set -- "$test_home/.claude/CLAUDE.md".bak.*
 [ "$#" -eq 1 ]
 printf '%s\n' 'User-owned instructions.' >"$test_root/original-instructions"
@@ -106,7 +131,7 @@ assert_payload "$test_home/.claude/CLAUDE.md" personal 3
 # Updates to a managed instruction file are backed up, including local edits.
 printf '%s\n' 'Local edit.' >>"$test_home/.claude/CLAUDE.md"
 cp "$test_home/.claude/CLAUDE.md" "$test_root/locally-edited"
-"$repo_dir/install.sh" claude --home "$test_home" >/dev/null
+"$repo_dir/install.sh" claude personal --home "$test_home" >/dev/null
 matched=false
 for backup in "$test_home/.claude/CLAUDE.md".bak.*; do
   if cmp -s "$backup" "$test_root/locally-edited"; then matched=true; fi
@@ -117,8 +142,8 @@ done
 test_home="$test_root/linked-instructions"
 mkdir -p "$test_home/.claude"
 ln -s "$test_root/original-instructions" "$test_home/.claude/CLAUDE.md"
-if "$repo_dir/install.sh" claude --home "$test_home" >/dev/null 2>&1; then exit 1; fi
-"$repo_dir/install.sh" claude --home "$test_home" --replace-instructions >/dev/null
+if "$repo_dir/install.sh" claude personal --home "$test_home" >/dev/null 2>&1; then exit 1; fi
+"$repo_dir/install.sh" claude personal --home "$test_home" --replace-instructions >/dev/null
 [ ! -L "$test_home/.claude/CLAUDE.md" ]
 set -- "$test_home/.claude/CLAUDE.md".bak.*
 [ "$#" -eq 1 ]
@@ -129,7 +154,7 @@ assert_payload "$test_home/.claude/CLAUDE.md" personal 3
 test_home="$test_root/copied"
 mkdir -p "$test_home/.codex/skills"
 cp -R "$repo_dir/shared/ponytail" "$test_home/.codex/skills/ponytail"
-"$repo_dir/install.sh" codex --home "$test_home" >/dev/null
+"$repo_dir/install.sh" codex personal --home "$test_home" >/dev/null
 assert_link "$test_home/.codex/skills/ponytail" "$repo_dir/shared/ponytail"
 set -- "$test_home/.codex/backups"/skill.*/original
 [ -f "$1/SKILL.md" ]
@@ -137,14 +162,14 @@ set -- "$test_home/.codex/backups"/skill.*/original
 test_home="$test_root/conflict"
 mkdir -p "$test_home/.codex/skills/ponytail"
 printf '%s\n' 'User-owned skill.' >"$test_home/.codex/skills/ponytail/SKILL.md"
-if "$repo_dir/install.sh" codex --home "$test_home" >/dev/null 2>&1; then exit 1; fi
+if "$repo_dir/install.sh" codex personal --home "$test_home" >/dev/null 2>&1; then exit 1; fi
 [ -f "$test_home/.codex/skills/ponytail/SKILL.md" ]
 
 # Retirement must not delete external links, even when a path shares a prefix.
 test_home="$test_root/foreign"
 mkdir -p "$test_home/.copilot/skills"
 ln -s "$repo_dir-foreign/devshell-preflight" "$test_home/.copilot/skills/devshell-preflight"
-if "$repo_dir/install.sh" copilot --home "$test_home" >/dev/null 2>&1; then exit 1; fi
+if "$repo_dir/install.sh" copilot work --home "$test_home" >/dev/null 2>&1; then exit 1; fi
 assert_link "$test_home/.copilot/skills/devshell-preflight" "$repo_dir-foreign/devshell-preflight"
 
 echo "Installer isolation, migration, and repeat-run tests passed."
