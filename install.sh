@@ -43,17 +43,14 @@ case $agent in
       agent_root=$CODEX_HOME
     fi
     instruction_file="$agent_root/AGENTS.md"
-    agent_source="$repo_dir/agents"
     ;;
   claude)
     agent_root="$home_dir/.claude"
     instruction_file="$agent_root/CLAUDE.md"
-    agent_source="$repo_dir/claude-agents"
     ;;
   copilot)
     agent_root="$home_dir/.copilot"
     instruction_file="$agent_root/instructions/agent-skills.instructions.md"
-    agent_source=
     ;;
   *) usage ;;
 esac
@@ -150,18 +147,19 @@ for source_root in "$repo_dir/shared" "$repo_dir/generic" "$repo_dir/$agent"; do
   done
 done
 
-if [ -n "$agent_source" ]; then
-  mkdir -p "$agent_root/agents"
-  if [ "$agent" = codex ]; then
-    for retired_name in task-orchestrator.toml prompt-validator.toml agents-md-author.toml; do
-      remove_owned_link "$agent_root/agents/$retired_name"
-    done
-  fi
+mkdir -p "$agent_root/agents"
+if [ "$agent" = codex ]; then
+  for retired_name in task-orchestrator.toml prompt-validator.toml agents-md-author.toml; do
+    remove_owned_link "$agent_root/agents/$retired_name"
+  done
+fi
+for agent_source in "$repo_dir/agents/$agent" "$repo_dir/dist/agents/$agent"; do
+  [ -d "$agent_source" ] || continue
   for source_path in "$agent_source"/*; do
     [ -f "$source_path" ] || continue
     link_path "$source_path" "$agent_root/agents/$(basename -- "$source_path")"
   done
-fi
+done
 
 mkdir -p "$(dirname -- "$instruction_file")"
 if [ -L "$instruction_file" ] || ! cmp -s "$scratch/instructions" "$instruction_file"; then

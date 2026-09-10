@@ -51,7 +51,10 @@ try {
         New-Item -ItemType SymbolicLink -Path (Join-Path $skillsRoot $skill) -Target (Join-Path $repoDir "shared/$skill") | Out-Null
       }
     }
+    $agentsRoot = Join-Path $agentRoot 'agents'
+    New-Item -ItemType Directory -Force -Path $agentsRoot | Out-Null
     if ($agent -eq 'codex') {
+      New-Item -ItemType SymbolicLink -Path (Join-Path $agentsRoot 'feature-reviewer.toml') -Target (Join-Path $repoDir 'agents/feature-reviewer.toml') | Out-Null
       $config = Join-Path $agentRoot 'config.toml'
       [IO.File]::WriteAllText($config, '[agents]' + $lf + 'max_threads = 1' + $lf)
       $originalConfig = [IO.File]::ReadAllText($config)
@@ -74,18 +77,22 @@ try {
       'codex' {
         $instructionFile = Join-Path $agentRoot 'AGENTS.md'
         Assert-Payload $instructionFile personal $false
-        Assert-Link (Join-Path $agentRoot 'agents/feature-implementer.toml') (Join-Path $repoDir 'agents/feature-implementer.toml')
+        Assert-Link (Join-Path $agentRoot 'agents/feature-implementer.toml') (Join-Path $repoDir 'agents/codex/feature-implementer.toml')
+        Assert-Link (Join-Path $agentRoot 'agents/feature-reviewer.toml') (Join-Path $repoDir 'dist/agents/codex/feature-reviewer.toml')
         Assert ([IO.File]::ReadAllText($config) -ceq $originalConfig) 'Codex config unchanged'
       }
       'claude' {
         $instructionFile = Join-Path $agentRoot 'CLAUDE.md'
         Assert-Payload $instructionFile personal $false
-        Assert-Link (Join-Path $agentRoot 'agents/feature-implementer.md') (Join-Path $repoDir 'claude-agents/feature-implementer.md')
+        Assert-Link (Join-Path $agentRoot 'agents/feature-implementer.md') (Join-Path $repoDir 'agents/claude/feature-implementer.md')
+        Assert-Link (Join-Path $agentRoot 'agents/change-reviewer.md') (Join-Path $repoDir 'dist/agents/claude/change-reviewer.md')
       }
       'copilot' {
         $instructionFile = Join-Path $agentRoot 'instructions/agent-skills.instructions.md'
         Assert-Payload $instructionFile work $true
-        Assert (-not (Test-Path (Join-Path $agentRoot 'agents'))) 'no personal custom agents'
+        Assert-Link (Join-Path $agentRoot 'agents/reviewer.agent.md') (Join-Path $repoDir 'dist/agents/copilot/reviewer.agent.md')
+        Assert-Link (Join-Path $agentRoot 'agents/researcher.agent.md') (Join-Path $repoDir 'dist/agents/copilot/researcher.agent.md')
+        Assert (@(Get-ChildItem -LiteralPath (Join-Path $agentRoot 'agents') -Force).Count -eq 2) 'Copilot has exactly two agents'
       }
     }
     $first = [IO.File]::ReadAllText($instructionFile)

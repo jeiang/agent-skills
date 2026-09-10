@@ -30,11 +30,14 @@ for agent in codex claude copilot; do
   ln -s "$repo_dir/codex/start-task" "$agent_root/skills/start-task"
   ln -s "$repo_dir/claude/start-feature" "$agent_root/skills/start-feature"
   ln -s "$repo_dir/codex/ponytail" "$agent_root/skills/ponytail"
+  mkdir -p "$agent_root/agents"
   if [ "$agent" = codex ]; then
-    mkdir -p "$agent_root/agents"
     ln -s "$repo_dir/agents/task-orchestrator.toml" "$agent_root/agents/task-orchestrator.toml"
+    ln -s "$repo_dir/agents/feature-reviewer.toml" "$agent_root/agents/feature-reviewer.toml"
     printf '%s\n' '[agents]' 'max_threads = 1' >"$agent_root/config.toml"
     cp "$agent_root/config.toml" "$test_root/original-config"
+  elif [ "$agent" = claude ]; then
+    ln -s "$repo_dir/claude-agents/researcher.md" "$agent_root/agents/researcher.md"
   elif [ "$agent" = copilot ]; then
     while IFS= read -r skill; do
       ln -s "$repo_dir/shared/$skill" "$agent_root/skills/$skill"
@@ -61,14 +64,18 @@ for agent in codex claude copilot; do
     codex)
       instruction_file="$agent_root/AGENTS.md"
       assert_payload "$instruction_file" personal 3
-      assert_link "$agent_root/agents/feature-implementer.toml" "$repo_dir/agents/feature-implementer.toml"
+      assert_link "$agent_root/agents/feature-implementer.toml" "$repo_dir/agents/codex/feature-implementer.toml"
+      assert_link "$agent_root/agents/feature-reviewer.toml" "$repo_dir/dist/agents/codex/feature-reviewer.toml"
+      assert_link "$agent_root/agents/task-researcher.toml" "$repo_dir/dist/agents/codex/task-researcher.toml"
       [ ! -L "$agent_root/agents/task-orchestrator.toml" ]
       cmp "$agent_root/config.toml" "$test_root/original-config"
       ;;
     claude)
       instruction_file="$agent_root/CLAUDE.md"
       assert_payload "$instruction_file" personal 3
-      assert_link "$agent_root/agents/feature-implementer.md" "$repo_dir/claude-agents/feature-implementer.md"
+      assert_link "$agent_root/agents/feature-implementer.md" "$repo_dir/agents/claude/feature-implementer.md"
+      assert_link "$agent_root/agents/change-reviewer.md" "$repo_dir/dist/agents/claude/change-reviewer.md"
+      assert_link "$agent_root/agents/researcher.md" "$repo_dir/dist/agents/claude/researcher.md"
       ;;
     copilot)
       instruction_file="$agent_root/instructions/agent-skills.instructions.md"
@@ -76,7 +83,9 @@ for agent in codex claude copilot; do
       head -n 3 "$instruction_file" >"$test_root/header"
       printf '%s\n' '---' 'applyTo: "**"' '---' >"$test_root/expected-header"
       cmp "$test_root/header" "$test_root/expected-header"
-      [ ! -e "$agent_root/agents" ]
+      assert_link "$agent_root/agents/reviewer.agent.md" "$repo_dir/dist/agents/copilot/reviewer.agent.md"
+      assert_link "$agent_root/agents/researcher.agent.md" "$repo_dir/dist/agents/copilot/researcher.agent.md"
+      [ "$(find "$agent_root/agents" -mindepth 1 | wc -l)" -eq 2 ]
       ;;
   esac
 

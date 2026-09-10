@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Validate Codex agent structure without treating prompt wording as behavior."""
+"""Validate Codex agent structure without treating prompt wording as behavior.
+
+Static definitions live in agents/codex/; rendered shared agents in
+dist/agents/codex/. Both are installed into the same directory.
+"""
 from pathlib import Path
 import sys
 import tomllib
@@ -10,7 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main() -> int:
     errors: list[str] = []
-    paths = sorted((ROOT / "agents").glob("*.toml"))
+    paths = sorted((ROOT / "agents" / "codex").glob("*.toml")) + sorted(
+        (ROOT / "dist" / "agents" / "codex").glob("*.toml")
+    )
     names: set[str] = set()
     if not paths:
         errors.append("no agent configurations found")

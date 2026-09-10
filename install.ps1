@@ -27,16 +27,13 @@ if (-not $customHome) {
   $InstallHome = if ($env:USERPROFILE) { $env:USERPROFILE } else { $env:HOME }
 }
 $agentRoot = Join-Path $InstallHome ".$Agent"
-$agentSource = $null
 switch ($Agent) {
   'codex' {
     if (-not $customHome -and $env:CODEX_HOME) { $agentRoot = $env:CODEX_HOME }
     $instructionFile = Join-Path $agentRoot 'AGENTS.md'
-    $agentSource = Join-Path $repoDir 'agents'
   }
   'claude' {
     $instructionFile = Join-Path $agentRoot 'CLAUDE.md'
-    $agentSource = Join-Path $repoDir 'claude-agents'
   }
   'copilot' {
     $instructionFile = Join-Path $agentRoot 'instructions/agent-skills.instructions.md'
@@ -122,14 +119,15 @@ foreach ($root in 'shared', 'generic', $Agent) {
     New-AgentLink $source.FullName (Join-Path $skillsRoot $source.Name)
   }
 }
-if ($agentSource) {
-  $agentsRoot = Join-Path $agentRoot 'agents'
-  New-Item -ItemType Directory -Force -Path $agentsRoot | Out-Null
-  if ($Agent -eq 'codex') {
-    foreach ($name in 'task-orchestrator.toml', 'prompt-validator.toml', 'agents-md-author.toml') {
-      Remove-OwnedLink (Join-Path $agentsRoot $name)
-    }
+$agentsRoot = Join-Path $agentRoot 'agents'
+New-Item -ItemType Directory -Force -Path $agentsRoot | Out-Null
+if ($Agent -eq 'codex') {
+  foreach ($name in 'task-orchestrator.toml', 'prompt-validator.toml', 'agents-md-author.toml') {
+    Remove-OwnedLink (Join-Path $agentsRoot $name)
   }
+}
+foreach ($agentSource in (Join-Path $repoDir "agents/$Agent"), (Join-Path $repoDir "dist/agents/$Agent")) {
+  if (-not (Test-Path -LiteralPath $agentSource -PathType Container)) { continue }
   foreach ($source in Get-ChildItem -LiteralPath $agentSource -File) {
     New-AgentLink $source.FullName (Join-Path $agentsRoot $source.Name)
   }

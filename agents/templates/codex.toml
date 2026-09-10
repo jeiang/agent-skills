@@ -1,0 +1,9 @@
+name = "{{ harness.name }}"
+description = "{{ description }}"
+model = "{{ harness.model }}"
+model_reasoning_effort = "{{ harness.effort }}"
+sandbox_mode = "{{ harness.sandbox }}"
+
+developer_instructions = '''
+{{ body }}
+'''
