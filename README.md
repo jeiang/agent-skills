@@ -1,15 +1,31 @@
 # Agent Skills
 
-Shared skills and working instructions for personal Codex/Claude Code and
-work Copilot Chat in VS Code.
+Shared skills, subagents, and working instructions for Codex, Claude Code,
+and Copilot Chat in VS Code, installed as one harness plus one profile.
 
-## Instructions and workflow
+## Instructions, profiles, and rendering
 
 `instructions/common.md` owns behavior, communication, skill selection,
-validation, and Git policy. `instructions/personal.md` and
-`instructions/work.md` supply the environment rules. The installer combines
-the common source and one policy into a self-contained native instruction
-file. Edit the sources and rerun the installer to update that file.
+validation, and Git policy. It is a Jinja2 template; its only variable is
+the profile. Each profile under `profiles/<name>/` supplies `environment.md`
+with the environment rules and `excluded-skills.txt` with skills that are
+not installed for it:
+
+| Profile | Environment | Excluded skills |
+| --- | --- | --- |
+| `personal` | macOS and Linux with Nix, the personal stack and cluster | none |
+| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor` |
+| `generic` | No assumed OS, stack, or tools; ask before installing tools | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation` |
+
+`scripts/render.py` renders the combined instructions and the shared
+subagents into `dist/`, which is committed. The installers copy or link
+rendered files and need no runtime beyond a shell. After editing a template,
+profile, or agent source, run the renderer inside the devenv shell and commit
+`dist/` with the change; `check` and CI fail when `dist/` is stale:
+
+```sh
+devenv shell -- python scripts/render.py
+```
 
 Ordinary coding uses Ponytail. Grilling applies when intent is unclear or a
 decision materially affects scope, design, compatibility, or risk. It
@@ -27,26 +43,33 @@ commit sequence from a large uncommitted diff.
 The retired `start-task`, `start-feature`, and `task_orchestrator` are no
 longer needed. Use ordinary requests, or invoke a focused skill directly.
 
-## Install one agent
+## Install one harness with one profile
 
 Use a stable checkout. Skill and custom-agent symlinks point to this checkout,
-so moving or deleting it breaks those links. Run only the target you use:
+so moving or deleting it breaks those links. Both arguments are required, and
+any harness accepts any profile:
 
-| Machine and agent | POSIX shell | PowerShell 7 |
+| Machine and harness | POSIX shell | PowerShell 7 |
 | --- | --- | --- |
-| Personal Codex | `./install.sh codex` | `./install.ps1 codex` |
-| Personal Claude Code | `./install.sh claude` | `./install.ps1 claude` |
-| Work Copilot Chat in VS Code | `./install.sh copilot` | `./install.ps1 copilot` |
+| Personal Codex | `./install.sh codex personal` | `./install.ps1 codex personal` |
+| Personal Claude Code | `./install.sh claude personal` | `./install.ps1 claude personal` |
+| Work Copilot Chat in VS Code | `./install.sh copilot work` | `./install.ps1 copilot work` |
+| Another person's machine | `./install.sh claude generic` | `./install.ps1 claude generic` |
+
+Reinstalling with a different profile regenerates the instruction file and
+removes links to skills that the new profile excludes. Installations made
+before profiles existed upgrade in place: links that point at former agent
+locations inside this checkout are relinked to `dist/`.
 
 Windows symlink creation requires Developer Mode or an authorized
 administrator shell. The installer does not download tools or change the
 selected model, reasoning effort, VS Code settings, or Codex agent limits.
 
-| Agent | Installed instruction file | Skill directory |
-| --- | --- | --- |
-| Codex | `~/.codex/AGENTS.md` | `~/.codex/skills/` |
-| Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/skills/` |
-| Copilot | `~/.copilot/instructions/agent-skills.instructions.md` | `~/.copilot/skills/` |
+| Harness | Installed instruction file | Skills | Agents |
+| --- | --- | --- | --- |
+| Codex | `~/.codex/AGENTS.md` | `~/.codex/skills/` | `~/.codex/agents/` |
+| Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/skills/` | `~/.claude/agents/` |
+| Copilot | `~/.copilot/instructions/agent-skills.instructions.md` | `~/.copilot/skills/` | `~/.copilot/agents/` |
 
 Codex honors `CODEX_HOME` when set. `--home DIR` (PowerShell:
 `-InstallHome DIR`) selects an isolated installation home and takes
@@ -74,8 +97,8 @@ with identical content does not create another backup. Edit source policies,
 not the generated installed file; managed local edits are backed up when
 regenerated.
 
-The installer updates only the selected agent. It relinks moved skills and
-removes retired launchers or excluded personal skills only when their
+The installer updates only the selected harness. It relinks moved skills and
+agents and removes retired launchers or excluded skills only when their
 symlinks point inside this checkout. Conflicting files, external symlinks,
 and unmanaged retired entries are left intact with an error. Review those
 entries before removing them. The POSIX installer can also migrate identical
@@ -84,12 +107,12 @@ copied skill directories, which its previous installer did not create.
 
 ### Work boundary
 
-Copilot receives common + work policy only. It receives no personal-policy
-file, import, reference, or symlink. The full repository can remain checked
-out on the work machine.
+The work profile receives common + work policy only. It receives no
+personal-policy file, import, reference, or symlink. The full repository can
+remain checked out on the work machine.
 
-`instructions/personal-skills.txt` excludes Actual Budget, devshell, NixOS
-validation, and Warp Skill Doctor from Copilot installation. The remaining
+`profiles/work/excluded-skills.txt` excludes Actual Budget, devshell, NixOS
+validation, and Warp Skill Doctor from a work installation. The remaining
 skills use the work policy: no missing-tool installation and no ad hoc
 replacement validators. Edits can continue with available checks and tests;
 the agent identifies testing still needed instead of claiming it ran.
@@ -126,10 +149,19 @@ Descriptions define automatic relevance. Claude/Copilot use
 checks that these settings agree. Automatic discovery does not authorize
 external actions or override environment restrictions.
 
-`agents/` contains optional Codex specialists; `claude-agents/` contains
-optional Claude implementer, reviewer, and researcher definitions. They
-retain their platform-specific model defaults. Copilot uses its selected
-VS Code model and available agent tools.
+The reviewer and researcher subagents have one body each under
+`agents/bodies/`, with per-harness names, models, and tools in
+`agents/agents.yaml`, rendered through `agents/templates/` into
+`dist/agents/<harness>/`. Harness-specific agents that are not shared stay
+as plain files under `agents/codex/` (implementer, planner, plan reviewer,
+documentation author) and `agents/claude/` (implementer). Claude and Codex
+agents keep their platform model defaults.
+
+Copilot installs exactly two agents, `reviewer` and `researcher`. Both are
+pinned to GPT-5.6 Luna, cannot spawn further subagents, and use read-only
+tools plus the terminal for inspection commands. Reasoning effort is a
+global Copilot setting, not a per-agent field. The reviewer reports only
+demonstrable merge-blocking defects and is instructed not to be pedantic.
 
 Vendored skills retain their upstream notes and licenses beside the source.
 `audit-your-codebase` has no stated upstream license; this existing
@@ -146,8 +178,9 @@ devenv shell -- check
 If `devenv` is not on PATH, use
 `nix run nixpkgs#devenv -- shell -- check`. Inside the environment, run
 `check` directly. The checks validate skill and agent structure, invocation
-policy consistency, native installer isolation and migration, shell syntax
-and formatting, and the Git diff. PowerShell execution runs when `pwsh` is
+policy consistency, that `dist/` matches its sources, native installer
+isolation and migration, shell syntax and formatting, and the Git diff. The
+same checks run in GitHub Actions on pull requests and pushes to `main`. PowerShell execution runs when `pwsh` is
 available; otherwise the suite reports that check as skipped.
 
 Structural checks do not prove model behavior. Use the
