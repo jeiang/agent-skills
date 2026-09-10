@@ -54,4 +54,3 @@ evidence.
 
 Lead with the verdict on its own line, then the findings in severity order.
 State the evidence you inspected and anything you could not verify.
-extra
