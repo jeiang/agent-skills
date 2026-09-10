@@ -133,7 +133,7 @@ try {
   Assert-Payload $instructionFile personal $false
 
   $testHome = Join-Path $testRoot 'generic'
-  Assert-Throws { & $installer -Agent claude -Profile personal -InstallHome $testHome 6> $null }
+  Assert-Throws { & $installer -Agent claude -Profile '' -InstallHome $testHome 6> $null }
   Assert-Throws { & $installer -Agent claude -Profile other -InstallHome $testHome 6> $null }
   Assert (-not (Test-Path $testHome)) 'missing or unknown profile installs nothing'
   & $installer -Agent claude -Profile personal -InstallHome $testHome 6> $null

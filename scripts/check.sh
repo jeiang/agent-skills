@@ -68,7 +68,7 @@ shfmt -d -i 2 -ci install.sh scripts/check.sh scripts/test-install.sh
 taplo format --check agents/codex/*.toml dist/agents/codex/*.toml
 scripts/test-install.sh
 if command -v pwsh >/dev/null 2>&1; then
-  pwsh -NoProfile -File scripts/test-install.ps1
+  pwsh -NoProfile -NonInteractive -File scripts/test-install.ps1
 else
   echo "Skipping PowerShell installer test: pwsh not found" >&2
 fi
