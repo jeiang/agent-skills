@@ -4,6 +4,11 @@
 
 ### Added
 
+- Explicit installation profiles. `install.sh <harness> <profile>` and `install.ps1 <harness> <profile>` pair any harness with `personal`, `work`, or a new `generic` profile that assumes no operating system, stack, or tools. Each profile owns its environment policy and excluded-skill list under `profiles/`.
+- A Jinja2 renderer (`scripts/render.py`) that writes the combined instructions and the shared subagents into a committed `dist/` directory; `check` fails when `dist/` is stale.
+- Copilot custom agents: exactly `reviewer` and `researcher`, pinned to GPT-5.6 Luna, unable to nest subagents, rendered from the same bodies as the Claude and Codex reviewer and researcher.
+- A GitHub Actions workflow that runs `devenv test` on pull requests and pushes to `main`.
+
 - Common working instructions with separate personal and work policies, a dated platform research report, and reproducible workflow scenarios.
 
 - A `devshell-preflight` skill for resolving a repository's command entry point (direnv, `devenv.nix`, `flake.nix`, `shell.nix`) before running its commands, including the `devenv.nix`-without-`flake.nix` case where `nix develop` is the wrong entry point, git worktrees that are not part of the flake, and the `python3.withPackages` wrapper needed to put a library on the interpreter's path.
@@ -30,6 +35,10 @@
 - `wayfinder` as a vendored skill from mattpocock/skills, with its `research` and `prototype` dependencies vendored alongside and the upstream issue-tracker docs bundled in its `trackers/` directory in place of the un-vendored `setup-matt-pocock-skills` skill.
 
 ### Changed
+
+- The work profile keeps Ponytail in full mode without an opt-out; the personal and generic profiles keep the existing opt-out.
+- The reviewer body now states that it is not pedantic and shares one source across Claude, Codex, and Copilot. Codex and Claude agent files that are not shared moved to `agents/codex/` and `agents/claude/`; the installers relink existing links from the former locations.
+- `instructions/personal-skills.txt` moved to `profiles/work/excluded-skills.txt`; the generic profile keeps `warp-skill-doctor`.
 
 - Install one selected agent at a time, with self-contained common plus environment instructions, explicit backup-and-replace migration for unmanaged instructions, and preserved unrelated configuration. Copilot Chat in VS Code receives only work-compatible skills and policy.
 

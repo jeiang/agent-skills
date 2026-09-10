@@ -1,0 +1,52 @@
+# Shared subagents rendered into every harness's native definition format.
+# Bodies live in agents/bodies/ and templates in agents/templates/. Run
+# `python scripts/render.py` after editing; check fails when dist/ is stale.
+
+# Every Copilot subagent uses the work Copilot Business model. The list tries
+# the display name first, then the settings identifier. Reasoning effort is a
+# global Copilot setting and cannot be pinned per agent.
+copilot:
+  model: ["GPT-5.6 Luna", "gpt-5.6-luna"]
+
+agents:
+  reviewer:
+    body: reviewer.md
+    description: >-
+      Reviews a completed change once for demonstrable merge-blocking defects,
+      or verifies one supplied repair pass. Use when complexity or risk
+      warrants an independent review; pass the goal, constraints, environment
+      policy, baseline, commits, diff, and validation evidence.
+    claude:
+      name: change-reviewer
+      model: sonnet
+      effort: high
+      tools: [Bash, Read, Grep, Glob]
+    codex:
+      name: feature_reviewer
+      model: gpt-5.6-sol
+      effort: medium
+      sandbox: read-only
+    copilot:
+      name: reviewer
+      tools: [codebase, search, readFile, listDirectory, usages, changes, problems, runInTerminal]
+
+  researcher:
+    body: researcher.md
+    description: >-
+      Researches one bounded repository, compatibility, security, or
+      operational question without editing files. Use when independent
+      repository or primary-source research benefits from a separate context;
+      pass the question, relevant evidence, and environment restrictions.
+    claude:
+      name: researcher
+      model: sonnet
+      effort: high
+      tools: [Bash, Read, Grep, Glob, WebSearch, WebFetch]
+    codex:
+      name: task_researcher
+      model: gpt-5.6-luna
+      effort: high
+      sandbox: read-only
+    copilot:
+      name: researcher
+      tools: [codebase, search, readFile, listDirectory, usages, fetch, githubRepo, runInTerminal]

@@ -4,33 +4,38 @@ param(
   [Parameter(Mandatory, Position = 0)]
   [ValidateSet('codex', 'claude', 'copilot')]
   [string] $Agent,
+  [Parameter(Mandatory, Position = 1)]
+  [ValidateSet('personal', 'work', 'generic')]
+  [string] $Profile,
   [ValidateNotNullOrEmpty()]
   [string] $InstallHome,
   [switch] $ReplaceInstructions
 )
 $ErrorActionPreference = 'Stop'
 $Agent = $Agent.ToLowerInvariant()
+$Profile = $Profile.ToLowerInvariant()
 $repoDir = $PSScriptRoot
+$profileDir = Join-Path $repoDir "profiles/$Profile"
+$renderedInstructions = Join-Path $repoDir "dist/instructions/$Profile.md"
+if (-not (Test-Path -LiteralPath (Join-Path $profileDir 'excluded-skills.txt') -PathType Leaf) -or
+  -not (Test-Path -LiteralPath $renderedInstructions -PathType Leaf)) {
+  throw "Unknown profile: $Profile. Run the renderer and check profiles/ and dist/instructions/."
+}
 $repoPrefix = $repoDir + [IO.Path]::DirectorySeparatorChar
 $customHome = $PSBoundParameters.ContainsKey('InstallHome')
 if (-not $customHome) {
   $InstallHome = if ($env:USERPROFILE) { $env:USERPROFILE } else { $env:HOME }
 }
 $agentRoot = Join-Path $InstallHome ".$Agent"
-$profile = 'personal'
-$agentSource = $null
 switch ($Agent) {
   'codex' {
     if (-not $customHome -and $env:CODEX_HOME) { $agentRoot = $env:CODEX_HOME }
     $instructionFile = Join-Path $agentRoot 'AGENTS.md'
-    $agentSource = Join-Path $repoDir 'agents'
   }
   'claude' {
     $instructionFile = Join-Path $agentRoot 'CLAUDE.md'
-    $agentSource = Join-Path $repoDir 'claude-agents'
   }
   'copilot' {
-    $profile = 'work'
     $instructionFile = Join-Path $agentRoot 'instructions/agent-skills.instructions.md'
   }
 }
@@ -41,8 +46,7 @@ $rendered = $marker + $lf + $lf
 if ($Agent -eq 'copilot') {
   $rendered = (@('---', 'applyTo: "**"', '---') -join $lf) + $lf + $rendered
 }
-$rendered += [IO.File]::ReadAllText((Join-Path $repoDir 'instructions/common.md')) + $lf
-$rendered += [IO.File]::ReadAllText((Join-Path $repoDir "instructions/$profile.md"))
+$rendered += [IO.File]::ReadAllText($renderedInstructions)
 # Normalize source checkout line endings, including Windows Git checkouts.
 $rendered = $rendered.Replace(([string][char]13 + $lf), $lf)
 
@@ -102,29 +106,28 @@ $skillsRoot = Join-Path $agentRoot 'skills'
 New-Item -ItemType Directory -Force -Path $skillsRoot | Out-Null
 Remove-OwnedLink (Join-Path $skillsRoot 'start-task')
 Remove-OwnedLink (Join-Path $skillsRoot 'start-feature')
-$personalSkills = @(Get-Content -LiteralPath (Join-Path $repoDir 'instructions/personal-skills.txt'))
-if ($profile -eq 'work') {
-  foreach ($skill in $personalSkills) {
-    if ($skill) { Remove-OwnedLink (Join-Path $skillsRoot $skill) }
-  }
+$excludedSkills = @(Get-Content -LiteralPath (Join-Path $profileDir 'excluded-skills.txt') | Where-Object { $_ })
+foreach ($skill in $excludedSkills) {
+  Remove-OwnedLink (Join-Path $skillsRoot $skill)
 }
 foreach ($root in 'shared', 'generic', $Agent) {
   $sourceRoot = Join-Path $repoDir $root
   if (-not (Test-Path -LiteralPath $sourceRoot -PathType Container)) { continue }
   foreach ($source in Get-ChildItem -LiteralPath $sourceRoot -Directory) {
     if (-not (Test-Path -LiteralPath (Join-Path $source.FullName 'SKILL.md'))) { continue }
-    if ($profile -eq 'work' -and $source.Name -in $personalSkills) { continue }
+    if ($source.Name -in $excludedSkills) { continue }
     New-AgentLink $source.FullName (Join-Path $skillsRoot $source.Name)
   }
 }
-if ($agentSource) {
-  $agentsRoot = Join-Path $agentRoot 'agents'
-  New-Item -ItemType Directory -Force -Path $agentsRoot | Out-Null
-  if ($Agent -eq 'codex') {
-    foreach ($name in 'task-orchestrator.toml', 'prompt-validator.toml', 'agents-md-author.toml') {
-      Remove-OwnedLink (Join-Path $agentsRoot $name)
-    }
+$agentsRoot = Join-Path $agentRoot 'agents'
+New-Item -ItemType Directory -Force -Path $agentsRoot | Out-Null
+if ($Agent -eq 'codex') {
+  foreach ($name in 'task-orchestrator.toml', 'prompt-validator.toml', 'agents-md-author.toml') {
+    Remove-OwnedLink (Join-Path $agentsRoot $name)
   }
+}
+foreach ($agentSource in (Join-Path $repoDir "agents/$Agent"), (Join-Path $repoDir "dist/agents/$Agent")) {
+  if (-not (Test-Path -LiteralPath $agentSource -PathType Container)) { continue }
   foreach ($source in Get-ChildItem -LiteralPath $agentSource -File) {
     New-AgentLink $source.FullName (Join-Path $agentsRoot $source.Name)
   }
@@ -140,5 +143,5 @@ if ($instructionItem.LinkType -or -not (Test-Path -LiteralPath $instructionFile)
   }
   [IO.File]::WriteAllText($instructionFile, $rendered, [Text.UTF8Encoding]::new($false))
 }
-Write-Host "Installed $Agent with common + $profile instructions: $instructionFile"
+Write-Host "Installed $Agent with common + $Profile instructions: $instructionFile"
 Write-Host 'Restart the agent or open a new chat to reload instructions.'

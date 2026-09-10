@@ -2,13 +2,14 @@
 set -eu
 
 usage() {
-  echo "Usage: $0 codex|claude|copilot [--home DIR] [--replace-instructions]" >&2
+  echo "Usage: $0 codex|claude|copilot personal|work|generic [--home DIR] [--replace-instructions]" >&2
   exit 2
 }
 
-[ "$#" -gt 0 ] || usage
+[ "$#" -gt 1 ] || usage
 agent=$1
-shift
+profile=$2
+shift 2
 home_dir=$HOME
 home_override=false
 replace_instructions=false
@@ -29,27 +30,27 @@ while [ "$#" -gt 0 ]; do
 done
 
 repo_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+profile_dir="$repo_dir/profiles/$profile"
+rendered_instructions="$repo_dir/dist/instructions/$profile.md"
+case $profile in
+  */* | .*) usage ;;
+esac
+[ -f "$profile_dir/excluded-skills.txt" ] && [ -f "$rendered_instructions" ] || usage
 case $agent in
   codex)
     agent_root="$home_dir/.codex"
     if [ "$home_override" = false ] && [ -n "${CODEX_HOME:-}" ]; then
       agent_root=$CODEX_HOME
     fi
-    profile=personal
     instruction_file="$agent_root/AGENTS.md"
-    agent_source="$repo_dir/agents"
     ;;
   claude)
     agent_root="$home_dir/.claude"
-    profile=personal
     instruction_file="$agent_root/CLAUDE.md"
-    agent_source="$repo_dir/claude-agents"
     ;;
   copilot)
     agent_root="$home_dir/.copilot"
-    profile=work
     instruction_file="$agent_root/instructions/agent-skills.instructions.md"
-    agent_source=
     ;;
   *) usage ;;
 esac
@@ -62,9 +63,7 @@ marker='<!-- Managed by agent-skills; rerun the installer to update. -->'
     printf '%s\n' '---' 'applyTo: "**"' '---'
   fi
   printf '%s\n\n' "$marker"
-  cat "$repo_dir/instructions/common.md"
-  printf '\n'
-  cat "$repo_dir/instructions/$profile.md"
+  cat "$rendered_instructions"
 } >"$scratch/instructions"
 
 # Check the instruction destination before changing any installation links.
@@ -131,37 +130,36 @@ link_path() {
 mkdir -p "$agent_root/skills"
 remove_owned_link "$agent_root/skills/start-task"
 remove_owned_link "$agent_root/skills/start-feature"
-if [ "$profile" = work ]; then
-  while IFS= read -r personal_skill; do
-    [ -n "$personal_skill" ] || continue
-    remove_owned_link "$agent_root/skills/$personal_skill"
-  done <"$repo_dir/instructions/personal-skills.txt"
-fi
+while IFS= read -r excluded_skill; do
+  [ -n "$excluded_skill" ] || continue
+  remove_owned_link "$agent_root/skills/$excluded_skill"
+done <"$profile_dir/excluded-skills.txt"
 
 for source_root in "$repo_dir/shared" "$repo_dir/generic" "$repo_dir/$agent"; do
   [ -d "$source_root" ] || continue
   for source_path in "$source_root"/*; do
     [ -f "$source_path/SKILL.md" ] || continue
     skill_name=$(basename -- "$source_path")
-    if [ "$profile" = work ] && grep -Fxq "$skill_name" "$repo_dir/instructions/personal-skills.txt"; then
+    if grep -Fxq "$skill_name" "$profile_dir/excluded-skills.txt"; then
       continue
     fi
     link_path "$source_path" "$agent_root/skills/$skill_name"
   done
 done
 
-if [ -n "$agent_source" ]; then
-  mkdir -p "$agent_root/agents"
-  if [ "$agent" = codex ]; then
-    for retired_name in task-orchestrator.toml prompt-validator.toml agents-md-author.toml; do
-      remove_owned_link "$agent_root/agents/$retired_name"
-    done
-  fi
+mkdir -p "$agent_root/agents"
+if [ "$agent" = codex ]; then
+  for retired_name in task-orchestrator.toml prompt-validator.toml agents-md-author.toml; do
+    remove_owned_link "$agent_root/agents/$retired_name"
+  done
+fi
+for agent_source in "$repo_dir/agents/$agent" "$repo_dir/dist/agents/$agent"; do
+  [ -d "$agent_source" ] || continue
   for source_path in "$agent_source"/*; do
     [ -f "$source_path" ] || continue
     link_path "$source_path" "$agent_root/agents/$(basename -- "$source_path")"
   done
-fi
+done
 
 mkdir -p "$(dirname -- "$instruction_file")"
 if [ -L "$instruction_file" ] || ! cmp -s "$scratch/instructions" "$instruction_file"; then
