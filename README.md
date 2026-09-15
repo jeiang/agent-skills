@@ -14,7 +14,7 @@ not installed for it:
 | Profile | Environment | Excluded skills |
 | --- | --- | --- |
 | `personal` | macOS and Linux with Nix, the personal stack and cluster | none |
-| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor` |
+| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; existing delivery patterns over general best practices | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor` |
 | `generic` | No assumed OS, stack, or tools; ask before installing tools | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation` |
 
 `scripts/render.py` renders the combined instructions and the shared
