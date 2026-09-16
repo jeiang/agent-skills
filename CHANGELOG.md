@@ -36,6 +36,9 @@
 
 ### Changed
 
+- The skill validator accepts an optional `metadata` frontmatter mapping, as upstream skills such as `i-have-adhd` ship it.
+- `grilling` adopts upstream's round-by-round frontier interview and asks each round's closed questions through the harness's structured question tool when one exists (Claude Code's `AskUserQuestion`), with two to four options, a one-line trade-off each, and the recommendation first; open-ended questions stay in chat. The common instructions and README no longer prescribe one decision per turn and defer to the skill.
+- Vendored skills updated to their current upstreams: mattpocock/skills `959a8e9` (`grilling`, `grill-with-docs`, `domain-modeling`, `wayfinder`, `research`, `prototype`, and the bundled tracker docs), ayghri/i-have-adhd `0a84de4`, ponytail v4.10.0, and warpdotdev/common-skills `82d2bd9`. Local adaptations are re-applied and listed in each `UPSTREAM.md`; `i-have-adhd` gains upstream's persistence section, harness-precedence exceptions, and Gemini CLI command, `domain-modeling` triggers on CONTEXT.md and ADR edits, and `warp-skill-doctor` collects Pi, Grok Build, and ZCode sessions.
 - The work profile keeps Ponytail in full mode without an opt-out; the personal and generic profiles keep the existing opt-out.
 - The reviewer body now states that it is not pedantic and shares one source across Claude, Codex, and Copilot. Codex and Claude agent files that are not shared moved to `agents/codex/` and `agents/claude/`; the installers relink existing links from the former locations.
 - `instructions/personal-skills.txt` moved to `profiles/work/excluded-skills.txt`; the generic profile keeps `warp-skill-doctor`.

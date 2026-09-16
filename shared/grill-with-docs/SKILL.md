@@ -5,5 +5,5 @@ disable-model-invocation: true
 ---
 
 Use the installed `grilling` and `domain-modeling` skills. Follow grilling's
-one-question rhythm and confirmation boundary. Record only resolved terms
+round-by-round rhythm and confirmation boundary. Record only resolved terms
 and decisions that meet domain-modeling's criteria; do not create empty docs.

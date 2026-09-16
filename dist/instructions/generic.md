@@ -22,10 +22,10 @@ in full mode unless the user selected another level or turned it off. Its
 purpose is the smallest correct solution after understanding the problem.
 
 Load `grilling` when intent is unclear or an unresolved decision materially
-affects scope, design, compatibility, or risk. Ask one decision at a time,
-recommend an answer, and wait. Confirm the resulting shared understanding
-before implementing that decision. Do not turn a clear request into an
-interview or reopen decisions already resolved.
+affects scope, design, compatibility, or risk. Follow the skill's interview
+procedure and confirm the resulting shared understanding before implementing
+the decisions. Do not turn a clear request into an interview or reopen
+decisions already resolved.
 
 Proceed directly on clear, reversible work. For high-impact or hard-to-reverse
 changes, present a short plan and obtain approval before implementation.

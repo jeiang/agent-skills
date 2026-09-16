@@ -29,7 +29,7 @@ devenv shell -- python scripts/render.py
 
 Ordinary coding uses Ponytail. Grilling applies when intent is unclear or a
 decision materially affects scope, design, compatibility, or risk. It
-distinguishes goals from proposed tools and asks one question at a time.
+distinguishes goals from proposed tools and interviews round by round.
 Clear, reversible changes proceed directly; consequential changes need a
 short approved plan. Research, implementation, and review use subagents only
 when a separate context or parallel work will help.
