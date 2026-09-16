@@ -48,6 +48,17 @@ class SkillValidationTests(unittest.TestCase):
                 )
                 self.assertEqual(not validate(skill), valid)
 
+    def test_metadata_field_allowed(self):
+        with tempfile.TemporaryDirectory() as root:
+            skill = Path(root) / "example"
+            skill.mkdir()
+            for field, valid in (("metadata:\n  category: productivity\n", True), ("unknown: x\n", False)):
+                (skill / "SKILL.md").write_text(
+                    "---\nname: example\ndescription: Example task\n" + field
+                    + "---\nDo the example task.\n"
+                )
+                self.assertEqual(not validate(skill), valid)
+
 
 if __name__ == "__main__":
     unittest.main()

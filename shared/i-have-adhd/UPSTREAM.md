@@ -10,6 +10,5 @@
 This copy adds adaptive expertise calibration: use personalization and prior
 context to preserve action-first ADHD guidance without explaining familiar
 tools or routine mechanics to experienced readers.
-- Upstream's `metadata:` frontmatter block (tags, category) is dropped because this repository's skill validator does not allow the field; `license: MIT` is kept.
 - The upstream `agents/gemini.toml` Gemini CLI command is vendored unmodified; no installer here uses it.
 - Invocation alignment: Codex now uses the same explicit-only setting as Claude and Copilot.

@@ -8,7 +8,7 @@ import yaml
 
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 REQUIRED_FIELDS = {"name", "description"}
-OPTIONAL_FIELDS = {"argument-hint", "disable-model-invocation", "license"}
+OPTIONAL_FIELDS = {"argument-hint", "disable-model-invocation", "license", "metadata"}
 
 
 class UniqueKeyLoader(yaml.SafeLoader):
