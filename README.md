@@ -164,6 +164,9 @@ global Copilot setting, not a per-agent field. The reviewer reports only
 demonstrable merge-blocking defects and is instructed not to be pedantic.
 
 Vendored skills retain their upstream notes and licenses beside the source.
+When updating one, upstream content wins unless the deviation is recorded in
+the skill's `UPSTREAM.md`. If upstream conflicts with a repository check or a
+local rule, ask before dropping either side; do not resolve it silently.
 `audit-your-codebase` has no stated upstream license; this existing
 redistribution limitation is recorded in its `UPSTREAM.md`.
 

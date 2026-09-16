@@ -1,6 +1,6 @@
 ---
 name: devshell-preflight
-description: Resolve repository commands inside a declared Nix development environment on personal macOS or Linux systems with Nix available. Use before running those commands or diagnosing their environment setup. Do not use on the work machine, in environments without Nix, or for arbitrary missing commands.
+description: Resolve repository commands inside a declared Nix development environment on personal macOS or Linux systems with Nix available. Use at the start of any task in a repository that has devenv.nix, flake.nix, shell.nix, or .envrc, before the first just, statix, formatter, build, or test command, and when diagnosing that environment. Do not use on the work machine, in environments without Nix, or for arbitrary missing commands.
 ---
 
 # Devshell Preflight
@@ -28,6 +28,8 @@ A repo can have `devenv.nix` without `flake.nix`. `nix develop` fails there
 with "not part of a flake"; that is the wrong entry point, not a broken repo.
 
 Record the resolved prefix and use it for every repo command in the session.
+When a repo command still fails inside the prefix, read its `--help` or the
+`justfile` recipe once instead of guessing argument order.
 
 ## Git worktrees
 

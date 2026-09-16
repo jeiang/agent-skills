@@ -3,6 +3,12 @@
 Personal development uses macOS and Linux with Nix. Projects include Rust,
 Zig, Go, JavaScript/TypeScript, and a personal NixOS cluster.
 
+The agent's shell tool runs under zsh with unmatched globs treated as errors,
+and the login shell on this machine and on cluster hosts is fish. Quote every
+glob argument, such as `--include='*.nix'`. Wrap POSIX constructs such as
+`for` loops, `$(...)`, and heredocs in `bash -c '...'` when a command runs
+over `ssh`.
+
 Use `devshell-preflight` when Nix is available and the repository declares a
 Nix development environment. Resolve that environment before running its
 commands. Use `nixos-change-validation` for changes to Nix configuration,
