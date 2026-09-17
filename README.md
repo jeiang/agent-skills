@@ -81,6 +81,33 @@ discovery in your client before moving the links. Do not install the same
 skills into both directories. See the [research report](docs/skills-research.md)
 for current platform sources and compatibility limits.
 
+### Nix flake
+
+Nix configurations can consume the same content without running the
+installer. The flake exposes one package per harness and profile,
+`packages.<system>.<harness>-<profile>`, for example `claude-personal`. Each
+package is a store path with the layout the installer creates under the
+harness home: the instruction file (`CLAUDE.md`, `AGENTS.md`, or
+`instructions/agent-skills.instructions.md`), `skills/`, and `agents/`, with
+the profile's excluded skills left out. Link its entries into place, for
+example with home-manager:
+
+```nix
+let
+  home = inputs.agent-skills.packages.${pkgs.system}.claude-personal;
+in
+{
+  home.file.".claude/CLAUDE.md".source = "${home}/CLAUDE.md";
+  home.file.".claude/skills".source = "${home}/skills";
+  home.file.".claude/agents".source = "${home}/agents";
+}
+```
+
+Set `inputs.agent-skills.inputs.nixpkgs.follows = "nixpkgs"` to avoid a
+second nixpkgs. The packages read the committed `dist/`, so render before
+committing as usual. Do not mix the flake and the installer in one harness
+home. `nix flake check` builds every package.
+
 ### Existing installations
 
 Unmanaged instruction files are preserved by default. To adopt these
