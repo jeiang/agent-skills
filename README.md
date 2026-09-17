@@ -103,6 +103,20 @@ in
 }
 ```
 
+A client that keeps its own entries in these directories (Claude Code syncs
+plugin skills into `~/.claude/skills`, Codex ships `~/.codex/skills/.system`)
+needs the directory itself to stay writable, so link one entry at a time.
+`lib.entries.<harness>.<profile>` lists the entry names for that, alongside
+the harness instruction path, without building the package:
+
+```nix
+let
+  entries = inputs.agent-skills.lib.entries.claude.personal;
+  home = inputs.agent-skills.packages.${pkgs.system}.claude-personal;
+in
+lib.genAttrs (map (name: ".claude/skills/${name}") entries.skills) (...);
+```
+
 Set `inputs.agent-skills.inputs.nixpkgs.follows = "nixpkgs"` to avoid a
 second nixpkgs. The packages read the committed `dist/`, so render before
 committing as usual. Do not mix the flake and the installer in one harness
