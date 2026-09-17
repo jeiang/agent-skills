@@ -9,6 +9,7 @@
 - A Jinja2 renderer (`scripts/render.py`) that writes the combined instructions and the shared subagents into a committed `dist/` directory; `check` fails when `dist/` is stale.
 - Copilot custom agents: exactly `reviewer` and `researcher`, pinned to GPT-5.6 Luna, unable to nest subagents, rendered from the same bodies as the Claude and Codex reviewer and researcher.
 - A GitHub Actions workflow that runs `devenv test` on pull requests and pushes to `main`.
+- `lib.entries.<harness>.<profile>`, the skill and agent entry names and the instruction path each flake package installs, so a consumer that links one entry at a time does not have to enumerate the built tree.
 
 - Common working instructions with separate personal and work policies, a dated platform research report, and reproducible workflow scenarios.
 
