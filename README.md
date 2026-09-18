@@ -1,7 +1,8 @@
 # Agent Skills
 
 Shared skills, subagents, and working instructions for Codex, Claude Code,
-and Copilot Chat in VS Code, installed as one harness plus one profile.
+Copilot Chat in VS Code, and Oh My Pi (`omp`), installed as one harness plus
+one profile.
 
 ## Instructions, profiles, and rendering
 
@@ -55,6 +56,7 @@ any harness accepts any profile:
 | Personal Claude Code | `./install.sh claude personal` | `./install.ps1 claude personal` |
 | Work Copilot Chat in VS Code | `./install.sh copilot work` | `./install.ps1 copilot work` |
 | Another person's machine | `./install.sh claude generic` | `./install.ps1 claude generic` |
+| Personal Oh My Pi | `./install.sh omp personal` | `./install.ps1 omp personal` |
 
 Reinstalling with a different profile regenerates the instruction file and
 removes links to skills that the new profile excludes. Installations made
@@ -70,10 +72,20 @@ selected model, reasoning effort, VS Code settings, or Codex agent limits.
 | Codex | `~/.codex/AGENTS.md` | `~/.codex/skills/` | `~/.codex/agents/` |
 | Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/skills/` | `~/.claude/agents/` |
 | Copilot | `~/.copilot/instructions/agent-skills.instructions.md` | `~/.copilot/skills/` | `~/.copilot/agents/` |
+| Oh My Pi | `~/.omp/agent/AGENTS.md` | `~/.omp/agent/skills/` | `~/.omp/agent/agents/` |
 
 Codex honors `CODEX_HOME` when set. `--home DIR` (PowerShell:
 `-InstallHome DIR`) selects an isolated installation home and takes
 precedence over it. Tests use this option without changing the real home.
+
+Oh My Pi reads its native user directory only. `~/.omp/agent/AGENTS.md`
+shadows every other user-level context file it would otherwise discover
+(`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and the like), so an `omp`
+install alongside a Claude or Codex install loads this repository's
+instructions once. Skills with `disable-model-invocation` stay loaded but are
+hidden from the skill list; invoke them with `/skill:<name>`. The installer
+does not honor `PI_CODING_AGENT_DIR`: `omp` relocates skills and context
+files with it, but task-agent discovery still reads `~/.omp/agent/agents`.
 
 This repository retains the Codex skill directory observed in the installed
 client. Current OpenAI documentation lists `~/.agents/skills/`; verify
@@ -89,7 +101,8 @@ installer. The flake exposes one package per harness and profile,
 package is a store path with the layout the installer creates under the
 harness home: the instruction file (`CLAUDE.md`, `AGENTS.md`, or
 `instructions/agent-skills.instructions.md`), `skills/`, and `agents/`, with
-the profile's excluded skills left out. Link its entries into place, for
+the profile's excluded skills left out. The `omp` harness home is
+`~/.omp/agent`. Link its entries into place, for
 example with home-manager:
 
 ```nix
@@ -183,9 +196,9 @@ skill directory rather than creating another global discovery path.
 | `audit-your-codebase` | A requested whole-repository simplification audit |
 | `typesafe-ai` | A feature that needs a typed semantic judgment (Choice, Noul, Score) from TypeSafe's Jev models; reads the live TypeSafe docs |
 | `actual-budget-import`, `warp-skill-doctor` | Personal budget imports or evaluation from supported local agent histories |
-| `grill-with-docs`, `wayfinder`, `i-have-adhd` | Explicit invocation only, consistently across all three platforms |
+| `grill-with-docs`, `wayfinder`, `i-have-adhd` | Explicit invocation only, consistently across all platforms |
 
-Descriptions define automatic relevance. Claude/Copilot use
+Descriptions define automatic relevance. Claude/Copilot/omp use
 `disable-model-invocation` in skill frontmatter; Codex uses the inverse
 `policy.allow_implicit_invocation` in `agents/openai.yaml`. Validation
 checks that these settings agree. Automatic discovery does not authorize
@@ -218,7 +231,11 @@ The reviewer and researcher subagents have one body each under
 `dist/agents/<harness>/`. Harness-specific agents that are not shared stay
 as plain files under `agents/codex/` (implementer, planner, plan reviewer,
 documentation author) and `agents/claude/` (implementer). Claude and Codex
-agents keep their platform model defaults.
+agents keep their platform model defaults. The omp `change-reviewer` and
+`researcher` pin no model, so they run on the parent session's model at
+`thinking-level: high` with read-only tools (`bash` for inspection commands)
+and cannot spawn further subagents; `change-reviewer` is named to avoid
+shadowing omp's bundled `reviewer`.
 
 Copilot installs exactly two agents, `reviewer` and `researcher`. Both are
 pinned to GPT-5.6 Luna, cannot spawn further subagents, and use read-only

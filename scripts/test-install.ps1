@@ -37,10 +37,10 @@ try {
     @(Get-Content -LiteralPath (Join-Path $repoDir "profiles/$Profile/excluded-skills.txt") | Where-Object { $_ })
   }
   $personalSkills = Get-Excluded work
-  foreach ($agent in 'codex', 'claude', 'copilot') {
+  foreach ($agent in 'codex', 'claude', 'copilot', 'omp') {
     $profile = if ($agent -eq 'copilot') { 'work' } else { 'personal' }
     $testHome = Join-Path $testRoot $agent
-    $agentRoot = Join-Path $testHome ".$agent"
+    $agentRoot = if ($agent -eq 'omp') { Join-Path $testHome '.omp/agent' } else { Join-Path $testHome ".$agent" }
     $skillsRoot = Join-Path $agentRoot 'skills'
     New-Item -ItemType Directory -Force -Path $skillsRoot | Out-Null
     foreach ($retired in @('codex/start-task', 'claude/start-feature')) {
@@ -67,7 +67,7 @@ try {
       }
       else { Assert-Link $target $source.FullName }
     }
-    foreach ($other in 'codex', 'claude', 'copilot', 'agents') {
+    foreach ($other in 'codex', 'claude', 'copilot', 'omp', 'agents') {
       if ($other -ne $agent) { Assert (-not (Test-Path (Join-Path $testHome ".$other"))) 'only selected agent is installed' }
     }
     foreach ($name in 'start-task', 'start-feature') {
@@ -93,6 +93,13 @@ try {
         Assert-Link (Join-Path $agentRoot 'agents/reviewer.agent.md') (Join-Path $repoDir 'dist/agents/copilot/reviewer.agent.md')
         Assert-Link (Join-Path $agentRoot 'agents/researcher.agent.md') (Join-Path $repoDir 'dist/agents/copilot/researcher.agent.md')
         Assert (@(Get-ChildItem -LiteralPath (Join-Path $agentRoot 'agents') -Force).Count -eq 2) 'Copilot has exactly two agents'
+      }
+      'omp' {
+        $instructionFile = Join-Path $agentRoot 'AGENTS.md'
+        Assert-Payload $instructionFile personal $false
+        Assert-Link (Join-Path $agentRoot 'agents/change-reviewer.md') (Join-Path $repoDir 'dist/agents/omp/change-reviewer.md')
+        Assert-Link (Join-Path $agentRoot 'agents/researcher.md') (Join-Path $repoDir 'dist/agents/omp/researcher.md')
+        Assert (@(Get-ChildItem -LiteralPath (Join-Path $agentRoot 'agents') -Force).Count -eq 2) 'omp has exactly two agents'
       }
     }
     $first = [IO.File]::ReadAllText($instructionFile)

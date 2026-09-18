@@ -2,7 +2,7 @@
 set -eu
 
 usage() {
-  echo "Usage: $0 codex|claude|copilot personal|work|generic [--home DIR] [--replace-instructions]" >&2
+  echo "Usage: $0 codex|claude|copilot|omp personal|work|generic [--home DIR] [--replace-instructions]" >&2
   exit 2
 }
 
@@ -51,6 +51,10 @@ case $agent in
   copilot)
     agent_root="$home_dir/.copilot"
     instruction_file="$agent_root/instructions/agent-skills.instructions.md"
+    ;;
+  omp)
+    agent_root="$home_dir/.omp/agent"
+    instruction_file="$agent_root/AGENTS.md"
     ;;
   *) usage ;;
 esac

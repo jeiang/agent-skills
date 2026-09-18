@@ -2,7 +2,7 @@
 #Requires -Version 7
 param(
   [Parameter(Mandatory, Position = 0)]
-  [ValidateSet('codex', 'claude', 'copilot')]
+  [ValidateSet('codex', 'claude', 'copilot', 'omp')]
   [string] $Agent,
   [Parameter(Mandatory, Position = 1)]
   [ValidateSet('personal', 'work', 'generic')]
@@ -26,7 +26,7 @@ $customHome = $PSBoundParameters.ContainsKey('InstallHome')
 if (-not $customHome) {
   $InstallHome = if ($env:USERPROFILE) { $env:USERPROFILE } else { $env:HOME }
 }
-$agentRoot = Join-Path $InstallHome ".$Agent"
+$agentRoot = if ($Agent -eq 'omp') { Join-Path $InstallHome '.omp/agent' } else { Join-Path $InstallHome ".$Agent" }
 switch ($Agent) {
   'codex' {
     if (-not $customHome -and $env:CODEX_HOME) { $agentRoot = $env:CODEX_HOME }
@@ -37,6 +37,9 @@ switch ($Agent) {
   }
   'copilot' {
     $instructionFile = Join-Path $agentRoot 'instructions/agent-skills.instructions.md'
+  }
+  'omp' {
+    $instructionFile = Join-Path $agentRoot 'AGENTS.md'
   }
 }
 
