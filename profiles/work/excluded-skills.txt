@@ -3,3 +3,4 @@ devshell-preflight
 nixos-change-validation
 warp-skill-doctor
 typesafe-ai
+fast-jev-compaction
