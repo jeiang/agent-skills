@@ -56,12 +56,6 @@ for agent in codex claude copilot; do
   [ ! -L "$agent_root/skills/start-task" ]
   [ ! -L "$agent_root/skills/start-feature" ]
   [ ! -e "$test_home/.agents" ]
-  # Claude Code plugins install for the Claude harness only.
-  if [ "$agent" = claude ]; then
-    assert_link "$agent_root/skills/fast-jev-compaction" "$repo_dir/claude/fast-jev-compaction"
-  else
-    [ ! -e "$agent_root/skills/fast-jev-compaction" ] && [ ! -L "$agent_root/skills/fast-jev-compaction" ]
-  fi
   for other in codex claude copilot; do
     [ "$other" = "$agent" ] || [ ! -e "$test_home/.$other" ]
   done
@@ -126,7 +120,6 @@ for skill_path in "$repo_dir/shared"/*; do
   fi
 done
 assert_link "$test_home/.claude/skills/warp-skill-doctor" "$repo_dir/shared/warp-skill-doctor"
-[ ! -e "$test_home/.claude/skills/fast-jev-compaction" ] && [ ! -L "$test_home/.claude/skills/fast-jev-compaction" ]
 "$repo_dir/install.sh" copilot generic --home "$test_home" >/dev/null
 assert_payload "$test_home/.copilot/instructions/agent-skills.instructions.md" generic 6
 assert_link "$test_home/.copilot/skills/warp-skill-doctor" "$repo_dir/shared/warp-skill-doctor"

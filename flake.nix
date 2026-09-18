@@ -35,12 +35,7 @@
           excluded = lib.splitString "\n" (
             builtins.readFile (./profiles + "/${profile}/excluded-skills.txt")
           );
-          # A Claude Code plugin under the skills directory loads as <name>@skills-dir.
-          installable =
-            root: name:
-            builtins.pathExists "${root}/${name}/SKILL.md"
-            || (harness == "claude" && builtins.pathExists "${root}/${name}/.claude-plugin/plugin.json");
-          keep = root: name: installable root name && !(lib.elem name excluded);
+          keep = root: name: builtins.pathExists "${root}/${name}/SKILL.md" && !(lib.elem name excluded);
         in
         lib.listToAttrs (
           lib.concatMap

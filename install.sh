@@ -138,10 +138,7 @@ done <"$profile_dir/excluded-skills.txt"
 for source_root in "$repo_dir/shared" "$repo_dir/generic" "$repo_dir/$agent"; do
   [ -d "$source_root" ] || continue
   for source_path in "$source_root"/*; do
-    if [ ! -f "$source_path/SKILL.md" ]; then
-      # A Claude Code plugin under the skills directory loads as <name>@skills-dir.
-      [ "$agent" = claude ] && [ -f "$source_path/.claude-plugin/plugin.json" ] || continue
-    fi
+    [ -f "$source_path/SKILL.md" ] || continue
     skill_name=$(basename -- "$source_path")
     if grep -Fxq "$skill_name" "$profile_dir/excluded-skills.txt"; then
       continue
