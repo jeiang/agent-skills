@@ -1,0 +1,4 @@
+interface:
+  display_name: "TypeSafe"
+  short_description: "Design typed TypeSafe System One judgments for application code"
+  default_prompt: "Use $typesafe-ai to design the judgments this feature needs."

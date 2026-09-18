@@ -14,7 +14,7 @@ not installed for it:
 | Profile | Environment | Excluded skills |
 | --- | --- | --- |
 | `personal` | macOS and Linux with Nix, the personal stack and cluster | none |
-| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; existing delivery patterns over general best practices | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor` |
+| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; existing delivery patterns over general best practices | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation`, `typesafe-ai`, `warp-skill-doctor` |
 | `generic` | No assumed OS, stack, or tools; ask before installing tools | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation` |
 
 `scripts/render.py` renders the combined instructions and the shared
@@ -153,7 +153,7 @@ personal-policy file, import, reference, or symlink. The full repository can
 remain checked out on the work machine.
 
 `profiles/work/excluded-skills.txt` excludes Actual Budget, devshell, NixOS
-validation, and Warp Skill Doctor from a work installation. The remaining
+validation, TypeSafe, and Warp Skill Doctor from a work installation. The remaining
 skills use the work policy: no missing-tool installation and no ad hoc
 replacement validators. Edits can continue with available checks and tests;
 the agent identifies testing still needed instead of claiming it ran.
@@ -181,6 +181,7 @@ skill directory rather than creating another global discovery path.
 | `devshell-preflight`, `nixos-change-validation` | Personal Nix environments and Nix configuration changes |
 | `research`, `prototype`, `domain-modeling`, `diagram`, `eli5` | The specific research, design, documentation, or explanation request |
 | `audit-your-codebase` | A requested whole-repository simplification audit |
+| `typesafe-ai` | A feature that needs a typed semantic judgment (Choice, Noul, Score) from TypeSafe's Jev models; reads the live TypeSafe docs |
 | `actual-budget-import`, `warp-skill-doctor` | Personal budget imports or evaluation from supported local agent histories |
 | `grill-with-docs`, `wayfinder`, `i-have-adhd` | Explicit invocation only, consistently across all three platforms |
 
@@ -189,6 +190,27 @@ Descriptions define automatic relevance. Claude/Copilot use
 `policy.allow_implicit_invocation` in `agents/openai.yaml`. Validation
 checks that these settings agree. Automatic discovery does not authorize
 external actions or override environment restrictions.
+
+### TypeSafe API key
+
+`typesafe-ai` designs judgments and writes integration code without any
+credential. Running that code, or a test call against the API, needs
+`TYPESAFE_API_KEY`, which the TypeSafe SDKs read from the environment. Create
+a key at <https://console.typesafe.ai/keys> and set the variable where your
+harness will see it:
+
+| Harness | Where |
+| --- | --- |
+| Any | Your shell profile or a project `.envrc` |
+| Claude Code | The `env` block of `~/.claude/settings.json` or a project `.claude/settings.json` |
+| Codex | `[shell_environment_policy.set]` in `~/.codex/config.toml` |
+| Flake consumers | Your own Nix secret handling; the packages carry no secrets |
+
+The installer and the flake never write settings files or credentials. When
+the variable is absent, the skill tells the agent to stop and explain this
+instead of producing a failing call. Upstream also ships this skill as the
+Claude Code plugin `typesafe@typesafe-ai`; do not install both, or Claude
+Code loads two copies.
 
 The reviewer and researcher subagents have one body each under
 `agents/bodies/`, with per-harness names, models, and tools in
