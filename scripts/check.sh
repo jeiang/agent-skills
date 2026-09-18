@@ -40,6 +40,24 @@ for path in claude_agents:
     if data["name"] != path.stem:
         sys.exit(f"{path}: name {data['name']!r} must match filename")
 
+omp_agents = sorted(Path("dist/agents/omp").glob("*.md"))
+if len(omp_agents) != 2:
+    sys.exit(f"dist/agents/omp: expected exactly two agents, found {len(omp_agents)}")
+for path in omp_agents:
+    data = frontmatter(path)
+    for field in ("name", "description"):
+        value = data.get(field)
+        if not isinstance(value, str) or not value.strip():
+            sys.exit(f"{path}: frontmatter field {field!r} must be a nonempty string")
+    if data["name"] != path.stem:
+        sys.exit(f"{path}: name {data['name']!r} must match filename")
+    tools = [tool.strip() for tool in str(data.get("tools", "")).split(",")]
+    for tool in tools:
+        if tool in ("edit", "write", "task", "ast_edit"):
+            sys.exit(f"{path}: read-only agent must not use {tool}")
+    if "spawns" in data:
+        sys.exit(f"{path}: agents must not declare spawns so subagents cannot nest")
+
 copilot_model = yaml.safe_load(Path("agents/agents.yaml").read_text(encoding="utf-8"))["copilot"]["model"]
 copilot_agents = sorted(Path("dist/agents/copilot").glob("*.agent.md"))
 if len(copilot_agents) != 2:

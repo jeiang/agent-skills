@@ -29,6 +29,10 @@ agents:
     copilot:
       name: reviewer
       tools: [codebase, search, readFile, listDirectory, usages, changes, problems, runInTerminal]
+    omp:
+      name: change-reviewer
+      effort: high
+      tools: [bash, read, grep, glob]
 
   researcher:
     body: researcher.md
@@ -50,3 +54,7 @@ agents:
     copilot:
       name: researcher
       tools: [codebase, search, readFile, listDirectory, usages, fetch, githubRepo, runInTerminal]
+    omp:
+      name: researcher
+      effort: high
+      tools: [bash, read, grep, glob, web_search]

@@ -13,11 +13,13 @@
         "x86_64-darwin"
         "aarch64-darwin"
       ];
-      # Instruction file path inside each harness home, as in install.sh.
+      # Instruction file path inside each harness home, as in install.sh. The
+      # omp home is ~/.omp/agent rather than ~/.omp.
       harnesses = {
         claude = "CLAUDE.md";
         codex = "AGENTS.md";
         copilot = "instructions/agent-skills.instructions.md";
+        omp = "AGENTS.md";
       };
       profiles = builtins.attrNames (builtins.readDir ./profiles);
 

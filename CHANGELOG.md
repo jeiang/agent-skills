@@ -4,6 +4,7 @@
 
 ### Added
 
+- Oh My Pi (`omp`) as a fourth harness: `install.sh omp <profile>`, `install.ps1 omp <profile>`, and the `omp-<profile>` flake packages install the instructions to `~/.omp/agent/AGENTS.md`, link skills into `~/.omp/agent/skills/`, and render the shared `change-reviewer` and `researcher` subagents into omp's task-agent format under `~/.omp/agent/agents/`. Verified against a live `omp` session: all non-hidden skills, the managed instruction file, and both agents are discovered, and `change-reviewer` spawns.
 - `typesafe-ai` as a vendored skill from typesafe-ai/skills, with its upstream MIT license, Codex display metadata, and source metadata, for designing TypeSafe System One judgments (Choice, Noul, Score) against the live TypeSafe docs. A local section makes the agent check for `TYPESAFE_API_KEY` before running API calls, and the README says where each harness sets it. It replaces upstream's `typesafe@typesafe-ai` Claude Code plugin and is excluded from the work profile.
 - A Nix flake exposing `packages.<system>.<harness>-<profile>`: store paths with the instruction file, skills, and agents laid out as the installer would, so Nix configurations can link them without running the installer.
 - Explicit installation profiles. `install.sh <harness> <profile>` and `install.ps1 <harness> <profile>` pair any harness with `personal`, `work`, or a new `generic` profile that assumes no operating system, stack, or tools. Each profile owns its environment policy and excluded-skill list under `profiles/`.

@@ -19,13 +19,16 @@ excluded() {
   grep -Fxq "$2" "$repo_dir/profiles/$1/excluded-skills.txt"
 }
 
-for agent in codex claude copilot; do
+for agent in codex claude copilot omp; do
   case $agent in
     copilot) profile=work ;;
     *) profile=personal ;;
   esac
   test_home="$test_root/$agent"
-  agent_root="$test_home/.$agent"
+  case $agent in
+    omp) agent_root="$test_home/.omp/agent" ;;
+    *) agent_root="$test_home/.$agent" ;;
+  esac
   mkdir -p "$agent_root/skills"
   ln -s "$repo_dir/codex/start-task" "$agent_root/skills/start-task"
   ln -s "$repo_dir/claude/start-feature" "$agent_root/skills/start-feature"
@@ -56,7 +59,7 @@ for agent in codex claude copilot; do
   [ ! -L "$agent_root/skills/start-task" ]
   [ ! -L "$agent_root/skills/start-feature" ]
   [ ! -e "$test_home/.agents" ]
-  for other in codex claude copilot; do
+  for other in codex claude copilot omp; do
     [ "$other" = "$agent" ] || [ ! -e "$test_home/.$other" ]
   done
 
@@ -85,6 +88,13 @@ for agent in codex claude copilot; do
       cmp "$test_root/header" "$test_root/expected-header"
       assert_link "$agent_root/agents/reviewer.agent.md" "$repo_dir/dist/agents/copilot/reviewer.agent.md"
       assert_link "$agent_root/agents/researcher.agent.md" "$repo_dir/dist/agents/copilot/researcher.agent.md"
+      [ "$(find "$agent_root/agents" -mindepth 1 | wc -l)" -eq 2 ]
+      ;;
+    omp)
+      instruction_file="$agent_root/AGENTS.md"
+      assert_payload "$instruction_file" personal 3
+      assert_link "$agent_root/agents/change-reviewer.md" "$repo_dir/dist/agents/omp/change-reviewer.md"
+      assert_link "$agent_root/agents/researcher.md" "$repo_dir/dist/agents/omp/researcher.md"
       [ "$(find "$agent_root/agents" -mindepth 1 | wc -l)" -eq 2 ]
       ;;
   esac
