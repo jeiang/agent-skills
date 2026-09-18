@@ -4,7 +4,6 @@
 
 ### Added
 
-- `fast-jev-compaction` as a vendored Claude Code plugin from tamaratran/fast-jev-compaction under `claude/`, installed by the personal profile into `~/.claude/skills/` where Claude Code loads it as `fast-jev-compaction@skills-dir`. The installers and the flake now link a `claude/` directory carrying `.claude-plugin/plugin.json` for the Claude harness only. It needs Claude Code 2.1.274+, `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`, and `TYPESAFE_API_KEY`; the README says where to set them.
 - `typesafe-ai` as a vendored skill from typesafe-ai/skills, with its upstream MIT license, Codex display metadata, and source metadata, for designing TypeSafe System One judgments (Choice, Noul, Score) against the live TypeSafe docs. A local section makes the agent check for `TYPESAFE_API_KEY` before running API calls, and the README says where each harness sets it. It replaces upstream's `typesafe@typesafe-ai` Claude Code plugin and is excluded from the work profile.
 - A Nix flake exposing `packages.<system>.<harness>-<profile>`: store paths with the instruction file, skills, and agents laid out as the installer would, so Nix configurations can link them without running the installer.
 - Explicit installation profiles. `install.sh <harness> <profile>` and `install.ps1 <harness> <profile>` pair any harness with `personal`, `work`, or a new `generic` profile that assumes no operating system, stack, or tools. Each profile owns its environment policy and excluded-skill list under `profiles/`.

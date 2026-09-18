@@ -14,8 +14,8 @@ not installed for it:
 | Profile | Environment | Excluded skills |
 | --- | --- | --- |
 | `personal` | macOS and Linux with Nix, the personal stack and cluster | none |
-| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; existing delivery patterns over general best practices | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation`, `typesafe-ai`, `warp-skill-doctor`, `fast-jev-compaction` |
-| `generic` | No assumed OS, stack, or tools; ask before installing tools | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation`, `fast-jev-compaction` |
+| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; existing delivery patterns over general best practices | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation`, `typesafe-ai`, `warp-skill-doctor` |
+| `generic` | No assumed OS, stack, or tools; ask before installing tools | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation` |
 
 `scripts/render.py` renders the combined instructions and the shared
 subagents into `dist/`, which is committed. The installers copy or link
@@ -153,8 +153,7 @@ personal-policy file, import, reference, or symlink. The full repository can
 remain checked out on the work machine.
 
 `profiles/work/excluded-skills.txt` excludes Actual Budget, devshell, NixOS
-validation, TypeSafe, Warp Skill Doctor, and the Jev compaction plugin from
-a work installation. The remaining
+validation, TypeSafe, and Warp Skill Doctor from a work installation. The remaining
 skills use the work policy: no missing-tool installation and no ad hoc
 replacement validators. Edits can continue with available checks and tests;
 the agent identifies testing still needed instead of claiming it ran.
@@ -212,35 +211,6 @@ the variable is absent, the skill tells the agent to stop and explain this
 instead of producing a failing call. Upstream also ships this skill as the
 Claude Code plugin `typesafe@typesafe-ai`; do not install both, or Claude
 Code loads two copies.
-
-### Claude Code plugins
-
-A directory under `claude/` with `.claude-plugin/plugin.json` is a Claude
-Code plugin. The installer and the flake link it under `~/.claude/skills/`
-for the Claude harness only, where Claude Code loads it as
-`<name>@skills-dir` with no marketplace or settings change. Codex and
-Copilot never receive it. Profiles exclude a plugin by name in
-`excluded-skills.txt` like a skill.
-
-`fast-jev-compaction` replaces Claude Code's compaction summary with Jev
-decisions: every tool call and result is scored in one request, stale ones
-are dropped or truncated, and everything kept stays verbatim. It is vendored
-from [tamaratran/fast-jev-compaction](https://github.com/tamaratran/fast-jev-compaction)
-and installed by the personal profile only. It needs Claude Code 2.1.274 or
-later and two variables where Claude Code runs, set as in the table above:
-
-| Variable | Value |
-| --- | --- |
-| `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS` | `1`, the early-access function-hooks opt-in |
-| `TYPESAFE_API_KEY` | Your TypeSafe key |
-
-After a restart, `claude plugin list` shows `fast-jev-compaction@skills-dir`
-and `/compact` reports `fast-jev-compaction: kept N/M messages` or a fallback
-to the built-in summary. Do not also install
-`fast-jev-compaction@fast-jev-compaction` from the upstream marketplace.
-Function hooks are early access; the vendored hook targets the 2.1.274
-declarations, so review `claude/fast-jev-compaction/UPSTREAM.md` after a
-Claude Code upgrade.
 
 The reviewer and researcher subagents have one body each under
 `agents/bodies/`, with per-harness names, models, and tools in

@@ -114,11 +114,7 @@ foreach ($root in 'shared', 'generic', $Agent) {
   $sourceRoot = Join-Path $repoDir $root
   if (-not (Test-Path -LiteralPath $sourceRoot -PathType Container)) { continue }
   foreach ($source in Get-ChildItem -LiteralPath $sourceRoot -Directory) {
-    if (-not (Test-Path -LiteralPath (Join-Path $source.FullName 'SKILL.md'))) {
-      # A Claude Code plugin under the skills directory loads as <name>@skills-dir.
-      $manifest = Join-Path $source.FullName '.claude-plugin/plugin.json'
-      if ($Agent -ne 'claude' -or -not (Test-Path -LiteralPath $manifest)) { continue }
-    }
+    if (-not (Test-Path -LiteralPath (Join-Path $source.FullName 'SKILL.md'))) { continue }
     if ($source.Name -in $excludedSkills) { continue }
     New-AgentLink $source.FullName (Join-Path $skillsRoot $source.Name)
   }
