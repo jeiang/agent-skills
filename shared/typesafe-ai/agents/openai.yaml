@@ -1,0 +1,4 @@
+interface:
+  display_name: "TypeSafe"
+  short_description: "Design typed Jev judgments for an app feature"
+  default_prompt: "Use $typesafe-ai on this."

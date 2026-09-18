@@ -4,6 +4,7 @@
 
 ### Added
 
+- `typesafe-ai` as a vendored skill from typesafe-ai/skills, with its upstream MIT license, Codex display metadata, and source metadata, for designing TypeSafe System One judgments (Choice, Noul, Score) in application code against the live TypeSafe docs. It replaces upstream's `typesafe@typesafe-ai` Claude Code plugin and is excluded from the work profile.
 - A Nix flake exposing `packages.<system>.<harness>-<profile>`: store paths with the instruction file, skills, and agents laid out as the installer would, so Nix configurations can link them without running the installer.
 - Explicit installation profiles. `install.sh <harness> <profile>` and `install.ps1 <harness> <profile>` pair any harness with `personal`, `work`, or a new `generic` profile that assumes no operating system, stack, or tools. Each profile owns its environment policy and excluded-skill list under `profiles/`.
 - A Jinja2 renderer (`scripts/render.py`) that writes the combined instructions and the shared subagents into a committed `dist/` directory; `check` fails when `dist/` is stale.
