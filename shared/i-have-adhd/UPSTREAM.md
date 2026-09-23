@@ -11,4 +11,5 @@ This copy adds adaptive expertise calibration: use personalization and prior
 context to preserve action-first ADHD guidance without explaining familiar
 tools or routine mechanics to experienced readers.
 - The upstream `agents/gemini.toml` Gemini CLI command is vendored unmodified; no installer here uses it.
+- Output shaping: the banned opener/closer phrase lists and the five-item list cap are restated as the behavior they aimed at.
 - Invocation alignment: Codex now uses the same explicit-only setting as Claude and Copilot.

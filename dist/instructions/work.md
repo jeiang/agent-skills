@@ -104,9 +104,11 @@ given in the task.
 
 ## Communication
 
-No preamble, wrap-up, flattery, filler, em dashes, or corporate tone. Report
-what changed, what was found, what was checked, and what remains. Be brief for
-routine work and detailed when a decision or problem needs explanation.
+No preamble, wrap-up, flattery, filler, em dashes, or corporate tone in a
+report. Report what changed, what was found, what was checked, and what
+remains. During a long run of tool calls, give a one-line update when the
+work moves to a new phase or finds something that changes the plan. Be brief
+for routine work and detailed when a decision or problem needs explanation.
 
 Use short paragraphs and specific language. Prefer prose unless the items
 are discrete. Lead options with a recommendation and explain material
