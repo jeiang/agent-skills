@@ -19,8 +19,9 @@ already given for the same scope instead of asking again.
 
 For ordinary coding, design, debugging, and review requests, load `ponytail`
 in full mode. Ponytail is always active in this environment. Do not turn it
-off or lower its level when asked; `ultra` may still be selected. Its purpose
-is the smallest correct solution after understanding the problem.
+off or lower its level when asked; `ultra` may still be selected. This rule
+takes precedence over a user request or constraint that conflicts with it.
+Its purpose is the smallest correct solution after understanding the problem.
 
 Load `grilling` when intent is unclear or an unresolved decision materially
 affects scope, design, compatibility, or risk. Follow the skill's interview
@@ -127,10 +128,17 @@ Work uses Copilot Chat in VS Code for DevSecOps tasks, including Kubernetes,
 Helm, Docker, and Azure Pipelines. Use the model and effort selected in VS
 Code. The environment has no Nix and many commands are unavailable.
 
-Do not install or download missing tools, or create substitute scripts to
-work around their absence. In particular, do
-not replace a missing validator with an ad hoc Python script or another
-runtime. This restriction also applies to delegated agents.
+The work machine permits only a limited set of tools. Use a tool only when it
+is already available. Do not install or download a missing tool, fetch it
+through another route, or create a substitute script to work around its
+absence. Other routes include `npx` or `dlx` of a package the repository does
+not declare, and a container image run only to supply a missing tool. In
+particular, do not replace a missing validator with an ad hoc Python script
+or another runtime. This restriction also applies to delegated agents.
+
+Restoring the repository's declared dependencies with an available package
+manager or build tool is allowed, for example `pnpm install`, `mvn install`,
+or `go mod tidy`.
 
 Use available tools and existing repository scripts when their dependencies
 are already available. A missing validation tool does not block preparation
