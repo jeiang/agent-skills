@@ -1,6 +1,6 @@
 ---
 description: Reviews a completed change once for demonstrable merge-blocking defects, or verifies one supplied repair pass. Use when complexity or risk warrants an independent review; pass the goal, constraints, environment policy, baseline, commits, diff, and validation evidence.
-model: ["GPT-5.6 Luna", "gpt-5.6-luna"]
+model: ["GPT-6 Luna", "gpt-6-luna"]
 tools: [codebase, search, readFile, listDirectory, usages, changes, problems, runInTerminal]
 agents: []
 ---

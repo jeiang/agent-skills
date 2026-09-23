@@ -9,7 +9,7 @@
 - A Nix flake exposing `packages.<system>.<harness>-<profile>`: store paths with the instruction file, skills, and agents laid out as the installer would, so Nix configurations can link them without running the installer.
 - Explicit installation profiles. `install.sh <harness> <profile>` and `install.ps1 <harness> <profile>` pair any harness with `personal`, `work`, or a new `generic` profile that assumes no operating system, stack, or tools. Each profile owns its environment policy and excluded-skill list under `profiles/`.
 - A Jinja2 renderer (`scripts/render.py`) that writes the combined instructions and the shared subagents into a committed `dist/` directory; `check` fails when `dist/` is stale.
-- Copilot custom agents: exactly `reviewer` and `researcher`, pinned to GPT-5.6 Luna, unable to nest subagents, rendered from the same bodies as the Claude and Codex reviewer and researcher.
+- Copilot custom agents: exactly `reviewer` and `researcher`, pinned to GPT-6 Luna, unable to nest subagents, rendered from the same bodies as the Claude and Codex reviewer and researcher.
 - A GitHub Actions workflow that runs `devenv test` on pull requests and pushes to `main`.
 - `lib.entries.<harness>.<profile>`, the skill and agent entry names and the instruction path each flake package installs, so a consumer that links one entry at a time does not have to enumerate the built tree.
 

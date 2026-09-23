@@ -238,7 +238,7 @@ and cannot spawn further subagents; `change-reviewer` is named to avoid
 shadowing omp's bundled `reviewer`.
 
 Copilot installs exactly two agents, `reviewer` and `researcher`. Both are
-pinned to GPT-5.6 Luna, cannot spawn further subagents, and use read-only
+pinned to GPT-6 Luna, cannot spawn further subagents, and use read-only
 tools plus the terminal for inspection commands. Reasoning effort is a
 global Copilot setting, not a per-agent field. The reviewer reports only
 demonstrable merge-blocking defects and is instructed not to be pedantic.
