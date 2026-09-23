@@ -1,6 +1,6 @@
 ---
 description: Researches one bounded repository, compatibility, security, or operational question without editing files. Use when independent repository or primary-source research benefits from a separate context; pass the question, relevant evidence, and environment restrictions.
-model: ["GPT-5.6 Luna", "gpt-5.6-luna"]
+model: ["GPT-6 Luna", "gpt-6-luna"]
 tools: [codebase, search, readFile, listDirectory, usages, fetch, githubRepo, runInTerminal]
 agents: []
 ---

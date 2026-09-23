@@ -6,7 +6,7 @@
 # the display name first, then the settings identifier. Reasoning effort is a
 # global Copilot setting and cannot be pinned per agent.
 copilot:
-  model: ["GPT-5.6 Luna", "gpt-5.6-luna"]
+  model: ["GPT-6 Luna", "gpt-6-luna"]
 
 agents:
   reviewer:

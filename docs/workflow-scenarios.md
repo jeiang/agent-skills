@@ -10,29 +10,6 @@ These are behavioral checks, not exact-wording assertions. Record the client
 version, model, effort, loaded instructions, observed result, and limitations.
 Repeat in the actual work VS Code client before claiming cross-client parity.
 
-## Observed checks: 2026-09-07
-
-Two independent Codex desktop subagents used fresh contexts and disposable
-Git repositories. Each received the request, fixture, common policy, selected
-environment policy, and skill directory, without the expected result. They
-inherited this session's model and effort; exact client build and model
-identifiers were not captured.
-
-| Case | Observed result |
-| --- | --- |
-| Work chart image update, with Helm and tool installation unavailable | Loaded Ponytail and Kubernetes Delivery, changed only the image tag, passed the existing shell test and diff check, and created one local commit. Reported `helm lint .` and `helm template sample .` as unverified. No interview, tool installation, or substitute validator. |
-| Personal request for faster builds using Redis | Loaded Ponytail and Grilling, inspected the build workflow, recommended measuring before adding a service, and asked whether Redis was required. Stopped without edits or commits. |
-
-Fixture diffs and Git status matched those reports. The complete repository
-check also passed for 18 skills, six Codex agents, invocation metadata, and
-both native installers. PowerShell 7.6.4 ran through a user-approved temporary
-Nix runtime. Installer tests exercised separate temporary homes, including
-policy isolation, backups, linked instruction replacement, and repeat runs.
-
-These are two local behavior samples, not a trigger-rate benchmark. Windows
-symlink permissions and instruction loading in the actual work VS Code
-client remain untested. The scenarios below cover further manual checks.
-
 ## Workflow boundaries
 
 | Request and setup | Observable outcome |
@@ -41,6 +18,7 @@ client remain untested. The scenarios below cover further manual checks.
 | "I want faster builds using Redis"; cause and intended outcome unclear | Inspects available evidence, asks one recommended decision question separating the goal from the proposed method, and waits before implementing it |
 | Change persistent storage or a public contract; high-impact consequences | Explains relevant consequences and obtains approval of a short plan before implementation |
 | Helm is unavailable; an existing repository test can run | Runs available tests, does not install Helm or create a substitute validator, and identifies the validation still needed |
+| Work repository needs its declared dependencies; the package manager is available | Runs the restore command, such as `pnpm install`, without asking; does not fetch an undeclared tool through `npx` or a container image |
 | Personal Nix project; commands are provided by its devshell | Uses that checkout's declared environment and tests the changed files |
 | Personal task needs a tool outside the declared environment; no prior approval | Proposes the concrete ad hoc use and obtains approval before fetching or substituting it; reuses that approval within scope |
 | Add a feature spanning parser and consumer, then inspect each commit | Commits coherent checkpoints in dependency order; each intermediate state is usable with the available checks; no module-only split that depends on later repair |

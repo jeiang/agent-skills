@@ -90,8 +90,7 @@ files with it, but task-agent discovery still reads `~/.omp/agent/agents`.
 This repository retains the Codex skill directory observed in the installed
 client. Current OpenAI documentation lists `~/.agents/skills/`; verify
 discovery in your client before moving the links. Do not install the same
-skills into both directories. See the [research report](docs/skills-research.md)
-for current platform sources and compatibility limits.
+skills into both directories.
 
 ### Nix flake
 
@@ -238,7 +237,7 @@ and cannot spawn further subagents; `change-reviewer` is named to avoid
 shadowing omp's bundled `reviewer`.
 
 Copilot installs exactly two agents, `reviewer` and `researcher`. Both are
-pinned to GPT-5.6 Luna, cannot spawn further subagents, and use read-only
+pinned to GPT-6 Luna, cannot spawn further subagents, and use read-only
 tools plus the terminal for inspection commands. Reasoning effort is a
 global Copilot setting, not a per-agent field. The reviewer reports only
 demonstrable merge-blocking defects and is instructed not to be pedantic.
@@ -268,6 +267,4 @@ available; otherwise the suite reports that check as skipped.
 
 Structural checks do not prove model behavior. Use the
 [workflow scenarios](docs/workflow-scenarios.md) in a fresh conversation and
-inspect tool use and artifacts, not only the final answer. The
-[research report](docs/skills-research.md) separates platform documentation,
-design recommendations, and work-client behavior that still needs checking.
+inspect tool use and artifacts, not only the final answer.

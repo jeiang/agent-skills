@@ -20,8 +20,9 @@ already given for the same scope instead of asking again.
 {% if profile == "work" %}
 For ordinary coding, design, debugging, and review requests, load `ponytail`
 in full mode. Ponytail is always active in this environment. Do not turn it
-off or lower its level when asked; `ultra` may still be selected. Its purpose
-is the smallest correct solution after understanding the problem.
+off or lower its level when asked; `ultra` may still be selected. This rule
+takes precedence over a user request or constraint that conflicts with it.
+Its purpose is the smallest correct solution after understanding the problem.
 {% else %}
 For ordinary coding, design, debugging, and review requests, load `ponytail`
 in full mode unless the user selected another level or turned it off. Its
@@ -40,6 +41,13 @@ Examples include data migrations, public contract changes, and changes that
 affect deployment safety. Plan depth follows the consequences, not the file
 extension. Ask again when new evidence materially changes the approved scope
 or consequences; routine corrections stay within the existing authorization.
+
+Read-only inspection of live systems is allowed. Commands that change state
+outside the working tree, such as changes to hosts, clusters, cloud
+resources, remote data, or published packages, require explicit
+authorization for that action. Do not print, log, or commit secret values,
+such as tokens, keys, passwords, or decoded Kubernetes Secrets. Refer to a
+secret by its name and location.
 
 Select other skills by the actual task and environment, using their
 descriptions and invocation settings. Do not load every skill for a stack
