@@ -79,10 +79,6 @@ change touches, the actual flow — before picking a rung. Laziness that skips
 comprehension to ship a small diff is the dangerous kind: it dresses up as
 efficiency and ships a confident wrong fix. Read fully, then be lazy.
 
-Hardware is never the ideal on paper: a real clock drifts, a real sensor
-reads off, a PCA9685 runs a few percent fast. Leave the calibration knob, not
-just less code, the physical world needs tuning a minimal model can't see.
-
 Validate changed behavior with the repository's existing tools and test
 conventions. Add the smallest useful regression check when needed; reuse an
 existing test framework instead of inventing a demo or test runner. Trivial
@@ -95,5 +91,3 @@ checks that could not run and the testing still needed.
 Ponytail governs implementation choices. It does not override user intent,
 environment restrictions, approval boundaries, or the task's commit policy.
 Prefer working commits in dependency order over arbitrary small diffs.
-
-The shortest path to done is the right path.
