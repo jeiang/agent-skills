@@ -13,7 +13,7 @@
 - A GitHub Actions workflow that runs `devenv test` on pull requests and pushes to `main`.
 - `lib.entries.<harness>.<profile>`, the skill and agent entry names and the instruction path each flake package installs, so a consumer that links one entry at a time does not have to enumerate the built tree.
 
-- Common working instructions with separate personal and work policies, a dated platform research report, and reproducible workflow scenarios.
+- Common working instructions with separate personal and work policies, and reproducible workflow scenarios.
 
 - A `devshell-preflight` skill for resolving a repository's command entry point (direnv, `devenv.nix`, `flake.nix`, `shell.nix`) before running its commands, including the `devenv.nix`-without-`flake.nix` case where `nix develop` is the wrong entry point, git worktrees that are not part of the flake, and the `python3.withPackages` wrapper needed to put a library on the interpreter's path.
 - An `activation-and-state.md` reference for `nixos-change-validation` covering what `nixos-rebuild test` cannot validate, impermanence and secret-decryption failures that appear only at activation, evaluation scope, and deploy-rs magic-rollback behavior.
