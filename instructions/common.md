@@ -41,6 +41,13 @@ affect deployment safety. Plan depth follows the consequences, not the file
 extension. Ask again when new evidence materially changes the approved scope
 or consequences; routine corrections stay within the existing authorization.
 
+Read-only inspection of live systems is allowed. Commands that change state
+outside the working tree, such as changes to hosts, clusters, cloud
+resources, remote data, or published packages, require explicit
+authorization for that action. Do not print, log, or commit secret values,
+such as tokens, keys, passwords, or decoded Kubernetes Secrets. Refer to a
+secret by its name and location.
+
 Select other skills by the actual task and environment, using their
 descriptions and invocation settings. Do not load every skill for a stack
 merely because the repository uses it. Grilling alone does not require ADRs,

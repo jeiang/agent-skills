@@ -35,6 +35,13 @@ affect deployment safety. Plan depth follows the consequences, not the file
 extension. Ask again when new evidence materially changes the approved scope
 or consequences; routine corrections stay within the existing authorization.
 
+Read-only inspection of live systems is allowed. Commands that change state
+outside the working tree, such as changes to hosts, clusters, cloud
+resources, remote data, or published packages, require explicit
+authorization for that action. Do not print, log, or commit secret values,
+such as tokens, keys, passwords, or decoded Kubernetes Secrets. Refer to a
+secret by its name and location.
+
 Select other skills by the actual task and environment, using their
 descriptions and invocation settings. Do not load every skill for a stack
 merely because the repository uses it. Grilling alone does not require ADRs,
@@ -120,8 +127,8 @@ Work uses Copilot Chat in VS Code for DevSecOps tasks, including Kubernetes,
 Helm, Docker, and Azure Pipelines. Use the model and effort selected in VS
 Code. The environment has no Nix and many commands are unavailable.
 
-Do not invoke `devshell-preflight`, install or download missing tools, or
-create substitute scripts to work around their absence. In particular, do
+Do not install or download missing tools, or create substitute scripts to
+work around their absence. In particular, do
 not replace a missing validator with an ad hoc Python script or another
 runtime. This restriction also applies to delegated agents.
 
@@ -146,5 +153,6 @@ without discussion.
 
 Select Kubernetes diagnosis, Kubernetes delivery, or Azure Pipelines skills
 when their specific task applies. Prepare reviewable edits and testing or
-deployment instructions within the requested scope. Live operations require
-the user's authorization and the tools already permitted in this environment.
+deployment instructions within the requested scope. Use only the tools
+already permitted in this environment for live inspection. Confirm the
+active cluster context or subscription before the first live command.

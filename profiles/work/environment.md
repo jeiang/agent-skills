@@ -4,8 +4,8 @@ Work uses Copilot Chat in VS Code for DevSecOps tasks, including Kubernetes,
 Helm, Docker, and Azure Pipelines. Use the model and effort selected in VS
 Code. The environment has no Nix and many commands are unavailable.
 
-Do not invoke `devshell-preflight`, install or download missing tools, or
-create substitute scripts to work around their absence. In particular, do
+Do not install or download missing tools, or create substitute scripts to
+work around their absence. In particular, do
 not replace a missing validator with an ad hoc Python script or another
 runtime. This restriction also applies to delegated agents.
 
@@ -30,5 +30,6 @@ without discussion.
 
 Select Kubernetes diagnosis, Kubernetes delivery, or Azure Pipelines skills
 when their specific task applies. Prepare reviewable edits and testing or
-deployment instructions within the requested scope. Live operations require
-the user's authorization and the tools already permitted in this environment.
+deployment instructions within the requested scope. Use only the tools
+already permitted in this environment for live inspection. Confirm the
+active cluster context or subscription before the first live command.
