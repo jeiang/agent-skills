@@ -17,11 +17,7 @@ work around work-machine restrictions.
 
 ## Investigate
 
-1. Inspect repository manifests, Helm values, deployment workflows, and applicable AGENTS.md files.
-2. Gather the smallest useful live evidence: workload and pod status, events, logs, rollout history, rendered release values, services, endpoints, ingress, policies, volumes, and node scheduling data as relevant.
-3. Trace the failure from the user-visible symptom through routing, workload, dependencies, and infrastructure. Distinguish configuration evidence from inference.
-4. Compare declared, rendered, and live state. Account for GitOps or pipeline ownership before recommending direct cluster changes.
-5. Identify the primary cause, contributing conditions, and evidence that rules out plausible alternatives.
+Read the repository manifests, Helm values, deployment workflows, and applicable AGENTS.md files before live commands, so live evidence is checked against declared intent. Gather the smallest live evidence that separates the plausible causes, and trace the failure from the user-visible symptom through routing, workload, dependencies, and infrastructure. Compare declared, rendered, and live state, and account for GitOps or pipeline ownership before recommending direct cluster changes. The investigation is done when it names the primary cause, the contributing conditions, and the evidence that rules out the plausible alternatives. Distinguish configuration evidence from inference throughout.
 
 Do not restart, delete, scale, patch, upgrade, or roll back resources unless the user explicitly asks for remediation and the impact is understood. Do not treat warnings or incidental drift as root causes without a demonstrated connection to the symptom.
 
