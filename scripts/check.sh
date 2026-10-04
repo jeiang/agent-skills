@@ -58,6 +58,13 @@ for path in omp_agents:
     if "spawns" in data:
         sys.exit(f"{path}: agents must not declare spawns so subagents cannot nest")
 
+for path in sorted(Path("agents/omp").glob("*.md")):
+    data = frontmatter(path)
+    if data.get("name") != path.stem:
+        sys.exit(f"{path}: name {data.get('name')!r} must match filename")
+    if not isinstance(data.get("description"), str) or not data["description"].strip():
+        sys.exit(f"{path}: description must be a nonempty string")
+
 copilot_model = yaml.safe_load(Path("agents/agents.yaml").read_text(encoding="utf-8"))["copilot"]["model"]
 copilot_agents = sorted(Path("dist/agents/copilot").glob("*.agent.md"))
 if len(copilot_agents) != 2:
