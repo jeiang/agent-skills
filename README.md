@@ -229,12 +229,16 @@ The reviewer and researcher subagents have one body each under
 `agents/agents.yaml`, rendered through `agents/templates/` into
 `dist/agents/<harness>/`. Harness-specific agents that are not shared stay
 as plain files under `agents/codex/` (implementer, planner, plan reviewer,
-documentation author) and `agents/claude/` (implementer). Claude and Codex
-agents keep their platform model defaults. The omp `change-reviewer` and
-`researcher` pin no model, so they run on the parent session's model at
-`thinking-level: high` with read-only tools (`bash` for inspection commands)
-and cannot spawn further subagents; `change-reviewer` is named to avoid
-shadowing omp's bundled `reviewer`.
+documentation author), `agents/claude/` (implementer), and `agents/omp/`
+(designer). Claude and Codex agents keep their platform model defaults. The
+omp `change-reviewer` and `researcher` pin no model, so they run on the
+parent session's model at `thinking-level: high` with read-only tools
+(`bash` for inspection commands) and cannot spawn further subagents;
+`change-reviewer` is named to avoid shadowing omp's bundled `reviewer`. The
+omp `designer` is the UI/UX subagent omp bundled until upstream removed it
+(can1357/oh-my-pi `2493ba99c4`, MIT); it keeps that prompt, runs on the
+parent session's model in place of the removed `@designer` role, and can
+edit files.
 
 Copilot installs exactly two agents, `reviewer` and `researcher`. Both are
 pinned to GPT-6 Luna, cannot spawn further subagents, and use read-only
