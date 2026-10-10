@@ -93,10 +93,12 @@ for agent in codex claude copilot omp; do
     omp)
       instruction_file="$agent_root/AGENTS.md"
       assert_payload "$instruction_file" personal 3
-      assert_link "$agent_root/agents/designer.md" "$repo_dir/agents/omp/designer.md"
+      for omp_agent in designer fast smol max-reasoning; do
+        assert_link "$agent_root/agents/$omp_agent.md" "$repo_dir/agents/omp/$omp_agent.md"
+      done
       assert_link "$agent_root/agents/change-reviewer.md" "$repo_dir/dist/agents/omp/change-reviewer.md"
       assert_link "$agent_root/agents/researcher.md" "$repo_dir/dist/agents/omp/researcher.md"
-      [ "$(find "$agent_root/agents" -mindepth 1 | wc -l)" -eq 3 ]
+      [ "$(find "$agent_root/agents" -mindepth 1 | wc -l)" -eq 6 ]
       ;;
   esac
 
