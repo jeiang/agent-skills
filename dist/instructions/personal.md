@@ -72,6 +72,21 @@ because work occurred.
 
 ## Git
 
+Do all branch work in a linked worktree under `.worktrees/` at the repository
+root, one worktree per branch. Fetch first and branch from the latest
+upstream default branch, for example
+`git worktree add -b <branch> .worktrees/<name> origin/main`. Create
+`.worktrees/` when it does not exist. If `.gitignore` does not ignore
+`.worktrees/`, add it and commit that change on the branch. Reuse the
+existing worktree for a branch that already has one. Each agent and subagent
+that works on a separate branch uses its own worktree; a coordinator gives
+each worker its worktree path and branch.
+
+Keep the main checkout on the default branch at the latest upstream commit,
+and update it only by fast-forward. Do not edit, commit, or switch branches
+in the main checkout. If it is on another branch or has changes you do not
+own, do not discard them; report the state.
+
 An implementation request authorizes local commits unless the user says
 otherwise. Commit each completed logical change as a coherent working
 checkpoint, in dependency order. Run the available relevant checks at each

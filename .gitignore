@@ -1,3 +1,4 @@
 .devenv/
 result
 result-*
+.worktrees/
