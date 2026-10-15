@@ -17,6 +17,7 @@ not installed for it:
 | `personal` | macOS and Linux with Nix, the personal stack and cluster | none |
 | `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; existing delivery patterns over general best practices | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor` |
 | `generic` | No assumed OS, stack, or tools; ask before installing tools | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation` |
+| `cloud` | Disposable Claude Code on the web container with Nix; no cluster or host access; temporary Nix tooling allowed | `actual-budget-import`, `warp-skill-doctor` |
 
 `scripts/render.py` renders the combined instructions and the shared
 subagents into `dist/`, which is committed. The installers copy or link
@@ -56,6 +57,7 @@ any harness accepts any profile:
 | Personal Claude Code | `./install.sh claude personal` | `./install.ps1 claude personal` |
 | Work Copilot Chat in VS Code | `./install.sh copilot work` | `./install.ps1 copilot work` |
 | Another person's machine | `./install.sh claude generic` | `./install.ps1 claude generic` |
+| Claude Code on the web | `./install.sh claude cloud` | n/a |
 | Personal Oh My Pi | `./install.sh omp personal` | `./install.ps1 omp personal` |
 
 Reinstalling with a different profile regenerates the instruction file and
