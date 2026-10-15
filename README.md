@@ -182,6 +182,31 @@ discovery also affects useful project Claude instructions. The installer
 does not link personal policy into the repository root or modify settings.
 See [VS Code instruction discovery](https://code.visualstudio.com/docs/agent-customization/custom-instructions).
 
+### Claude Code on the web
+
+Each cloud session starts in a fresh container, so the installation runs from
+the environment's setup script (environment menu, Edit, Setup script). The
+checkout lives outside the session's working directory so the skill links
+stay valid whichever repository the session opens:
+
+```sh
+#!/bin/sh
+set -eu
+ref=main
+dir=/opt/agent-skills
+if [ ! -d "$dir/.git" ]; then
+  git clone --depth 1 --branch "$ref" https://github.com/jeiang/agent-skills "$dir"
+else
+  git -C "$dir" fetch --depth 1 origin "$ref"
+  git -C "$dir" checkout -q --detach FETCH_HEAD
+fi
+"$dir/install.sh" claude cloud
+```
+
+Every new session installs whatever `ref` names at that moment; set it to a
+tag to update deliberately. The environment's network policy must allow
+github.com.
+
 ## Skills and optional agents
 
 Every maintained skill has one source under `shared/`. `generic/` remains
