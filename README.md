@@ -192,6 +192,7 @@ skill directory rather than creating another global discovery path.
 | `kubernetes-delivery`, `kubernetes-diagnose`, `azure-pipelines-maintenance` | The matching delivery, incident, or pipeline task |
 | `devshell-preflight`, `nixos-change-validation` | Personal Nix environments and Nix configuration changes |
 | `research`, `prototype`, `domain-modeling`, `diagram`, `eli5` | The specific research, design, documentation, or explanation request |
+| `anatomy` | Detailed interactive isometric SVG explainers, with optional WebGL and 3D |
 | `audit-your-codebase` | A requested whole-repository simplification audit |
 | `actual-budget-import`, `warp-skill-doctor` | Personal budget imports or evaluation from supported local agent histories |
 | `grill-with-docs`, `wayfinder`, `i-have-adhd` | Explicit invocation only, consistently across all platforms |
