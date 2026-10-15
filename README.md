@@ -17,6 +17,7 @@ not installed for it:
 | `personal` | macOS and Linux with Nix, the personal stack and cluster | none |
 | `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; existing delivery patterns over general best practices | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor` |
 | `generic` | No assumed OS, stack, or tools; ask before installing tools | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation` |
+| `cloud` | Disposable Claude Code on the web container with Nix; no cluster or host access; temporary Nix tooling allowed | `actual-budget-import`, `warp-skill-doctor` |
 
 `scripts/render.py` renders the combined instructions and the shared
 subagents into `dist/`, which is committed. The installers copy or link
@@ -56,6 +57,7 @@ any harness accepts any profile:
 | Personal Claude Code | `./install.sh claude personal` | `./install.ps1 claude personal` |
 | Work Copilot Chat in VS Code | `./install.sh copilot work` | `./install.ps1 copilot work` |
 | Another person's machine | `./install.sh claude generic` | `./install.ps1 claude generic` |
+| Claude Code on the web | `./install.sh claude cloud` | n/a |
 | Personal Oh My Pi | `./install.sh omp personal` | `./install.ps1 omp personal` |
 
 Reinstalling with a different profile regenerates the instruction file and
@@ -179,6 +181,31 @@ instructions, review `chat.useClaudeMdFile` and
 discovery also affects useful project Claude instructions. The installer
 does not link personal policy into the repository root or modify settings.
 See [VS Code instruction discovery](https://code.visualstudio.com/docs/agent-customization/custom-instructions).
+
+### Claude Code on the web
+
+Each cloud session starts in a fresh container, so the installation runs from
+the environment's setup script (environment menu, Edit, Setup script). The
+checkout lives outside the session's working directory so the skill links
+stay valid whichever repository the session opens:
+
+```sh
+#!/bin/sh
+set -eu
+ref=main
+dir=/opt/agent-skills
+if [ ! -d "$dir/.git" ]; then
+  git clone --depth 1 --branch "$ref" https://github.com/jeiang/agent-skills "$dir"
+else
+  git -C "$dir" fetch --depth 1 origin "$ref"
+  git -C "$dir" checkout -q --detach FETCH_HEAD
+fi
+"$dir/install.sh" claude cloud
+```
+
+Every new session installs whatever `ref` names at that moment; set it to a
+tag to update deliberately. The environment's network policy must allow
+github.com.
 
 ## Skills and optional agents
 

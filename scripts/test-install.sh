@@ -137,6 +137,19 @@ assert_link "$test_home/.claude/skills/warp-skill-doctor" "$repo_dir/shared/warp
 assert_payload "$test_home/.copilot/instructions/agent-skills.instructions.md" generic 6
 assert_link "$test_home/.copilot/skills/warp-skill-doctor" "$repo_dir/shared/warp-skill-doctor"
 
+# The cloud profile keeps the Nix skills and drops host-only ones.
+test_home="$test_root/cloud"
+"$repo_dir/install.sh" claude cloud --home "$test_home" >/dev/null
+for skill_path in "$repo_dir/shared"/*; do
+  skill=$(basename "$skill_path")
+  if excluded cloud "$skill"; then
+    [ ! -e "$test_home/.claude/skills/$skill" ] && [ ! -L "$test_home/.claude/skills/$skill" ]
+  else
+    assert_link "$test_home/.claude/skills/$skill" "$skill_path"
+  fi
+done
+assert_payload "$test_home/.claude/CLAUDE.md" cloud 3
+
 # Existing user instructions require an explicit replacement and a backup.
 test_home="$test_root/user-instructions"
 mkdir -p "$test_home/.claude"

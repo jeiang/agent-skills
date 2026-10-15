@@ -4,6 +4,7 @@
 
 ### Added
 
+- A `cloud` profile for Claude Code on the web sandboxes: Nix available, no cluster or host access, temporary Nix tooling without approval, and activation handed back to the user. It excludes `actual-budget-import` and `warp-skill-doctor`. Install it from the environment's setup script with `install.sh claude cloud`.
 - `anatomy` vendored from `wheresryan22/anatomy` at `bc943e4`, including its rendering kit, reference guides, scripts, eight examples, Codex display metadata, and MIT license.
 - omp-only `fast`, `smol`, and `max-reasoning` general-purpose subagents under `agents/omp/`, each running on the model role of the same name so the consumer's `modelRoles` picks the model and thinking level.
 - An omp-only `designer` subagent under `agents/omp/`: the UI/UX implementation and review agent omp removed from its bundled set, kept with its upstream prompt and running on the parent session's model.
