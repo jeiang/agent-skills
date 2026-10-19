@@ -236,7 +236,7 @@ The reviewer and researcher subagents have one body each under
 `dist/agents/<harness>/`. Harness-specific agents that are not shared stay
 as plain files under `agents/codex/` (implementer, planner, plan reviewer,
 documentation author), `agents/claude/` (implementer), and `agents/omp/`
-(designer, fast, smol, reasoning-task, max-reasoning). Claude and Codex agents keep their
+(designer, fast, smol, max-reasoning). Claude and Codex agents keep their
 platform model defaults. The
 omp `change-reviewer` and `researcher` pin no model, so they run on the
 parent session's model at `thinking-level: high` with read-only tools
@@ -245,7 +245,7 @@ parent session's model at `thinking-level: high` with read-only tools
 omp `designer` is the UI/UX subagent omp bundled until upstream removed it
 (can1357/oh-my-pi `2493ba99c4`, MIT); it keeps that prompt, runs on the
 parent session's model in place of the removed `@designer` role, and can
-edit files. The omp `fast`, `smol`, `reasoning-task`, and `max-reasoning` agents are
+edit files. The omp `fast`, `smol`, and `max-reasoning` agents are
 general-purpose workers that run on the model role of the same name
 (`model: "@<role>"`); the consumer assigns each role a model and thinking
 level in `modelRoles`.
