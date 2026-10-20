@@ -29,6 +29,8 @@ When a change is intended to preserve behavior, prove it rather than asserting i
 
 Capture a check's full output. Piping a long-running check through `tail` discards the error that made it fail and forces a second run.
 
+Before pushing an input bump or package change, list what the affected outputs will build: `nix build --dry-run <output>` and read the "will be built" section. A heavy package there (a compiler, an application, a kernel) means the configured caches do not have it, so CI will build it from source. Report that before opening the pull request, and use the repository's way to prebuild and push it if one exists.
+
 If the Nix daemon, remote builder, required system, cache, or secret is unavailable, report the limitation and do not claim runtime validation.
 
 ## Activate safely

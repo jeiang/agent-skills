@@ -43,6 +43,8 @@
 
 ### Changed
 
+- `nixos-change-validation` requires a `nix build --dry-run` check of what an input bump or package change will build, and a report of any heavy uncached package before the pull request opens, so CI does not compile it from source unannounced.
+- The `wayfinder` GitHub tracker doc adds a bulk-creation rule: run the ticket batch with a timeout that covers every `gh` call, and skip titles that already exist so a stopped batch can resume without duplicates.
 - Refreshed `anatomy` to `1482e84`, including A4/Letter PDF sheets, the push-button example, and upstream geometry, browser-automation, and publishing fixes. The recorded frontmatter adaptation is retained.
 - Refreshed the six mattpocock/skills copies and bundled tracker docs to `5beb35b`. Domain modeling now uses `GLOSSARY.md` and `GLOSSARY-MAP.md` in place of `CONTEXT.md` and `CONTEXT-MAP.md`; grilling questions make “yes” accept the recommendation; wayfinder clarifies labels, issue cross-references, and research-branch handling. Recorded local adaptations are retained.
 - Refreshed Ponytail to v5.3.2, `i-have-adhd` to `1ecea19`, and `warp-skill-doctor` to `acb107a`. Ponytail adopts upstream's shorter complete-change workflow while preserving local approval, testing, output, and persistence rules. Skill Doctor adds procedure-compliance and verbosity scoring plus Hermes session support.
