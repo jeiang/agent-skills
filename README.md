@@ -37,6 +37,8 @@ distinguishes goals from proposed tools and interviews round by round.
 Clear, reversible changes proceed directly; consequential changes need a
 short approved plan. Research, implementation, and review use subagents only
 when a separate context or parallel work will help.
+Research returns source-cited findings by default; repository notes are
+written only when the requested deliverable includes them.
 
 Implementation requests authorize local commits unless the user says
 otherwise. Each commit is a usable checkpoint in dependency order, not an
@@ -268,7 +270,8 @@ redistribution limitation is recorded in its `UPSTREAM.md`.
 
 ## Development and verification
 
-Run the repository checks through its Nix environment:
+Where the active environment policy permits Nix, run the repository checks
+through its Nix environment:
 
 ```sh
 devenv shell -- check
@@ -281,6 +284,8 @@ policy consistency, that `dist/` matches its sources, native installer
 isolation and migration, shell syntax and formatting, and the Git diff. The
 same checks run in GitHub Actions on pull requests and pushes to `main`. PowerShell execution runs when `pwsh` is
 available; otherwise the suite reports that check as skipped.
+The work profile must not fetch Nix or missing tools to run these commands;
+use available checks and the normal pipeline, and report checks still needed.
 
 Structural checks do not prove model behavior. Use the
 [workflow scenarios](docs/workflow-scenarios.md) in a fresh conversation and
