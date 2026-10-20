@@ -18,16 +18,20 @@ already given for the same scope instead of asking again.
 ## Choose the work needed
 
 {% if profile == "work" %}
-For ordinary coding, design, debugging, and review requests, load `ponytail`
-in full mode. Ponytail is always active in this environment. Do not turn it
-off or lower its level when asked; `ultra` may still be selected. This rule
-takes precedence over a user request or constraint that conflicts with it.
-Its purpose is the smallest correct solution after understanding the problem.
+For ordinary coding, design, debugging, and review requests, apply the
+Ponytail section below in full mode. Ponytail is always active in this
+environment. Do not turn it off or lower its level when asked; `ultra` may
+still be selected. This rule takes precedence over a user request or
+constraint that conflicts with it. Its purpose is the smallest correct
+solution after understanding the problem.
 {% else %}
-For ordinary coding, design, debugging, and review requests, load `ponytail`
-in full mode unless the user selected another level or turned it off. Its
-purpose is the smallest correct solution after understanding the problem.
+For ordinary coding, design, debugging, and review requests, apply the
+Ponytail section below in full mode unless the user selected another level
+or turned it off. Its purpose is the smallest correct solution after
+understanding the problem.
 {% endif %}
+The rules are already in context, so do not load the `ponytail` skill for
+ordinary coding; it exists for explicit invocation and level selection.
 
 Load `grilling` when intent is unclear or an unresolved decision materially
 affects scope, design, compatibility, or risk. Follow the skill's interview
@@ -60,6 +64,10 @@ and the agent tools are available. Pass the goal, constraints, environment
 policy, acceptance criteria, relevant evidence, and commit policy. Give each
 worker clear ownership. Use the selected model and effort unless there is a
 task-specific reason to use an available specialist.
+
+## Ponytail
+
+{{ ponytail }}
 
 ## Validation and review
 

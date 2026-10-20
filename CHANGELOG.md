@@ -43,6 +43,7 @@
 
 ### Changed
 
+- The rendered instructions carry the `ponytail` skill body as a Ponytail section, and the skill's description now limits it to explicit invocation and level selection. Ordinary coding no longer spends a turn loading the skill in every session.
 - The common Git instructions require branch work in a per-branch worktree under `.worktrees/`, created and git-ignored when missing, with a separate worktree for each agent and subagent branch. The main checkout stays on the latest default branch and is updated only by fast-forward. This repository ignores `.worktrees/`.
 - The skill validator accepts an optional `metadata` frontmatter mapping, as upstream skills such as `i-have-adhd` ship it.
 - `grilling` adopts upstream's round-by-round frontier interview and asks each round's closed questions through the harness's structured question tool when one exists (Claude Code's `AskUserQuestion`), with two to four options, a one-line trade-off each, and the recommendation first; open-ended questions stay in chat. The common instructions and README no longer prescribe one decision per turn and defer to the skill.

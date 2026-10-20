@@ -1,6 +1,6 @@
 ---
 name: ponytail
-description: Choose the smallest correct solution for coding, debugging, design, refactoring, review, and dependency choices. Use for ordinary coding requests or when the user asks for ponytail, simplicity, or less complexity. Do not use for general knowledge, prose, or other non-coding work.
+description: Select a Ponytail level (lite, full, or ultra), or turn Ponytail back on after it was stopped. Its full-mode rules are already in the working agreements, so do not load this skill for ordinary coding.
 argument-hint: "[lite|full|ultra]"
 license: MIT
 ---

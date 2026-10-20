@@ -3,6 +3,8 @@
 
 Sources:
 - instructions/common.md: Jinja template shared by every profile.
+- shared/ponytail/SKILL.md: its body is inlined into the instructions as the
+  Ponytail section, so ordinary coding needs no skill load.
 - profiles/<profile>/environment.md: appended after the common instructions.
 - agents/agents.yaml, agents/bodies/, agents/templates/: shared subagents
   rendered into each harness's native definition format.
@@ -44,13 +46,23 @@ def profiles() -> list[str]:
     )
 
 
+def ponytail_rules() -> str:
+    """The ponytail skill body with its title dropped and headings nested one level deeper."""
+    _, _, body = (ROOT / "shared" / "ponytail" / "SKILL.md").read_text(encoding="utf-8").split("---\n", 2)
+    title, *lines = body.strip().splitlines()
+    if title != "# Ponytail":
+        raise SystemExit(f"shared/ponytail/SKILL.md: expected '# Ponytail' title, got {title!r}")
+    return "\n".join("#" + line if line.startswith("#") else line for line in lines).strip()
+
+
 def render_instructions() -> dict[Path, str]:
     common = env.get_template("instructions/common.md")
+    ponytail = ponytail_rules()
     outputs: dict[Path, str] = {}
     for profile in profiles():
         environment = (ROOT / "profiles" / profile / "environment.md").read_text(encoding="utf-8")
         outputs[DIST / "instructions" / f"{profile}.md"] = (
-            common.render(profile=profile) + "\n" + environment
+            common.render(profile=profile, ponytail=ponytail) + "\n" + environment
         )
     return outputs
 
