@@ -15,9 +15,9 @@ not installed for it:
 | Profile | Environment | Excluded skills |
 | --- | --- | --- |
 | `personal` | macOS and Linux with Nix, the personal stack and cluster | none |
-| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; existing delivery patterns over general best practices | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor` |
-| `generic` | No assumed OS, stack, or tools; ask before installing tools | `actual-budget-import`, `devshell-preflight`, `nixos-change-validation` |
-| `cloud` | Disposable Claude Code on the web container with Nix; no cluster or host access; temporary Nix tooling allowed | `actual-budget-import`, `warp-skill-doctor` |
+| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; existing delivery patterns over general best practices | `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor` |
+| `generic` | No assumed OS, stack, or tools; ask before installing tools | `devshell-preflight`, `nixos-change-validation` |
+| `cloud` | Disposable Claude Code on the web container with Nix; no cluster or host access; temporary Nix tooling allowed | `warp-skill-doctor` |
 
 `scripts/render.py` renders the combined instructions and the shared
 subagents into `dist/`, which is committed. The installers copy or link
@@ -168,8 +168,8 @@ The work profile receives common + work policy only. It receives no
 personal-policy file, import, reference, or symlink. The full repository can
 remain checked out on the work machine.
 
-`profiles/work/excluded-skills.txt` excludes Actual Budget, devshell, NixOS
-validation, and Warp Skill Doctor from a work installation. The remaining
+`profiles/work/excluded-skills.txt` excludes devshell, NixOS validation, and
+Warp Skill Doctor from a work installation. The remaining
 skills use the work policy: no missing-tool installation and no ad hoc
 replacement validators. Edits can continue with available checks and tests;
 the agent identifies testing still needed instead of claiming it ran.
@@ -224,7 +224,7 @@ skill directory rather than creating another global discovery path.
 | `research`, `prototype`, `domain-modeling`, `diagram`, `eli5` | The specific research, design, documentation, or explanation request |
 | `anatomy` | Detailed interactive isometric SVG explainers, with optional WebGL and 3D |
 | `audit-your-codebase` | A requested whole-repository simplification audit |
-| `actual-budget-import`, `warp-skill-doctor` | Personal budget imports or evaluation from supported local agent histories |
+| `warp-skill-doctor` | Evaluation from supported local agent histories |
 | `grill-with-docs`, `wayfinder`, `i-have-adhd` | Explicit invocation only, consistently across all platforms |
 
 Descriptions define automatic relevance. Claude/Copilot/omp use

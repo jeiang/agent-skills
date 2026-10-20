@@ -43,7 +43,7 @@ try {
     $agentRoot = if ($agent -eq 'omp') { Join-Path $testHome '.omp/agent' } else { Join-Path $testHome ".$agent" }
     $skillsRoot = Join-Path $agentRoot 'skills'
     New-Item -ItemType Directory -Force -Path $skillsRoot | Out-Null
-    foreach ($retired in @('codex/start-task', 'claude/start-feature')) {
+    foreach ($retired in @('codex/start-task', 'claude/start-feature', 'shared/actual-budget-import')) {
       New-Item -ItemType SymbolicLink -Path (Join-Path $skillsRoot (Split-Path -Leaf $retired)) -Target (Join-Path $repoDir $retired) | Out-Null
     }
     if ($agent -eq 'copilot') {
@@ -70,8 +70,8 @@ try {
     foreach ($other in 'codex', 'claude', 'copilot', 'omp', 'agents') {
       if ($other -ne $agent) { Assert (-not (Test-Path (Join-Path $testHome ".$other"))) 'only selected agent is installed' }
     }
-    foreach ($name in 'start-task', 'start-feature') {
-      Assert ($null -eq (Get-Item -LiteralPath (Join-Path $skillsRoot $name) -Force -ErrorAction SilentlyContinue)) 'retired launcher removed'
+    foreach ($name in 'start-task', 'start-feature', 'actual-budget-import') {
+      Assert ($null -eq (Get-Item -LiteralPath (Join-Path $skillsRoot $name) -Force -ErrorAction SilentlyContinue)) 'retired skill removed'
     }
     switch ($agent) {
       'codex' {

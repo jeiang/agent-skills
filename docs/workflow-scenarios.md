@@ -45,7 +45,6 @@ still answering the request through a suitable path.
 | kubernetes-delivery | Change a Helm chart's workload configuration | Explain what Helm is |
 | kubernetes-diagnose | Investigate a workload failing to become ready | Add a new chart setting without a failure to diagnose |
 | azure-pipelines-maintenance | Change a pipeline template output variable | Edit an unrelated YAML application setting |
-| actual-budget-import | Record these transactions in Actual Budget | Discuss a hypothetical budget without requesting an import |
 | audit-your-codebase | Audit the whole repository for structural simplifications | Review one diff or fix one function |
 | diagram | Draw the repository's request path in its docs | Answer a one-step factual question |
 | domain-modeling | Resolve domain terminology or record a material design decision | Read a glossary to explain existing code |
