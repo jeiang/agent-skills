@@ -1,8 +1,8 @@
 # Upstream
 
 - Repository: https://github.com/ayghri/i-have-adhd
-- Version: 0a84de401019a3a822248df586d88a2b56f8c6af
-- Skill source: https://github.com/ayghri/i-have-adhd/tree/0a84de401019a3a822248df586d88a2b56f8c6af/skills/i-have-adhd
+- Version: 1ecea1993b7fce257ffbd686c070948b5e07eda6
+- Skill source: https://github.com/ayghri/i-have-adhd/tree/1ecea1993b7fce257ffbd686c070948b5e07eda6/skills/i-have-adhd
 - License: MIT; see `LICENSE` in this directory.
 
 ## Local adaptation
