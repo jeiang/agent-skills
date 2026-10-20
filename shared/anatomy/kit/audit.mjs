@@ -1085,7 +1085,7 @@ function surfaceOf(shape, spacing = 0.6) {
       }
     }
   } else {
-    for (const { p, r } of samplesOf(shape, spacing)) for (let k = 0; k < 8; k++) points.push(add3(p, mul3([Math.cos((k * Math.PI) / 4), Math.sin((k * Math.PI) / 4), 0], r)));
+    for (const sample of samplesOf(shape, spacing)) points.push(...ringAround(sample, sample.r));
   }
   return shape.cut ? points.filter((p) => cutDistance(shape, p) >= -1e-3) : points;
 }

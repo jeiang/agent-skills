@@ -64,6 +64,11 @@ jobs:
           node examples/raptor-engine/build.mjs
           node examples/raptor-engine/build.mjs --light
 
+      - name: Push button
+        run: |
+          node examples/push-button/build.mjs
+          node examples/push-button/build.mjs --light
+
       - name: Committed pages are unchanged
         run: |
           git status --short

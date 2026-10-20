@@ -90,7 +90,8 @@ for (const theta of angles) {
     const { F, ring, s0, s1 } = part.world;
     const up = run.up;
     const Pk = planted ? { ...Pp, azimuth: Pp.azimuth - 2 } : Pp;
-    const kit = up ? k.extrude(ring, s0, s1 - s0, Pk) : G.prismOf(F, ring, s0, s1, Pk);
+    const pts = up ? ring.map(([x, y]) => G.add3(G.add3(F.o, G.mul3(F.a, F.a[2] < 0 ? s1 : s0)), G.add3(G.mul3(F.u, x), G.mul3(F.v, y)))) : null;
+    const kit = up ? k.extrude(pts.map(([x, y]) => [x, y]), pts[0][2], s1 - s0, Pk) : G.prismOf(F, ring, s0, s1, Pk);
     const cut = Boolean(part.spec.cuts?.length);
     const mine = subpaths(f.d[run.role[cut ? "fill" : "edge"]])[0].pts;
     const theirs = sh(subpaths(kit.fill)[0].pts);

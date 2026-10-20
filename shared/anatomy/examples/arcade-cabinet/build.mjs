@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as k from "../../kit/iso-kit.mjs";
@@ -6,6 +6,7 @@ import * as G from "../../kit/lathe.mjs";
 import { tubePieces, tubeSvg } from "../../kit/tube.mjs";
 import * as A from "../../kit/audit.mjs";
 import { kitScript } from "../../scripts/inline-kit.mjs";
+import { pdfButton } from "../../kit/pdf-button.mjs";
 import { makeParts } from "./parts.mjs";
 import { SCREEN } from "./screen.mjs";
 
@@ -703,7 +704,7 @@ const body =
     ],
     caption:
       "An upright cabinet in the style of 1981, 178 cm tall, with the left side panel off. Drop a quarter (24.26 mm) in the left slot: the mech checks it and lets it fall 27 cm past the coin-switch wire into the open cash box. The switch pulses the meter and the board's coin line, and on this machine it also latches the power relay, so the first coin wakes the cabinet: the marquee strikes, the CRT's heater warms for about two seconds, the board runs its RAM and ROM self-test and the attract mode starts. The monitor lies on its side for a vertical game, 224 × 288 pixels on a 15.734 kHz raster, so its scan lines run up and down the glass and it collapses to a vertical line when switched off. Move the stick to see the actuator close a microswitch under the panel.",
-    body: `<div class="iso-stage ac-stage" tabindex="0" role="group" aria-label="Arcade cabinet. Press C or click the quarters to insert a coin; left and right arrows move the joystick; space presses the fire button; Escape switches the cabinet off.">${svg}<span class="ac-sr" role="status" aria-live="polite" data-status></span></div>`,
+    body: `${existsSync(join(HERE, "arcade-cabinet-poster-a4.pdf")) ? pdfButton("arcade-cabinet-poster-a4.pdf") : ""}<div class="iso-stage ac-stage" tabindex="0" role="group" aria-label="Arcade cabinet. Press C or click the quarters to insert a coin; left and right arrows move the joystick; space presses the fire button; Escape switches the cabinet off.">${svg}<span class="ac-sr" role="status" aria-live="polite" data-status></span></div>`,
   });
 
 const page = k.pageHtml({ title: "Arcade cabinet", theme: THEME, body, script: kitScript() + latheScript + partsScript + screenScript + LIVE, width: 650 });

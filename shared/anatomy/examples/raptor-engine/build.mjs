@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as k from "../../kit/iso-kit.mjs";
@@ -7,6 +7,7 @@ import { tubePieces, tubeSvg, crossingsOf } from "../../kit/tube.mjs";
 import * as A from "../../kit/audit.mjs";
 import { glCamera } from "../../kit/gl.mjs";
 import { glScript } from "../../scripts/inline-kit.mjs";
+import { pdfButton } from "../../kit/pdf-button.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const THEME = process.argv.includes("--light") ? "light" : "dark";
@@ -926,7 +927,7 @@ const glowSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="iso-svg rp-glow"
 const stage = `<div class="rp-stage" tabindex="0" role="slider" aria-label="Raptor 2 on a test stand. Hover or use the arrow keys to take the engine apart part by part; press I or the Ignite button to fire it, Escape to put it back together." aria-valuemin="0" aria-valuemax="${DATA.order.length}" aria-valuenow="0" aria-valuetext="Assembled, cold">${backSvg}<canvas class="rp-plume" aria-hidden="true"></canvas>${frontSvg}${glowSvg}<canvas class="rp-veil" aria-hidden="true"></canvas><div class="rp-flash" aria-hidden="true"></div></div>`;
 const caption =
   "Raptor 2 is SpaceX's full-flow staged-combustion engine: liquid oxygen and methane at a mixture ratio of 3.6, 300 bar in the main chamber, 230 tf at sea level, 1,630 kg dry. Every drop of oxygen passes through an oxygen-rich preburner that spins the oxygen pump, and every drop of methane through a fuel-rich preburner that spins the methane pump; the two hot gases meet in the main chamber, which has no igniter of its own. The load cell above the gimbal reads the thrust while it burns.";
-const body = `<figure class="iso-figure rp"><div class="iso-plate">${corners}${stage}${controls}</div><figcaption class="iso-legend"><span class="rp-parts">${PARTS}</span><span class="iso-caption">${caption}</span></figcaption></figure>`;
+const body = `<figure class="iso-figure rp"><div class="iso-plate">${existsSync(join(HERE, "raptor-engine-poster-a4.pdf")) ? pdfButton("raptor-engine-poster-a4.pdf") : ""}${corners}${stage}${controls}</div><figcaption class="iso-legend"><span class="rp-parts">${PARTS}</span><span class="iso-caption">${caption}</span></figcaption></figure>`;
 
 const CSS = readFileSync(join(HERE, "raptor.css"), "utf8");
 const LIVE = readFileSync(join(HERE, "live.js"), "utf8").replace("__DATA__", JSON.stringify(DATA));

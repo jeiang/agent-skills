@@ -43,6 +43,9 @@
 
 ### Changed
 
+- Refreshed `anatomy` to `1482e84`, including A4/Letter PDF sheets, the push-button example, and upstream geometry, browser-automation, and publishing fixes. The recorded frontmatter adaptation is retained.
+- Refreshed the six mattpocock/skills copies and bundled tracker docs to `5beb35b`. Domain modeling now uses `GLOSSARY.md` and `GLOSSARY-MAP.md` in place of `CONTEXT.md` and `CONTEXT-MAP.md`; grilling questions make “yes” accept the recommendation; wayfinder clarifies labels, issue cross-references, and research-branch handling. Recorded local adaptations are retained.
+- Refreshed Ponytail to v5.3.2, `i-have-adhd` to `1ecea19`, and `warp-skill-doctor` to `acb107a`. Ponytail adopts upstream's shorter complete-change workflow while preserving local approval, testing, output, and persistence rules. Skill Doctor adds procedure-compliance and verbosity scoring plus Hermes session support.
 - The rendered instructions carry the `ponytail` skill body as a Ponytail section, and the skill's description now limits it to explicit invocation and level selection. Ordinary coding no longer spends a turn loading the skill in every session.
 - The common Git instructions require branch work in a per-branch worktree under `.worktrees/`, created and git-ignored when missing, with a separate worktree for each agent and subagent branch. The main checkout stays on the latest default branch and is updated only by fast-forward. This repository ignores `.worktrees/`.
 - The skill validator accepts an optional `metadata` frontmatter mapping, as upstream skills such as `i-have-adhd` ship it.

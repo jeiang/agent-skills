@@ -308,10 +308,15 @@ function familiesOf(T, { sweep, clips }) {
   return out;
 }
 
-function samplesOf(family, frame) {
+export function samplesOf(family, frame) {
   const xs = [];
-  const count = Math.max(1, Math.round((family.to - family.from) / frame));
-  for (let i = 0; i < count + (family.periodic ? 0 : 1); i++) xs.push(family.from + i * frame);
+  if (family.periodic) {
+    const count = Math.max(1, Math.round((family.to - family.from) / frame));
+    for (let i = 0; i < count; i++) xs.push(family.from + i * frame);
+    return xs;
+  }
+  const count = Math.max(0, Math.ceil((family.to - family.from) / frame - 1e-9));
+  for (let i = 0; i <= count; i++) xs.push(Math.min(family.to, family.from + i * frame));
   return xs;
 }
 

@@ -26,7 +26,7 @@ const WAVE_GLSL = `
 uniform vec2 uS1;uniform vec2 uS2;uniform float uPhase;uniform float uReach;
 uniform sampler2D uHT;uniform vec4 uLo;uniform vec4 uSpan;uniform vec2 uHist;uniform float uIG;uniform float uKNow;uniform float uStep;
 uniform float uSlope;uniform float uCaustic;uniform float uMag;
-uniform vec4 uIn;uniform float uBeach;uniform vec4 uZ;uniform float uLight;uniform float uPale;uniform float uBed;uniform vec3 uLamp;uniform float uSpread;
+uniform vec4 uIn;uniform float uBeach;uniform vec4 uZ;uniform float uLight;uniform float uPale;uniform float uBed;uniform vec3 uLamp;uniform float uSpread;uniform vec3 uInk;
 const float HN=${HIST}.;
 float gPx;vec2 gGrad;vec3 gHess;float gCurv;float gAmp;float gKA;float gMove;
 float coneOf(vec3 p){float drop=uLamp.z-p.z;float spread=13.4+drop*uSpread;return 1.-smoothstep(spread*.72,spread,length(p.xy-uLamp.xy));}
@@ -175,7 +175,7 @@ void main(){
     float lit=mix(1.-.05*exp(-e),1.-uExpo.x/(1.+pow(e/uExpo.y,uExpo.z)),paper);
     float off=(1.-mix(.95,1.-uExpo.x,paper))/.89*base;
     float ink=mix(off,(1.-lit)/.89*base,uLight);
-    gl_FragColor=vec4(dither(vec3(.11,.11,.12)*ink),ink);
+    gl_FragColor=vec4(dither(uInk*ink),ink);
   }else{
     float glow=(1.-exp(-uExpo.x*e))*mix(.34,.92,paper)*base*uLight;
     vec3 c=dither(vec3(glow));
@@ -259,7 +259,7 @@ void main(){
   add=max(add,0.);tint=clamp(tint,0.,.9);
   float a=add+tint;
   float over=max(a,1.);
-  vec3 ink=uPale>.5?vec3(.11,.11,.12):vec3(.02,.025,.03);
+  vec3 ink=uInk;
   vec3 c=dither(vec3(add)+ink*tint)/over;
   gl_FragColor=vec4(c,a/over)*uLight;
 }`;
@@ -304,6 +304,7 @@ const FIXED = {
   uTop: D.top,
   uTint: pale ? 0.06 : 0.08,
   uWall: pale ? [0, 0.2, 0, 0.45] : [0.05, 0.16, 0.5, 0],
+  uInk: pale ? [0.11, 0.11, 0.12] : [0.02, 0.025, 0.03],
 };
 const NAMES = ["uS1", "uS2", "uPhase", "uHist", "uIG", "uKNow", "uStep", "uLight"];
 const paperLayer = glLayer({ canvas: paperCanvas, fragment: PAPER_GLSL, view: [D.W, D.H], camera: D.camera, uniforms: NAMES, fixed: FIXED, extensions: ["GL_OES_standard_derivatives"] });

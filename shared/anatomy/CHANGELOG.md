@@ -6,7 +6,9 @@ All notable changes to Anatomy are recorded here. The format follows [Keep a Cha
 
 ### Added
 
+- Printable sheets. `scripts/print.mjs` freezes poses of a built figure as vector stills (WebGL as a 2× PNG) and prints one A4 or US Letter PDF in three formats: `poster` (one page: big name, numbers, pinned figure and a line per part), `drawing` (one page: parts list, specification, inset and a strip of lit steps) and `detailed` (two pages: pinned figure with round close-ups, then large lit steps with text and the why). Parts are CSS selectors over the live SVG, so any figure can be printed; crowded pins spread apart with hairline leaders, and the script fails when a format runs past its pages. `examples/raptor-engine/sheet.mjs` and `examples/arcade-cabinet/sheet.mjs` are the references, `references/print.md` the guide.
 - Antigravity support, alongside Claude Code, OpenCode and Codex. Documented user and project installation paths in the README and CONTRIBUTING, updated SKILL.md compatibility, and added Antigravity to the bug report form.
+- MiniMax Code support. The README and CONTRIBUTING document its user (`~/.minimax/skills`) and project (`.minimax/skills`) folders and `npx skills add ... -a minimax-code`, SKILL.md lists it, and the bug report form offers it.
 
 ### Changed
 
@@ -14,6 +16,18 @@ All notable changes to Anatomy are recorded here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Line-end audits follow cubic and quadratic strokes with a bounded screen-space approximation, so lines attached between curve samples are not reported as loose.
+
+- `drive.mjs` waits for the page to load (up to 10 s) before it runs the first action, and gives up with an error when Chrome leaves a request unanswered for 60 s instead of hanging, as `capture.mjs` now does.
+- `drive.mjs` rejects an `orbit` whose step is zero or points away from its end angle, and a `sheet` whose count is not a whole number of at least 1, before Chrome starts. A zero step used to capture frames without ever finishing; the others died with `Cannot read properties of undefined (reading 'width')`.
+- `publish.mjs --force` keeps the figure it was replacing when the new publish fails (a `--pages` file that does not exist, files that reach outside the folder, a failed build), and a missing `--pages` file now says `page X not found` instead of a bare `ENOENT`.
+- `publish.mjs` rejects unsupported license values before building a figure, matching the community gallery's MIT and CC-BY-4.0 schema.
+- `capture.mjs` rejects option values it cannot use (`--zoom` without four numbers, `--hover` without two, a non-numeric `--width`, `--scale`, `--wait` or `--times`, a `--theme` other than dark or light) before Chrome starts, instead of saving a shot as if they had been honoured.
+- `turn-fidelity.mjs` transforms upright prisms through their authoring frame `F` (`F.o`, `F.u`, `F.v` and downward `F.a`) before calling `k.extrude`, so `turn-check.mjs --fidelity` matches `T.prism` on upright frame-authored and vertically split prisms.
+- `audit.mjs` `supports` samples stiff tube surfaces on rings perpendicular to each segment's tangent (`ringAround`) instead of flat horizontal `XY` circles, so horizontal and inclined tubes detect vertical and perpendicular support contacts and no longer bridge air gaps past their flat end caps.
+- A repeated vertex in a `T.prism` polygon no longer pushes a rounded corner outside the polygon: `roundedPolygon` drops consecutive duplicate points before it rounds.
+- `T.prism` rejects a star polygon such as a pentagram, which turns the same way at every vertex but winds twice, with the same "split it into convex pieces" error as any other non-convex part.
+- The 3D turn audit samples a clip through its last instant and never past it. A clip whose length was not a whole number of frames was sampled beyond its end, or stopped short of its final pose.
 - `capture.mjs` waits for the page to load before it touches it, even with `--wait 0`, and gives up with an error when Chrome leaves a request unanswered for 60 s instead of hanging.
 - `drive.mjs` `until` times a condition inside the page, so one that is already true passes however short the wait, even on a slow machine; a promise that never settles still times out.
 - Start headless Chrome on Windows from an elevated terminal: `capture.mjs`, `drive.mjs` and `turn-check.mjs` pass `--do-not-de-elevate` there. Chrome otherwise relaunches itself without the elevation, the process the script started exits with code 0, and the check stops with `Chrome exited before startup: 0` while the relaunched browser stays running.
@@ -22,6 +36,7 @@ All notable changes to Anatomy are recorded here. The format follows [Keep a Cha
 - Await asynchronous `until` conditions without treating the promise itself as success, while enforcing the wait deadline.
 - Capture measures the current figure before every screenshot, including moved, resized and timed zoom crops.
 - `publish.mjs --submit` makes the fork again with gh 2.101 and later, which refuse `--remote` when a repository is named; gh never adds a remote in that case, so the flag is gone (#53).
+- Ripple Tank's water and paper shaders read their ink colour from the same fixed per-theme uniform as every other tuned constant in the figure, instead of carrying its own hardcoded `pale ? light : dark` pair inline in GLSL.
 
 ## [1.1.0] - 2026-10-12
 
