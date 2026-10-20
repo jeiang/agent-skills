@@ -7,8 +7,8 @@ one profile.
 ## Instructions, profiles, and rendering
 
 `instructions/common.md` owns behavior, communication, skill selection,
-validation, and Git policy. It is a Jinja2 template; its only variable is
-the profile. Each profile under `profiles/<name>/` supplies `environment.md`
+validation, and Git policy. It is a Jinja2 template; its variables are the
+profile and the Ponytail rules. Each profile under `profiles/<name>/` supplies `environment.md`
 with the environment rules and `excluded-skills.txt` with skills that are
 not installed for it:
 
@@ -29,7 +29,9 @@ profile, or agent source, run the renderer inside the devenv shell and commit
 devenv shell -- python scripts/render.py
 ```
 
-Ordinary coding uses Ponytail. Grilling applies when intent is unclear or a
+Ordinary coding uses Ponytail, whose rules the renderer inlines from
+`shared/ponytail/SKILL.md` into the instructions, so no session spends a
+turn loading the skill. Grilling applies when intent is unclear or a
 decision materially affects scope, design, compatibility, or risk. It
 distinguishes goals from proposed tools and interviews round by round.
 Clear, reversible changes proceed directly; consequential changes need a
@@ -215,7 +217,8 @@ skill directory rather than creating another global discovery path.
 
 | Skills | When they apply |
 | --- | --- |
-| `ponytail`, `grilling` | Coding simplicity and unresolved intent or consequential decisions |
+| `ponytail` | Explicit invocation to select a level; its full-mode rules are already in the instructions |
+| `grilling` | Unresolved intent or consequential decisions |
 | `kubernetes-delivery`, `kubernetes-diagnose`, `azure-pipelines-maintenance` | The matching delivery, incident, or pipeline task |
 | `devshell-preflight`, `nixos-change-validation` | Personal Nix environments and Nix configuration changes |
 | `research`, `prototype`, `domain-modeling`, `diagram`, `eli5` | The specific research, design, documentation, or explanation request |
