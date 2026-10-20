@@ -44,3 +44,4 @@ Used by `/wayfinder`. The **map** is a single issue with **child** issues as tic
 - **Frontier query**: list the map's open children (`gh issue list --state open`, scoped to the map's sub-issues / task list), drop any with an open blocker (`issue_dependencies_summary.blocked_by > 0`, or an open issue in the `Blocked by` line) or an assignee; first in map order wins.
 - **Claim**: `gh issue edit <n> --add-assignee @me`, the session's first write.
 - **Resolve**: `gh issue comment <n> --body "<answer>"`, then `gh issue close <n>`, then append a context pointer (gist + link) to the map's Decisions-so-far.
+- **Bulk creation**: creating a map's tickets runs many `gh` calls of a few seconds each. Run the batch with a timeout that covers all of them, and make it resumable: list the repo's existing issue titles first and skip any that already exist, so a batch that stops partway can run again without duplicates.
