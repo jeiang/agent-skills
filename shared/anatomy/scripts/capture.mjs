@@ -62,6 +62,17 @@ function parse(argv) {
   return options;
 }
 
+function problemWith(options) {
+  const positive = (value) => Number.isFinite(value) && value > 0;
+  const numbers = (list, count) => list.length === count && list.every(Number.isFinite);
+  for (const name of ["width", "height", "scale", "zoomScale"]) if (!positive(options[name])) return `--${name === "zoomScale" ? "zoom-scale" : name} needs a number above 0`;
+  if (!Number.isFinite(options.wait) || options.wait < 0) return "--wait needs a number of milliseconds, 0 or more";
+  if (options.zoom && !(numbers(options.zoom, 4) && options.zoom[2] > 0 && options.zoom[3] > 0)) return "--zoom needs x,y,w,h in CSS px, with a width and height above 0";
+  if (options.hover && !numbers(options.hover, 2)) return "--hover needs fx,fy, two fractions like 0.6,0.5";
+  if (!options.times.every((delay) => Number.isFinite(delay) && delay >= 0)) return "--times needs milliseconds, 0 or more, comma separated";
+  if (options.theme !== undefined && options.theme !== "dark" && options.theme !== "light") return "--theme must be dark or light";
+}
+
 function chromePath() {
   const candidates = [
     process.env.CHROME_PATH,
@@ -73,6 +84,10 @@ function chromePath() {
     "/usr/bin/chromium",
     "/usr/bin/chromium-browser",
     "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    ...(process.env.LOCALAPPDATA ? [join(process.env.LOCALAPPDATA, "Google\\Chrome\\Application\\chrome.exe")] : []),
+    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
   ].filter(Boolean);
   const playwright = join(homedir(), "Library/Caches/ms-playwright");
   if (existsSync(playwright)) {
@@ -84,6 +99,8 @@ function chromePath() {
   }
   const linux = join(homedir(), ".cache/ms-playwright");
   if (existsSync(linux)) for (const dir of readdirSync(linux).sort().reverse()) for (const sub of ["chrome-linux64/chrome", "chrome-linux/chrome"]) candidates.push(join(linux, dir, sub));
+  const win = join(homedir(), "AppData/Local/ms-playwright");
+  if (existsSync(win)) for (const dir of readdirSync(win).sort().reverse()) for (const sub of ["chrome-win/chrome.exe", "chromium-win64/chrome.exe"]) candidates.push(join(win, dir, sub));
   return candidates.find((path) => existsSync(path));
 }
 
@@ -92,6 +109,11 @@ async function main() {
   if (options.help || !options.target) {
     usage();
     process.exit(options.help ? 0 : 1);
+  }
+  const problem = problemWith(options);
+  if (problem) {
+    console.error(`capture: ${problem}`);
+    process.exit(1);
   }
   const url = /^https?:|^file:/.test(options.target) ? options.target : pathToFileURL(resolve(options.target)).href;
   const out = resolve(options.out ?? "capture.png");

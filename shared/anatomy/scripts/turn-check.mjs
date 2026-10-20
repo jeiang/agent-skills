@@ -28,17 +28,38 @@ function usage() {
 }
 
 function chromePath() {
-  const candidates = [process.env.CHROME_PATH, "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "/Applications/Chromium.app/Contents/MacOS/Chromium", "/usr/bin/google-chrome", "/usr/bin/google-chrome-stable", "/usr/bin/chromium", "/usr/bin/chromium-browser"].filter(Boolean);
+  const candidates = [
+    process.env.CHROME_PATH,
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
+    "/usr/bin/google-chrome",
+    "/usr/bin/google-chrome-stable",
+    "/usr/bin/chromium",
+    "/usr/bin/chromium-browser",
+    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    ...(process.env.LOCALAPPDATA ? [join(process.env.LOCALAPPDATA, "Google\\Chrome\\Application\\chrome.exe")] : []),
+    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  ].filter(Boolean);
   const playwright = join(homedir(), "Library/Caches/ms-playwright");
   if (existsSync(playwright)) for (const dir of readdirSync(playwright).sort().reverse()) for (const sub of ["chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing", "chrome-mac/Chromium.app/Contents/MacOS/Chromium", "chrome-linux/chrome"]) candidates.push(join(playwright, dir, sub));
   const linux = join(homedir(), ".cache/ms-playwright");
   if (existsSync(linux)) for (const dir of readdirSync(linux).sort().reverse()) for (const sub of ["chrome-linux64/chrome", "chrome-linux/chrome"]) candidates.push(join(linux, dir, sub));
+  const win = join(homedir(), "AppData/Local/ms-playwright");
+  if (existsSync(win)) for (const dir of readdirSync(win).sort().reverse()) for (const sub of ["chrome-win/chrome.exe", "chromium-win64/chrome.exe"]) candidates.push(join(win, dir, sub));
   return candidates.find((path) => existsSync(path));
 }
 
 async function browser(target, { width, height, scale, throttle, noWebgl }) {
+  const binary = chromePath();
+  if (!binary) {
+    console.error("No Chrome found. Set CHROME_PATH to a Chrome or Chromium binary.");
+    process.exit(1);
+  }
   const profile = mkdtempSync(join(tmpdir(), "turn-check-"));
-  const chrome = spawn(chromePath(), ["--headless=new", ...(process.platform === "linux" ? ["--no-sandbox"] : []), ...(process.platform === "win32" ? ["--do-not-de-elevate"] : []), "--remote-debugging-port=0", `--user-data-dir=${profile}`, "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", "--allow-file-access-from-files", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "about:blank"]);
+  const chrome = spawn(binary, ["--headless=new", ...(process.platform === "linux" ? ["--no-sandbox"] : []), ...(process.platform === "win32" ? ["--do-not-de-elevate"] : []), "--remote-debugging-port=0", `--user-data-dir=${profile}`, "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", "--allow-file-access-from-files", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "about:blank"]);
   const port = await chromePort(chrome, profile);
   const page = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: "PUT" })).json();
   const socket = new WebSocket(page.webSocketDebuggerUrl);

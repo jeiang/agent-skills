@@ -1,8 +1,8 @@
 # Upstream
 
 - Repository: https://github.com/wheresryan22/anatomy
-- Revision: `bc943e40c59998be5da61f9d39c6a983b1116099`
-- Skill source: https://github.com/wheresryan22/anatomy/blob/bc943e40c59998be5da61f9d39c6a983b1116099/SKILL.md
+- Revision: `1482e8469b0a9e0d8cc18ea2740a01423d29ae80`
+- Skill source: https://github.com/wheresryan22/anatomy/blob/1482e8469b0a9e0d8cc18ea2740a01423d29ae80/SKILL.md
 - License: MIT; see `LICENSE` in this directory.
 - Imported the complete repository snapshot, without Git history, so the kit, scripts, references, examples, fixtures, and README assets remain available.
 - Local changes: moved the frontmatter `compatibility` value into `metadata.compatibility` to preserve the upstream requirements while using this repository's supported frontmatter fields. All other upstream files are unchanged.

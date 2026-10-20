@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, readlinkSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { fingerprintOfSkill } from "./fingerprint.mjs";
@@ -10,6 +10,7 @@ const SOURCE_TYPES = [".mjs", ".js", ".css", ".html", ".json", ".md", ".txt", ".
 const SKIP_DIRS = ["node_modules", "shots", ".git"];
 const ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const AGENTS = ["Claude Code", "OpenCode", "Codex", "Antigravity", "Other"];
+const LICENSES = ["MIT", "CC-BY-4.0"];
 const KINDS = ["SVG", "SVG + WebGL", "SVG + 3D", "SVG + WebGL + 3D"];
 
 const posix = (path) => path.split(sep).join("/");
@@ -71,6 +72,7 @@ function parse(argv) {
   for (const key of ["source", "into", "id", "title", "prompt", "author"]) if (!options[key]) usage(`missing ${key === "source" ? "the figure folder" : `--${key}`}`);
   if (!ID.test(options.id)) usage("--id must be kebab-case, like token-bucket-bench");
   if (!AGENTS.includes(options.agent)) usage(`--agent must be one of: ${AGENTS.join(", ")}`);
+  if (!LICENSES.includes(options.license)) usage(`--license must be one of: ${LICENSES.join(", ")}`);
   if (options.kind && !KINDS.includes(options.kind)) usage(`--kind must be one of: ${KINDS.join(", ")}`);
   return options;
 }
@@ -91,6 +93,7 @@ function detectPages(source, files, given) {
   const html = files.filter((file) => !file.includes("/") && file.endsWith(".html"));
   if (given) {
     const named = given.filter(Boolean);
+    for (const page of named) if (!files.includes(page)) throw new Error(`page ${page} not found in ${source}; build the figure first`);
     const pages = {};
     for (const page of named) pages[themeOf(source, page) === "light" ? "light" : themeOf(source, page) === "dark" ? "dark" : page.replace(/\.html$/, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 24)] = page;
     return pages;
@@ -145,88 +148,98 @@ export function publish(options) {
   const dest = join(repo, "figures", author.toLowerCase(), options.id);
   if (existsSync(dest)) {
     if (!options.force) throw new Error(`figures/${author.toLowerCase()}/${options.id} already exists; pick another --id or pass --force to replace it`);
+  }
+  const replaced = existsSync(dest) ? `${dest}.replaced` : null;
+  if (replaced) {
+    rmSync(replaced, { recursive: true, force: true });
+    renameSync(dest, replaced);
+  }
+  try {
+    const all = listFiles(source);
+    const typed = all.filter((file) => SOURCE_TYPES.includes(extname(file).toLowerCase()));
+    const pages = detectPages(source, typed, options.pages);
+    const lightPage = pages.light ?? null;
+    for (const page of Object.values(pages)) if (page && !typed.includes(page)) throw new Error(`page ${page} not found in ${source}; build the figure first`);
+    const outputs = new Set(Object.values(pages).filter(Boolean));
+    const files = typed.filter((file) => !outputs.has(file) && !/-verify(?:-light)?\.html$/.test(file));
+    const skipped = all.filter((file) => !files.includes(file) && !outputs.has(file));
+
+    const skillLink = join(repo, ".skill");
+    const kit = fingerprintOfSkill(SKILL);
+    const outside = [];
+    for (const file of files) {
+      const from = join(source, file);
+      const to = join(dest, "src", file);
+      mkdirSync(dirname(to), { recursive: true });
+      if (/\.m?js$/.test(file)) {
+        const result = rewriteSkillPaths(readFileSync(from, "utf8"), { fromDir: dirname(from), toDir: dirname(to), source, skill: SKILL, skillLink });
+        outside.push(...result.outside.map((path) => `${file}: ${path}`));
+        writeFileSync(to, result.text);
+      } else cpSync(from, to);
+    }
+    if (outside.length) {
+      rmSync(dest, { recursive: true, force: true });
+      throw new Error(`these files reach outside the figure folder and the skill; move what they need into the folder:\n  ${outside.join("\n  ")}`);
+    }
+
+    let linked = "existing";
+    if (!existsSync(skillLink)) {
+      symlinkSync(SKILL, skillLink, process.platform === "win32" ? "junction" : "dir");
+      linked = "created";
+    } else if (fingerprintOfSkill(skillLink) !== kit) {
+      const where = lstatSync(skillLink).isSymbolicLink() ? readlinkSync(skillLink) : skillLink;
+      throw new Error(`${repo}/.skill (${where}) is a different kit version than this skill; remove it and run again`);
+    }
+
+    const build = [];
+    if (pages.light) build.push([`src/${options.build}`, "--light"]);
+    if (Object.keys(pages).some((name) => name !== "light")) build.push([`src/${options.build}`]);
+    for (const command of build) {
+      log(`building ${command.includes("--light") ? "the light page" : "the page"} (heavy figures take a minute or two)…`);
+      run(command, dest);
+    }
+    let preview = null;
+    if (!options.noPreview) {
+      log("taking a preview…");
+      const shots = join(repo, "shots", `${author.toLowerCase()}-${options.id}`);
+      mkdirSync(shots, { recursive: true });
+      preview = join(shots, "preview.png");
+      run([join(SKILL, "scripts", "capture.mjs"), join(dest, "src", lightPage ?? Object.values(pages)[0]), "--reduced", "--width", "1200", "--out", preview], dest);
+    }
+    const measured = options.noSession || (options.minutes && options.tokens) ? null : fromThisSession({ prompt: options.prompt });
+    const minutes = options.minutes ?? measured?.minutes;
+    const tokens = options.tokens ?? measured?.tokens;
+    if (measured) log(`time and tokens from this session: ${describe(measured)}`);
+    const pageText = Object.values(pages).filter(Boolean).map((page) => readFileSync(join(dest, "src", page), "utf8")).join("\n");
+    for (const page of outputs) rmSync(join(dest, "src", page), { force: true });
+    const figure = {
+      id: options.id,
+      title: options.title.trim(),
+      author,
+      prompt: options.prompt.trim(),
+      kind: options.kind ?? detectKind(pageText),
+      agent: options.agent,
+      ...(options.model ? { model: options.model } : {}),
+      ...(minutes ? { minutes } : {}),
+      ...(tokens ? { tokens } : {}),
+      skill: { kit },
+      build,
+      pages: Object.fromEntries(Object.entries(pages).filter(([, page]) => page).map(([key, page]) => [key, `src/${page}`])),
+      preview: lightPage ? "light" : Object.keys(pages)[0],
+      ...(options.audit ? { audit: true } : {}),
+      license: options.license,
+      ...(options.tags.length ? { tags: options.tags } : {}),
+      created: options.date ?? new Date().toISOString().slice(0, 10),
+    };
+    writeFileSync(join(dest, "figure.json"), JSON.stringify(figure, null, 2) + "\n");
+
+    if (replaced) rmSync(replaced, { recursive: true, force: true });
+    return { dest, figure, skipped, linked, preview, measured };
+  } catch (error) {
     rmSync(dest, { recursive: true, force: true });
+    if (replaced) renameSync(replaced, dest);
+    throw error;
   }
-
-  const all = listFiles(source);
-  const typed = all.filter((file) => SOURCE_TYPES.includes(extname(file).toLowerCase()));
-  const pages = detectPages(source, typed, options.pages);
-  const lightPage = pages.light ?? null;
-  for (const page of Object.values(pages)) if (page && !typed.includes(page)) throw new Error(`page ${page} not found in ${source}; build the figure first`);
-  const outputs = new Set(Object.values(pages).filter(Boolean));
-  const files = typed.filter((file) => !outputs.has(file) && !/-verify(?:-light)?\.html$/.test(file));
-  const skipped = all.filter((file) => !files.includes(file) && !outputs.has(file));
-
-  const skillLink = join(repo, ".skill");
-  const kit = fingerprintOfSkill(SKILL);
-  const outside = [];
-  for (const file of files) {
-    const from = join(source, file);
-    const to = join(dest, "src", file);
-    mkdirSync(dirname(to), { recursive: true });
-    if (/\.m?js$/.test(file)) {
-      const result = rewriteSkillPaths(readFileSync(from, "utf8"), { fromDir: dirname(from), toDir: dirname(to), source, skill: SKILL, skillLink });
-      outside.push(...result.outside.map((path) => `${file}: ${path}`));
-      writeFileSync(to, result.text);
-    } else cpSync(from, to);
-  }
-  if (outside.length) {
-    rmSync(dest, { recursive: true, force: true });
-    throw new Error(`these files reach outside the figure folder and the skill; move what they need into the folder:\n  ${outside.join("\n  ")}`);
-  }
-
-  let linked = "existing";
-  if (!existsSync(skillLink)) {
-    symlinkSync(SKILL, skillLink, process.platform === "win32" ? "junction" : "dir");
-    linked = "created";
-  } else if (fingerprintOfSkill(skillLink) !== kit) {
-    const where = lstatSync(skillLink).isSymbolicLink() ? readlinkSync(skillLink) : skillLink;
-    throw new Error(`${repo}/.skill (${where}) is a different kit version than this skill; remove it and run again`);
-  }
-
-  const build = [];
-  if (pages.light) build.push([`src/${options.build}`, "--light"]);
-  if (Object.keys(pages).some((name) => name !== "light")) build.push([`src/${options.build}`]);
-  for (const command of build) {
-    log(`building ${command.includes("--light") ? "the light page" : "the page"} (heavy figures take a minute or two)…`);
-    run(command, dest);
-  }
-  let preview = null;
-  if (!options.noPreview) {
-    log("taking a preview…");
-    const shots = join(repo, "shots", `${author.toLowerCase()}-${options.id}`);
-    mkdirSync(shots, { recursive: true });
-    preview = join(shots, "preview.png");
-    run([join(SKILL, "scripts", "capture.mjs"), join(dest, "src", lightPage ?? Object.values(pages)[0]), "--reduced", "--width", "1200", "--out", preview], dest);
-  }
-  const measured = options.noSession || (options.minutes && options.tokens) ? null : fromThisSession({ prompt: options.prompt });
-  const minutes = options.minutes ?? measured?.minutes;
-  const tokens = options.tokens ?? measured?.tokens;
-  if (measured) log(`time and tokens from this session: ${describe(measured)}`);
-  const pageText = Object.values(pages).filter(Boolean).map((page) => readFileSync(join(dest, "src", page), "utf8")).join("\n");
-  for (const page of outputs) rmSync(join(dest, "src", page), { force: true });
-  const figure = {
-    id: options.id,
-    title: options.title.trim(),
-    author,
-    prompt: options.prompt.trim(),
-    kind: options.kind ?? detectKind(pageText),
-    agent: options.agent,
-    ...(options.model ? { model: options.model } : {}),
-    ...(minutes ? { minutes } : {}),
-    ...(tokens ? { tokens } : {}),
-    skill: { kit },
-    build,
-    pages: Object.fromEntries(Object.entries(pages).filter(([, page]) => page).map(([key, page]) => [key, `src/${page}`])),
-    preview: lightPage ? "light" : Object.keys(pages)[0],
-    ...(options.audit ? { audit: true } : {}),
-    license: options.license,
-    ...(options.tags.length ? { tags: options.tags } : {}),
-    created: options.date ?? new Date().toISOString().slice(0, 10),
-  };
-  writeFileSync(join(dest, "figure.json"), JSON.stringify(figure, null, 2) + "\n");
-
-  return { dest, figure, skipped, linked, preview, measured };
 }
 
 export function submitPlan({ login, canPush, upstream, author, id, title }) {

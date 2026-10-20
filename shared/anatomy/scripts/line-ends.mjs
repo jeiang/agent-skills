@@ -19,7 +19,7 @@ function lineEnds({ select = null, tolerance = 1, root: rootSlack = 2, mark = 7,
     return getComputedStyle(el).visibility === "hidden" ? 0 : alpha;
   };
   const numbers = (text) => (text.match(/-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi) || []).map(Number);
-  const subpathsOf = (d) => {
+  const subpathsOf = (d, curveTolerance) => {
     const out = [];
     let current = null;
     let x = 0;
@@ -38,24 +38,42 @@ function lineEnds({ select = null, tolerance = 1, root: rootSlack = 2, mark = 7,
       x = sx = px;
       y = sy = py;
     };
-    const cubic = (x1, y1, x2, y2, px, py) => {
-      const x0 = x;
-      const y0 = y;
-      for (let i = 1; i <= 8; i++) {
-        const t = i / 8;
-        const u = 1 - t;
-        push(u * u * u * x0 + 3 * u * u * t * x1 + 3 * u * t * t * x2 + t * t * t * px, u * u * u * y0 + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * py);
+    let curveBudget = 16384;
+    const chordDistance = (point, first, last) => {
+      const dx = last[0] - first[0];
+      const dy = last[1] - first[1];
+      const span = dx * dx + dy * dy;
+      const along = span > 0 ? Math.max(0, Math.min(1, ((point[0] - first[0]) * dx + (point[1] - first[1]) * dy) / span)) : 0;
+      return Math.hypot(point[0] - first[0] - along * dx, point[1] - first[1] - along * dy);
+    };
+    const curve = (points) => {
+      const pending = [points];
+      while (pending.length) {
+        if (--curveBudget < 0) throw new Error("Curve audit could not establish its screen-space sampling bound");
+        const controlPoints = pending.pop();
+        const first = controlPoints[0];
+        const last = controlPoints[controlPoints.length - 1];
+        if (controlPoints.slice(1, -1).every((point) => chordDistance(point, first, last) <= curveTolerance)) {
+          push(...last);
+          continue;
+        }
+        const left = [first];
+        const right = [last];
+        let level = controlPoints;
+        while (level.length > 1) {
+          level = level.slice(1).map((point, index) => [(level[index][0] + point[0]) / 2, (level[index][1] + point[1]) / 2]);
+          left.push(level[0]);
+          right.push(level[level.length - 1]);
+        }
+        pending.push(right.reverse(), left);
       }
+    };
+    const cubic = (x1, y1, x2, y2, px, py) => {
+      curve([[x, y], [x1, y1], [x2, y2], [px, py]]);
       control = { kind: "cubic", point: [x2, y2] };
     };
     const quad = (x1, y1, px, py) => {
-      const x0 = x;
-      const y0 = y;
-      for (let i = 1; i <= 6; i++) {
-        const t = i / 6;
-        const u = 1 - t;
-        push(u * u * x0 + 2 * u * t * x1 + t * t * px, u * u * y0 + 2 * u * t * y1 + t * t * py);
-      }
+      curve([[x, y], [x1, y1], [px, py]]);
       control = { kind: "quadratic", point: [x1, y1] };
     };
     for (const [, command, args] of d.matchAll(/([MmLlHhVvCcSsQqTtAaZz])([^MmLlHhVvCcSsQqTtAaZz]*)/g)) {
@@ -110,10 +128,10 @@ function lineEnds({ select = null, tolerance = 1, root: rootSlack = 2, mark = 7,
     }
     return out;
   };
-  const geometryOf = (el) => {
+  const geometryOf = (el, curveTolerance) => {
     const tag = el.tagName.toLowerCase();
     const num = (name) => Number(el.getAttribute(name) || 0);
-    if (tag === "path") return subpathsOf(el.getAttribute("d") || "");
+    if (tag === "path") return subpathsOf(el.getAttribute("d") || "", curveTolerance);
     if (tag === "line") return [{ points: [[num("x1"), num("y1")], [num("x2"), num("y2")]], closed: false }];
     if (tag === "polyline" || tag === "polygon") {
       const v = numbers(el.getAttribute("points") || "");
@@ -179,7 +197,8 @@ function lineEnds({ select = null, tolerance = 1, root: rootSlack = 2, mark = 7,
     const owner = el.closest("svg");
     const viewCtm = owner && owner.getScreenCTM();
     if (viewCtm) scale = Math.hypot(viewCtm.a, viewCtm.b) || scale;
-    const subpaths = geometryOf(el).map((sub, index) => ({ ...sub, index, flat: sub.points.map(map) }));
+    const curveTolerance = 0.15 / Math.max(1, Math.hypot(ctm.a, ctm.b, ctm.c, ctm.d));
+    const subpaths = geometryOf(el, curveTolerance).map((sub, index) => ({ ...sub, index, flat: sub.points.map(map) }));
     subpaths.forEach((sub) => {
       for (let i = 0; i < sub.flat.length - 1; i++) {
         const a = sub.flat[i];

@@ -58,9 +58,11 @@ function signedArea(points) {
   return s / 2;
 }
 
-function convexOrThrow(points, name) {
+function convexOrThrow(ring, name) {
+  const points = ring.filter((p, i) => Math.hypot(p[0] - ring[(i + ring.length - 1) % ring.length][0], p[1] - ring[(i + ring.length - 1) % ring.length][1]) > 1e-9);
   const n = points.length;
   let sign = 0;
+  let turned = 0;
   for (let i = 0; i < n; i++) {
     const a = points[i];
     const b = points[(i + 1) % n];
@@ -69,12 +71,18 @@ function convexOrThrow(points, name) {
     if (Math.abs(cross) < 1e-9) continue;
     if (!sign) sign = Math.sign(cross);
     else if (Math.sign(cross) !== sign) throw new Error(`turning: part ${name} is not convex; split it into convex pieces`);
+    turned += Math.atan2(cross, (b[0] - a[0]) * (c[0] - b[0]) + (b[1] - a[1]) * (c[1] - b[1]));
   }
+  if (sign && Math.abs(Math.abs(turned) - TAU) > 1e-6) throw new Error(`turning: part ${name} is not convex; split it into convex pieces`);
 }
 
 export function roundedPolygon(polygon, radius = 0, steps = 4) {
-  const poly = signedArea(polygon) < 0 ? polygon.slice().reverse() : polygon.slice();
-  if (!(radius > 0)) return poly.map(([x, y]) => [x, y]);
+  const ordered = signedArea(polygon) < 0 ? polygon.slice().reverse() : polygon.slice();
+  if (!(radius > 0)) return ordered.map(([x, y]) => [x, y]);
+  const same = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]) <= 1e-9;
+  const poly = ordered.filter((p, i) => i === 0 || !same(p, ordered[i - 1]));
+  while (poly.length > 1 && same(poly[0], poly[poly.length - 1])) poly.pop();
+  if (poly.length < 3) return poly.map(([x, y]) => [x, y]);
   const n = poly.length;
   const normals = poly.map((a, i) => {
     const b = poly[(i + 1) % n];

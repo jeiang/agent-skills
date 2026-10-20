@@ -64,11 +64,16 @@ function chromePath() {
     process.env.CHROME_PATH,
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
     "/usr/bin/google-chrome",
     "/usr/bin/google-chrome-stable",
     "/usr/bin/chromium",
     "/usr/bin/chromium-browser",
     "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    ...(process.env.LOCALAPPDATA ? [join(process.env.LOCALAPPDATA, "Google\\Chrome\\Application\\chrome.exe")] : []),
+    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
   ].filter(Boolean);
   const playwright = join(homedir(), "Library/Caches/ms-playwright");
   if (existsSync(playwright)) {
@@ -80,6 +85,8 @@ function chromePath() {
   }
   const linux = join(homedir(), ".cache/ms-playwright");
   if (existsSync(linux)) for (const dir of readdirSync(linux).sort().reverse()) for (const sub of ["chrome-linux64/chrome", "chrome-linux/chrome"]) candidates.push(join(linux, dir, sub));
+  const win = join(homedir(), "AppData/Local/ms-playwright");
+  if (existsSync(win)) for (const dir of readdirSync(win).sort().reverse()) for (const sub of ["chrome-win/chrome.exe", "chromium-win64/chrome.exe"]) candidates.push(join(win, dir, sub));
   return candidates.find((path) => existsSync(path));
 }
 
@@ -109,6 +116,14 @@ async function main() {
   if (!Array.isArray(actions)) throw new Error("actions must be an array");
   for (const action of actions) {
     if (!Array.isArray(action) || !kinds.has(action[0])) throw new Error(`unknown action ${Array.isArray(action) ? action[0] : action}`);
+    if (action[0] === "orbit") {
+      const [, , from, to, step] = action;
+      if (![from, to, step].every(Number.isFinite) || step === 0 || (step > 0 ? from > to : from < to)) throw new Error(`orbit needs numeric from, to and a nonzero step that moves from ${from} toward ${to}, got step ${step}`);
+    }
+    if (action[0] === "sheet") {
+      const [, , every, count] = action;
+      if (!Number.isFinite(every) || every < 0 || !Number.isInteger(count) || count < 1) throw new Error(`sheet needs a non-negative every and a whole count of at least 1, got every ${every} and count ${count}`);
+    }
   }
   const url = /^https?:|^file:/.test(target) ? target : pathToFileURL(resolve(target)).href;
   const binary = chromePath();
@@ -132,8 +147,10 @@ async function main() {
     let id = 0;
     const pending = new Map();
     const problems = [];
+    let loaded = () => {};
     socket.onmessage = (message) => {
       const data = JSON.parse(message.data);
+      if (data.method === "Page.loadEventFired") loaded();
       if (data.id && pending.has(data.id)) {
         pending.get(data.id)(data);
         pending.delete(data.id);
@@ -145,14 +162,21 @@ async function main() {
       }
     };
     await new Promise((done) => (socket.onopen = done));
-    const send = (method, params = {}) =>
-      new Promise((done) => {
+    const send = (method, params = {}, patience = 60000) =>
+      new Promise((done, fail) => {
         const call = ++id;
-        pending.set(call, done);
+        const timer = setTimeout(() => {
+          pending.delete(call);
+          fail(new Error(`Chrome did not answer ${method} within ${Math.round(patience / 1000)} s`));
+        }, patience);
+        pending.set(call, (data) => {
+          clearTimeout(timer);
+          done(data);
+        });
         socket.send(JSON.stringify({ id: call, method, params }));
       });
-    const evaluate = async (expression) => {
-      const reply = await send("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true });
+    const evaluate = async (expression, patience) => {
+      const reply = await send("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true }, patience);
       if (reply.error) throw new Error(reply.error.message);
       const exception = reply.result?.exceptionDetails;
       if (exception) throw new Error(exception.exception?.description ?? exception.text);
@@ -170,9 +194,14 @@ async function main() {
     const early = [SLOW, options.noWebgl ? NO_GL : "", options.preload ?? ""].filter(Boolean).join("\n");
     await send("Page.addScriptToEvaluateOnNewDocument", { source: early });
     await send("Emulation.setDeviceMetricsOverride", { width: options.width, height: options.height, deviceScaleFactor: options.scale, mobile: options.width < 600 });
+    const load = new Promise((done) => {
+      loaded = done;
+      setTimeout(done, 10000);
+    });
     const navigation = await send("Page.navigate", { url });
     if (navigation.error) throw new Error(`Navigation failed: ${navigation.error.message}`);
     if (navigation.result?.errorText) throw new Error(`Navigation failed: ${navigation.result.errorText}`);
+    await load;
     await sleep(1200);
     const targetOf = (selector, fallback = ".iso-plate") => `(()=>{const select=${JSON.stringify(selector ?? null)};const el=document.querySelector(select??${JSON.stringify(fallback)});if(select!==null&&!el)throw new Error("Drive target not found: "+select);return el})()`;
     const boxOf = (selector) => evaluate(`(()=>{const el=${targetOf(selector)}||document.body;const r=el.getBoundingClientRect();return {x:r.left,y:r.top,w:r.width,h:r.height,sx:scrollX,sy:scrollY}})()`);
@@ -236,7 +265,7 @@ async function main() {
         const limit = Date.now() + (args[1] ?? 10000);
         let ok = false;
         while (Date.now() < limit) {
-          ok = await evaluate(`Promise.race([Promise.resolve(${args[0]}).then(Boolean), new Promise((done) => setTimeout(() => done(false), ${Math.max(0, limit - Date.now())}))])`);
+          ok = await evaluate(`Promise.race([Promise.resolve(${args[0]}).then(Boolean), new Promise((done) => setTimeout(() => done(false), ${Math.max(0, limit - Date.now())}))])`, Math.max(0, limit - Date.now()) + 60000);
           if (ok) break;
           await sleep(25);
         }

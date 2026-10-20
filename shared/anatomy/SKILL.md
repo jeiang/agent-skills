@@ -1,9 +1,9 @@
 ---
 name: anatomy
-description: Build crafted, highly detailed, interactive isometric SVG figures that explain a technical idea as a real physical object (a test rig, a dial gauge, a cabinet of drawers, a plotter, a lock), with many small precise solid parts, four-tone shading, correct painter's order, a framed card with title, hint and live readout, and calm eased motion. Use this whenever someone wants an isometric illustration, an explanatory diagram or figure for docs, a blog post, a landing page or an article, a "Linear-style" or "premium" technical drawing, an interactive explainer, or an SVG that shows how a system, algorithm or component works, even if they never say "isometric". Works framework-free (TypeScript/JS that writes SVG and HTML) and in React/Next.js, and can add realistic WebGL shaders (fire, exhaust, water, caustics, lamp light) that live inside the drawing in the same isometric perspective. Also publishes a finished figure to the Anatomy community gallery when asked.
+description: Build crafted, highly detailed, interactive isometric SVG figures that explain a technical idea as a real physical object (a test rig, a dial gauge, a cabinet of drawers, a plotter, a lock), with many small precise solid parts, four-tone shading, correct painter's order, a framed card with title, hint and live readout, and calm eased motion. Use this whenever someone wants an isometric illustration, an explanatory diagram or figure for docs, a blog post, a landing page or an article, a "Linear-style" or "premium" technical drawing, an interactive explainer, or an SVG that shows how a system, algorithm or component works, even if they never say "isometric". Works framework-free (TypeScript/JS that writes SVG and HTML) and in React/Next.js, and can add realistic WebGL shaders (fire, exhaust, water, caustics, lamp light) that live inside the drawing in the same isometric perspective. Also prints a figure as an A4 PDF (poster, drawing or handout) and publishes it to the Anatomy community gallery when asked.
 license: MIT
 metadata:
-  compatibility: Written for Claude Code; also runs in Antigravity, OpenCode and Codex. Needs Node.js 20.10+, and Chrome or Chromium for the checks.
+  compatibility: Written for Claude Code; also runs in Antigravity, OpenCode, Codex and MiniMax Code. Needs Node.js 20.10+, and Chrome or Chromium for the checks.
   opencode/slash: "true"
 ---
 
@@ -97,6 +97,7 @@ The kit is in `kit/`:
 | `scripts/lines.mjs` | The line-end check on a built page, in headless Chrome: every texture line must end on a stroke, a dot or an outline. Rings the failures with `--out`; exits 1 on any. |
 | `scripts/inline-kit.mjs` | `kitScript()`, `glScript()` and `turnScript()` return the kit, the WebGL layer and the 3D runtime as source to inline into a standalone page. |
 | `scripts/turn-check.mjs`, `scripts/turn-bench.mjs` | 3D figures: fidelity against the kit builders, a z-buffer order check, pixel pops, line ends at 24 angles and frame timing in the browser; Node CPU time per part kind. |
+| `scripts/print.mjs`, `scripts/print-sheet.mjs` | Printable sheets: freeze poses of a built page as vector stills and lay them out as an A4 or Letter PDF in three formats (poster, drawing, detailed). `references/print.md`. |
 
 Pick the path that fits the project:
 
@@ -158,6 +159,16 @@ It is in beta: the engine is proved on its example and one test figure, not yet 
 
 Read `references/3d.md` first.
 
+## Printable sheets (A4)
+
+When the user wants the figure on paper (a handout, a poster, a PDF, an A4 or Letter sheet), print it from the finished figure instead of drawing again. Write a `sheet.mjs` next to the build: the poses to capture as `drive.mjs` actions, the parts as CSS selectors over the live SVG, and the words, every one of them true to the model. Then run `node scripts/print.mjs sheet.mjs --format all --png` and read every page.
+
+- **poster** (the default): one page, the name set large, the question, big numbers, the figure with numbered pins and every part with one line.
+- **drawing**: one page, a technical drawing with a parts list, a specification, an inset and a strip of steps with the working parts lit.
+- **detailed**: 2–4 pages, scaled to the machine: an overview with pins and round close-ups; "How it works" with each step as a large lit still (six per page, the why in the last slot); and for complex figures an "Assemblies" page with up to four large close-ups of part groups (`assemblies` in the spec). A simple figure stays at 2 pages; `maxPages` caps it.
+
+Offer all three when the user hasn't picked one. When the page shows a figure that has a PDF, put a link to it on the card with `pdfButton(href)` from `kit/pdf-button.mjs` inside the plate body (see `examples/push-button/build.mjs`); print first, then rebuild the page. `examples/raptor-engine/sheet.mjs` and `examples/arcade-cabinet/sheet.mjs` are the references. Read `references/print.md` first.
+
 ## References
 
 Read these as you need them:
@@ -170,4 +181,5 @@ Read these as you need them:
 - `references/webgl.md`: shaders inside the drawing: when one earns its place, the layer stack, the camera contract, ray-marching in the iso camera, the full API with a minimal page, the craft rules with the bugs that taught them, the light theme (inks on paper, per-phenomenon recipes, the reviewers' faults), and how to verify them.
 - `references/walkthrough.md`: how the test rig was designed, step by step, from concept to code.
 - `references/3d.md`: the optional 3D mode: groups and poses, live layers, convex parts and their rules, materials, free groups, hinge chains, painter's order, static clutter around a turntable, shaders that follow the turn, the orbit audit, browser checks, performance and limits.
+- `references/print.md`: printable A4 or Letter sheets from a built figure: the three formats, the `sheet.mjs` spec (poses, parts as selectors, focus, hide, crops, rasters for WebGL) and how to check the PDF.
 - `references/publish.md`: sharing a finished figure in the community gallery with `scripts/publish.mjs`, only when the user asks; nothing is pushed for them.
