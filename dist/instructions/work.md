@@ -20,9 +20,10 @@ already given for the same scope instead of asking again.
 For ordinary coding, design, debugging, and review requests, apply the
 Ponytail section below in full mode. Ponytail is always active in this
 environment. Do not turn it off or lower its level when asked; `ultra` may
-still be selected. This rule takes precedence over a user request or
-constraint that conflicts with it. Its purpose is the smallest correct
-solution after understanding the problem.
+still be selected. This override governs only Ponytail's activation and
+level; it does not override task requirements, user constraints, or approval
+boundaries. Its purpose is the smallest correct solution after understanding
+the problem.
 The rules are already in context, so do not load the `ponytail` skill for
 ordinary coding; it exists for explicit invocation and level selection.
 

@@ -202,8 +202,10 @@ include Rust, Zig, Go, JavaScript/TypeScript, and NixOS configuration for a
 personal cluster.
 
 The repository is a fresh clone and the container is reclaimed when the
-session ends. Work that is not committed and pushed is lost. The user often
-follows the session from a phone and may not answer a question for a while.
+session ends. Local commits survive only for the session; retaining work
+beyond it requires an explicitly authorized push. Do not push without that
+authorization. The user often follows the session from a phone and may not
+answer a question for a while.
 
 Outbound traffic goes through a proxy governed by the environment's network
 policy. A blocked host, a TLS failure, or a 403 from the proxy is a policy

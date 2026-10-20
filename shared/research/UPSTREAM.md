@@ -6,3 +6,4 @@
 - Used by: `wayfinder`.
 - License: MIT; see `LICENSE` in this directory.
 - Workflow alignment: research directly for small questions; delegate only when independent work and available tools justify it.
+- Artifact policy: return source-cited findings by default; write repository notes only when the requested deliverable includes them.

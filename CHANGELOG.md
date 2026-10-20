@@ -43,6 +43,8 @@
 
 ### Changed
 
+- `research` returns source-cited findings without repository edits by default; persistent notes are written only when requested.
+- The work profile's Ponytail override governs activation and level only, not task requirements, user constraints, or approval boundaries. Cloud persistence guidance explicitly requires push authorization, and development commands respect the active environment policy.
 - `nixos-change-validation` requires a `nix build --dry-run` check of what an input bump or package change will build, and a report of any heavy uncached package before the pull request opens, so CI does not compile it from source unannounced.
 - The `wayfinder` GitHub tracker doc adds a bulk-creation rule: run the ticket batch with a timeout that covers every `gh` call, and skip titles that already exist so a stopped batch can resume without duplicates.
 - Refreshed `anatomy` to `1482e84`, including A4/Letter PDF sheets, the push-button example, and upstream geometry, browser-automation, and publishing fixes. The recorded frontmatter adaptation is retained.
