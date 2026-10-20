@@ -38,6 +38,8 @@ An **open-ended** question, one whose answer is a description, a design, a set o
 
 Without a structured question tool, ask every question in that chat format, listing the options and trade-offs in the body.
 
+Word each question so "yes" accepts your recommended answer.
+
 ## Facts and decisions
 
 Finding _facts_ is your job, never the user's. If a fact can be found by exploring the environment (filesystem, tools, etc.), look it up rather than asking. Look it up again before _asserting_ it, in a question, a recommendation, or anything you write down for the user to keep. A remembered fact, including one from your own notes, is a guess until the repository confirms it.
