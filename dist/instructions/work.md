@@ -132,54 +132,59 @@ because work occurred.
 
 ## Git
 
-Do all branch work in a linked worktree under `.worktrees/` at the repository
-root, one worktree per branch. Fetch first and branch from the latest
-upstream default branch, for example
-`git worktree add -b <branch> .worktrees/<name> origin/main`. Create
-`.worktrees/` when it does not exist. If `.gitignore` does not ignore
-`.worktrees/`, add it and commit that change on the branch. Reuse the
-existing worktree for a branch that already has one. Each agent and subagent
-that works on a separate branch uses its own worktree; a coordinator gives
-each worker its worktree path and branch.
+### Branches
 
-Keep the main checkout on the default branch at the latest upstream commit,
-and update it only by fast-forward. Do not edit, commit, or switch branches
-in the main checkout. If it is on another branch or has changes you do not
-own, do not discard them; report the state.
+- Do all branch work in a linked worktree under `.worktrees/` at the
+  repository root, one worktree per branch. Fetch first and branch from the
+  latest upstream default branch, for example
+  `git worktree add -b <branch> .worktrees/<name> origin/main`.
+- Create `.worktrees/` when it does not exist. If `.gitignore` does not
+  ignore `.worktrees/`, add it and commit that change on the branch.
+- Reuse the existing worktree for a branch that already has one. Each agent
+  and subagent that works on a separate branch uses its own worktree; a
+  coordinator gives each worker its worktree path and branch.
+- Keep the main checkout on the default branch at the latest upstream
+  commit, and update it only by fast-forward. Do not edit, commit, or switch
+  branches in the main checkout. If it is on another branch or has changes
+  you do not own, do not discard them; report the state.
 
-An implementation request authorizes local commits unless the user says
-otherwise. Commit each completed logical change as a coherent working
-checkpoint, in dependency order. Run the available relevant checks at each
-checkpoint and disclose missing validation. Do not knowingly leave an
-intermediate commit broken until a later commit completes it.
+### Commits
 
-Choose checkpoints by usable behavior, not by module, file count, or an
-arbitrary commit quota. Keep mutually dependent changes together when they
-cannot be split into working states. A small feature can be one commit.
-Avoid mixing unrelated changes or delaying all commits until the end.
+- An implementation request authorizes local commits unless the user says
+  otherwise.
+- Commit each completed logical change as a coherent working checkpoint, in
+  dependency order. Run the available relevant checks at each checkpoint and
+  disclose missing validation. Do not knowingly leave an intermediate commit
+  broken until a later commit completes it.
+- Choose checkpoints by usable behavior, not by module, file count, or an
+  arbitrary commit quota. Keep mutually dependent changes together when they
+  cannot be split into working states. A small feature can be one commit.
+  Avoid mixing unrelated changes or delaying all commits until the end.
+- For delegated implementation, the implementer owns both the changes and
+  their commits. Assign one bounded checkpoint at a time for dependent work.
+  The coordinator must not suppress commits on its own or reconstruct
+  history from a large uncommitted diff. An explicit user instruction to
+  leave work uncommitted takes precedence and must be passed to each worker.
+- Preserve unrelated staged, unstaged, and untracked work. Stage only owned
+  changes, using hunks when files contain other work. A dirty worktree alone
+  is not a reason to stop; ask when changes overlap and ownership cannot be
+  resolved. Never discard or commit another person's work without
+  authorization.
+- Use Conventional Commits and the repository's body and footer conventions.
 
-For delegated implementation, the implementer owns both the changes and their
-commits. Assign one bounded checkpoint at a time for dependent work. The
-coordinator must not suppress commits on its own or reconstruct history from
-a large uncommitted diff. An explicit user instruction to leave work
-uncommitted takes precedence and must be passed to each worker.
+### History and publishing
 
-Preserve unrelated staged, unstaged, and untracked work. Stage only owned
-changes, using hunks when files contain other work. A dirty worktree alone is
-not a reason to stop; ask when changes overlap and ownership cannot be
-resolved. Never discard or commit another person's work without authorization.
-
-Use Conventional Commits and the repository's body and footer conventions.
-Do not amend, rebase, squash, reset, or force-push existing commits unless
-asked. Push, open pull requests, merge, or deploy only within explicit user
-authorization for that action. Do not ask again for authorization already
-given in the task.
+- Do not amend, rebase, squash, reset, or force-push existing commits unless
+  asked.
+- Push, open pull requests, merge, or deploy only within explicit user
+  authorization for that action.
+- Do not ask again for authorization already given in the task.
 
 ## Communication
 
 No preamble, wrap-up, flattery, filler, em dashes, or corporate tone in a
 report. Report what changed, what was found, what was checked, and what
-remains. During a long run of tool calls, give a one-line update when the
+remains. During a long run of tool calls, give a short update when the
 work moves to a new phase or finds something that changes the plan. Be brief
 for routine work and detailed when a decision or problem needs explanation.
 

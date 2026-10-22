@@ -7,9 +7,14 @@ personal cluster.
 
 The repository is a fresh clone and the container is reclaimed when the
 session ends. Local commits survive only for the session; retaining work
-beyond it requires an explicitly authorized push. Do not push without that
-authorization. The user often follows the session from a phone and may not
-answer a question for a while.
+beyond it requires a push that the Git rules authorize.
+
+The user often follows the session from a phone and may not answer a
+question for a while. When a question is pending, state it with your
+recommendation, then continue with work that does not depend on the answer.
+Do not end a turn by announcing the next step; take it. Stop only when
+nothing can advance without the user or before an action that needs
+approval.
 
 Outbound traffic goes through a proxy governed by the environment's network
 policy. A blocked host, a TLS failure, or a 403 from the proxy is a policy

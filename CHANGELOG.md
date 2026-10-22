@@ -43,6 +43,7 @@
 
 ### Changed
 
+- The cloud profile works and pushes on the session's designated branch instead of a `.worktrees/` checkout, and continues independent work while a question is pending instead of ending the turn. The common Git rules are grouped as bullets, and progress updates are short rather than one line.
 - Claude agents follow current model guidance: `change-reviewer` runs on `opus`; `feature-implementer` runs at high effort and applies the inlined Ponytail rules instead of loading the skill; `researcher` sets `omitClaudeMd`.
 - `research` returns source-cited findings without repository edits by default; persistent notes are written only when requested.
 - The work profile's Ponytail override governs activation and level only, not task requirements, user constraints, or approval boundaries. Cloud persistence guidance explicitly requires push authorization, and development commands respect the active environment policy.
