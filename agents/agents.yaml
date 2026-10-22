@@ -2,6 +2,10 @@
 # Bodies live in agents/bodies/ and templates in agents/templates/. Run
 # `python scripts/render.py` after editing; check fails when dist/ is stale.
 
+# Claude agents use model aliases. On the Anthropic API `sonnet` and `opus`
+# resolve to the latest models; on Bedrock, Vertex, and Foundry they can
+# resolve to older ones. Full model IDs would fail on those providers.
+
 # Every Copilot subagent uses the work Copilot Business model. The list tries
 # the display name first, then the settings identifier. Reasoning effort is a
 # global Copilot setting and cannot be pinned per agent.
@@ -18,7 +22,7 @@ agents:
       policy, baseline, commits, diff, and validation evidence.
     claude:
       name: change-reviewer
-      model: sonnet
+      model: opus
       effort: high
       tools: [Bash, Read, Grep, Glob]
     codex:
@@ -45,6 +49,9 @@ agents:
       name: researcher
       model: sonnet
       effort: high
+      # The caller passes the environment policy, so the Git, Ponytail, and
+      # commit rules in CLAUDE.md would only add context.
+      omit_claude_md: true
       tools: [Bash, Read, Grep, Glob, WebSearch, WebFetch]
     codex:
       name: task_researcher

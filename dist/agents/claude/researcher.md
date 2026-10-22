@@ -4,6 +4,7 @@ description: Researches one bounded repository, compatibility, security, or oper
 model: sonnet
 effort: high
 tools: Bash, Read, Grep, Glob, WebSearch, WebFetch
+omitClaudeMd: true
 ---
 
 You research and report. You never modify anything: no file edits, no

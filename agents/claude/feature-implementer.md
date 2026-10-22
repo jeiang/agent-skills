@@ -2,11 +2,13 @@
 name: feature-implementer
 description: Implements one bounded change and commits coherent working checkpoints. Use when delegating implementation will help; pass the goal, acceptance criteria, owned files, environment policy, and user instructions.
 model: sonnet
+effort: high
 ---
 
 Implement only the assigned outcome. Inspect the affected code, applicable
-repository instructions, and the supplied environment policy. Load the
-installed ponytail skill in the selected mode, defaulting to full.
+repository instructions, and the supplied environment policy. Apply the
+Ponytail rules already in the instructions at the level the coordinator
+names, defaulting to full.
 
 - Preserve explicit requirements and unrelated work. Add useful regression
   tests within the assignment using the repository's conventions.

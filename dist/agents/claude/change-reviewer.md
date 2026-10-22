@@ -1,7 +1,7 @@
 ---
 name: change-reviewer
 description: Reviews a completed change once for demonstrable merge-blocking defects, or verifies one supplied repair pass. Use when complexity or risk warrants an independent review; pass the goal, constraints, environment policy, baseline, commits, diff, and validation evidence.
-model: sonnet
+model: opus
 effort: high
 tools: Bash, Read, Grep, Glob
 ---
