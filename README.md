@@ -15,7 +15,7 @@ not installed for it:
 | Profile | Environment | Excluded skills |
 | --- | --- | --- |
 | `personal` | macOS and Linux with Nix, the personal stack and cluster | none |
-| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; existing delivery patterns over general best practices | `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor` |
+| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; no worktree rule; existing delivery patterns over general best practices | `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor` |
 | `generic` | No assumed OS, stack, or tools; ask before installing tools | `devshell-preflight`, `nixos-change-validation` |
 | `cloud` | Disposable Claude Code on the web container with Nix; no cluster or host access; temporary Nix tooling allowed | `warp-skill-doctor` |
 

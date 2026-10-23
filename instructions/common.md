@@ -89,6 +89,7 @@ because work occurred.
 
 ## Git
 
+{% if profile != "work" %}
 Do all branch work in a linked worktree under `.worktrees/` at the repository
 root, one worktree per branch. Fetch first and branch from the latest
 upstream default branch, for example
@@ -104,6 +105,7 @@ and update it only by fast-forward. Do not edit, commit, or switch branches
 in the main checkout. If it is on another branch or has changes you do not
 own, do not discard them; report the state.
 
+{% endif %}
 An implementation request authorizes local commits unless the user says
 otherwise. Commit each completed logical change as a coherent working
 checkpoint, in dependency order. Run the available relevant checks at each
