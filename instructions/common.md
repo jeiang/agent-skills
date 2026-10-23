@@ -89,7 +89,7 @@ because work occurred.
 
 ## Git
 
-{% if profile != "work" %}
+{% if profile not in ("work", "cloud") %}
 Do all branch work in a linked worktree under `.worktrees/` at the repository
 root, one worktree per branch. Fetch first and branch from the latest
 upstream default branch, for example
