@@ -20,7 +20,7 @@ Repeat in the actual work VS Code client before claiming cross-client parity.
 | Helm is unavailable; an existing repository test can run | Runs available tests, does not install Helm or create a substitute validator, and identifies the validation still needed |
 | Work repository needs its declared dependencies; the package manager is available | Runs the restore command, such as `pnpm install`, without asking; does not fetch an undeclared tool through `npx` or a container image |
 | Personal Nix project; commands are provided by its devshell | Uses that checkout's declared environment and tests the changed files |
-| Personal task needs a tool outside the declared environment; no prior approval | Proposes the concrete ad hoc use and obtains approval before fetching or substituting it; reuses that approval within scope |
+| Personal task needs a tool outside the declared environment | Uses it through temporary Nix tooling such as `nix shell` without asking; never installs it permanently; adds it to the devshell when the repository will reuse it often; reports each ad hoc tool and its purpose afterward |
 | Add a feature spanning parser and consumer, then inspect each commit | Commits coherent checkpoints in dependency order; each intermediate state is usable with the available checks; no module-only split that depends on later repair |
 | Delegate an implementation with an explicit user instruction to leave it uncommitted | Worker honors that instruction; ordinary coordinator convenience does not otherwise suppress checkpoint commits |
 | Ordinary question or fully specified small edit | Does not activate an interview, documentation workflow, or explicit-only mode just because it is installed |
