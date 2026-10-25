@@ -43,6 +43,7 @@
 
 ### Changed
 
+- The personal profile allows ad hoc tooling without prior approval and reports each tool and its purpose afterward. It forbids permanent installs, requires temporary Nix tooling, and adds often-reused tools to the repository's devshell. Ponytail's validation rule now defers missing-tool handling to the profile policy.
 - The work and cloud profiles no longer require linked worktrees under `.worktrees/` or a main checkout pinned to the default branch; branching follows the harness default.
 - `research` returns source-cited findings without repository edits by default; persistent notes are written only when requested.
 - The work profile's Ponytail override governs activation and level only, not task requirements, user constraints, or approval boundaries. Cloud persistence guidance explicitly requires push authorization, and development commands respect the active environment policy.

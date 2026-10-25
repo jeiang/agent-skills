@@ -88,7 +88,7 @@ Take the first option that fully works:
 - Bug fix: before you edit, grep every caller of the function you touch, then fix the root cause once in the shared code.
 - Code you move or merge keeps its error handling and validation.
 - Between options of equal size, take the one that is correct on edge cases.
-- Validate changed behavior with the repository's existing tools and test conventions. Add the smallest useful regression check when needed; reuse an existing test framework instead of inventing a demo or test runner. Trivial edits do not need new tests. Follow the installed environment policy: missing tools do not justify installation or substitute validation scripts. Report checks that could not run and the testing still needed.
+- Validate changed behavior with the repository's existing tools and test conventions. Add the smallest useful regression check when needed; reuse an existing test framework instead of inventing a demo or test runner. Trivial edits do not need new tests. Follow the installed environment policy for missing tools. Report checks that could not run and the testing still needed.
 
 Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, anything the user asked for.
 
