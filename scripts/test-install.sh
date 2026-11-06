@@ -33,6 +33,7 @@ for agent in codex claude copilot omp; do
   ln -s "$repo_dir/codex/start-task" "$agent_root/skills/start-task"
   ln -s "$repo_dir/claude/start-feature" "$agent_root/skills/start-feature"
   ln -s "$repo_dir/shared/actual-budget-import" "$agent_root/skills/actual-budget-import"
+  ln -s "$repo_dir/shared/grill-with-docs" "$agent_root/skills/grill-with-docs"
   ln -s "$repo_dir/codex/ponytail" "$agent_root/skills/ponytail"
   mkdir -p "$agent_root/agents"
   if [ "$agent" = codex ]; then
@@ -60,6 +61,7 @@ for agent in codex claude copilot omp; do
   [ ! -L "$agent_root/skills/start-task" ]
   [ ! -L "$agent_root/skills/start-feature" ]
   [ ! -L "$agent_root/skills/actual-budget-import" ]
+  [ ! -L "$agent_root/skills/grill-with-docs" ]
   [ ! -e "$test_home/.agents" ]
   for other in codex claude copilot omp; do
     [ "$other" = "$agent" ] || [ ! -e "$test_home/.$other" ]

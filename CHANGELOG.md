@@ -98,6 +98,7 @@
 
 ### Removed
 
+- The `grill-with-docs` skill, which no session invoked; `wayfinder` already calls `grilling` and `domain-modeling` directly. Both installers remove their owned skill links on reinstall.
 - The `actual-budget-import` skill and CLI reference. Both installers remove their owned legacy skill links on reinstall.
 
 - The `start-task` and `start-feature` launchers, mandatory task coordinator, and automatic Codex concurrency configuration. Ordinary requests use the shared dynamic workflow.
