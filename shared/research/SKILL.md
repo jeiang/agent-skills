@@ -5,8 +5,9 @@ description: Investigate a question against high-trust primary sources and retur
 
 Research directly for a small question. Use a background agent when the
 question is independently bounded, delegation is available, and useful work
-can continue alongside it. Pass the environment and tool restrictions; do
-not require a particular agent tool or model.
+can continue alongside it. Start it with a fresh context window. Pass the
+environment and tool restrictions; do not require a particular agent tool or
+model.
 
 The research task:
 

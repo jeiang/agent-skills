@@ -44,7 +44,7 @@ Word each question so "yes" accepts your recommended answer.
 
 Finding _facts_ is your job, never the user's. If a fact can be found by exploring the environment (filesystem, tools, etc.), look it up rather than asking. Look it up again before _asserting_ it, in a question, a recommendation, or anything you write down for the user to keep. A remembered fact, including one from your own notes, is a guess until the repository confirms it.
 
-Don't block a round on a lookup: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait; ask the rest of the frontier now. Delegate the lookup to a sub-agent when one is available and the search is large enough to justify it.
+Don't block a round on a lookup: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait; ask the rest of the frontier now. Delegate the lookup to a sub-agent with a fresh context window when one is available and the search is large enough to justify it.
 
 Closing a branch as impossible or infeasible is itself an assertion. Name the file, command, or source you checked before recording it, or leave the branch open.
 

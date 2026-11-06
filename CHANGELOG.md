@@ -43,6 +43,7 @@
 
 ### Changed
 
+- Refreshed the six mattpocock/skills copies and bundled tracker docs to `4ae2317`. Research, grilling lookups, and wayfinder research tickets start subagents with a fresh context window; the GitHub tracker uses `gh` 2.94 sub-issue and blocked-by flags, counts open blockers, comments before closing, and checks the target repository before the first issue; the GitLab tracker links children to the map. Ponytail's recorded upstream moves to v5.3.3, whose skill file is unchanged.
 - The personal profile allows ad hoc tooling without prior approval and reports each tool and its purpose afterward. It forbids permanent installs, requires temporary Nix tooling, and adds often-reused tools to the repository's devshell. Ponytail's validation rule now defers missing-tool handling to the profile policy.
 - The work and cloud profiles no longer require linked worktrees under `.worktrees/` or a main checkout pinned to the default branch; branching follows the harness default.
 - `research` returns source-cited findings without repository edits by default; persistent notes are written only when requested.
