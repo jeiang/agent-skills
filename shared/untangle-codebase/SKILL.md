@@ -5,9 +5,9 @@ disable-model-invocation: true
 argument-hint: "[optional area or concern to focus on]"
 ---
 
-Start a thorough refactor of this codebase and complete it to the end.
+Start a thorough refactor of this codebase. Plan it first, stop for the user's review, then complete it to the end.
 
-Treat this as a goal.
+Treat this as a goal once the user approves the plan.
 
 **Why do this at all?**
 
@@ -69,7 +69,13 @@ Ask the same thing of every fix, even one that looks better in the code: pieces 
 
 Write each fix above the problems it solves, as in the [decision log example](#decision-log-example).
 
-**4. Fix everything on the list**
+**Stop for review**
+
+Don't change any code before this point. Show the user the decision log: each fix with the problems it solves, the special cases each fix removes and keeps, and the additions they chose. Then stop and wait.
+
+Apply only the fixes the user approves, with their changes. If the user rejects a fix or asks for a different one, update the decision log and show it again before you start step 4.
+
+**4. Fix everything on the approved list**
 
 Remove the special cases the redesign makes unnecessary, and keep the ones the system still needs. Don't go looking for bugs separately. A structural fix may fix some along the way, which is fine.
 
@@ -87,7 +93,7 @@ If the user chose Tests, do this last, because tests are your regression safety 
 
 **5. Check, and repeat until done**
 
-Have subagents search for special cases, hidden links, needless links and surplus. **Do not stop until there is nothing worth fixing left.**
+Have subagents search for special cases, hidden links, needless links and surplus. Add new fixes to the decision log and stop for review again before you make them. **Do not stop until there is nothing worth fixing left.**
 
 You're done when:
 

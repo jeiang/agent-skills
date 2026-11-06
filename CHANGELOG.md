@@ -5,7 +5,7 @@
 ### Added
 
 - A `cloud` profile for Claude Code on the web sandboxes: Nix available, no cluster or host access, temporary Nix tooling without approval, and activation handed back to the user. It excludes `warp-skill-doctor`. Install it from the environment's setup script with `install.sh claude cloud`.
-- `untangle-codebase` vendored from `caldoai/skills` at `f3cf477` with its MIT license: an explicit-invocation, whole-codebase refactor that lists hidden links, needless links, surplus, and special cases, redesigns from first principles, and repeats until subagents find nothing worth fixing.
+- `untangle-codebase` vendored from `caldoai/skills` at `f3cf477` with its MIT license: an explicit-invocation, whole-codebase refactor that lists hidden links, needless links, surplus, and special cases, redesigns from first principles, and repeats until subagents find nothing worth fixing. Local change: it stops after the decision log, and again before each new round of fixes, so the user can review before any code changes.
 - `anatomy` vendored from `wheresryan22/anatomy` at `bc943e4`, including its rendering kit, reference guides, scripts, eight examples, Codex display metadata, and MIT license.
 - omp-only `fast`, `smol`, and `max-reasoning` general-purpose subagents under `agents/omp/`, each running on the model role of the same name so the consumer's `modelRoles` picks the model and thinking level.
 - An omp-only `designer` subagent under `agents/omp/`: the UI/UX implementation and review agent omp removed from its bundled set, kept with its upstream prompt and running on the parent session's model.
