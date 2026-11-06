@@ -14,7 +14,7 @@ not installed for it:
 
 | Profile | Environment | Excluded skills |
 | --- | --- | --- |
-| `personal` | macOS and Linux with Nix, the personal stack and cluster | none |
+| `personal` | macOS and Linux with Nix, the personal stack and cluster | `azure-pipelines-maintenance`, `kubernetes-delivery`, `kubernetes-diagnose` |
 | `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; no worktree rule; existing delivery patterns over general best practices | `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor` |
 | `generic` | No assumed OS, stack, or tools; ask before installing tools | `devshell-preflight`, `nixos-change-validation` |
 | `cloud` | Disposable Claude Code on the web container with Nix; no cluster or host access; no worktree rule; temporary Nix tooling allowed | `warp-skill-doctor` |
@@ -221,7 +221,7 @@ skill directory rather than creating another global discovery path.
 | --- | --- |
 | `ponytail` | Explicit invocation to select a level; its full-mode rules are already in the instructions |
 | `grilling` | Unresolved intent or consequential decisions |
-| `kubernetes-delivery`, `kubernetes-diagnose`, `azure-pipelines-maintenance` | The matching delivery, incident, or pipeline task |
+| `kubernetes-delivery`, `kubernetes-diagnose`, `azure-pipelines-maintenance` | The matching delivery, incident, or pipeline task; not installed by the personal profile |
 | `devshell-preflight`, `nixos-change-validation` | Personal Nix environments and Nix configuration changes |
 | `research`, `prototype`, `domain-modeling`, `diagram`, `eli5` | The specific research, design, documentation, or explanation request |
 | `anatomy` | Detailed interactive isometric SVG explainers, with optional WebGL and 3D |

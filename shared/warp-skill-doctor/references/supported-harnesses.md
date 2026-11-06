@@ -10,7 +10,7 @@ This file is the single source of truth for harness support in `warp-skill-docto
 | Claude Code | `claude` | Project-history JSONL |
 | Codex | `codex` | Rollout JSONL |
 | Pi | `pi` | Pi agent JSONL (`~/.pi/agent/sessions`) |
-| Oh My Pi (`omp`) | `pi` with `--pi-home ~/.omp/agent --skills-dir ~/.omp/agent/skills` | omp agent JSONL (`~/.omp/agent/sessions`); top-level sessions only, subagent transcripts are not collected |
+| Oh My Pi (`omp`) | `pi` with `--pi-home ~/.omp/agent --skills-dir ~/.omp/agent/skills` | omp agent JSONL (`~/.omp/agent/sessions`); subagent sessions only with `--include-subagents` |
 | Grok Build | `grok` | Grok Build chat_history JSONL (`~/.grok/sessions`) |
 | ZCode | `zcode` | ZCode model-io rollout (`~/.zcode/cli/rollout`) |
 | Hermes | `hermes` | Hermes Agent state.db (SQLite: `sessions` + `messages`) |
