@@ -1,6 +1,6 @@
 ---
 name: "warp-skill-doctor"
-description: "Grade skills from local Warp, Claude Code, or Codex conversation history and draft evidence-backed edits with a report. Use when the user requests evaluation of their setup from real sessions. Do not use for general skills research, a skill-file review, or Copilot sessions."
+description: "Grade skills from local Warp, Claude Code, Codex, Pi, or Oh My Pi conversation history and draft evidence-backed edits with a report. Use when the user requests evaluation of their setup from real sessions. Do not use for general skills research, a skill-file review, or Copilot sessions."
 ---
 # warp-skill-doctor
 
@@ -123,7 +123,7 @@ Then derive the substance:
 
 Follow `$SKILL_ROOT/references/skill-improvements.md` to propose improvements to project skills based only on `failed_conversations`.
 
-1. Read the skill's current file (path is in `inventory.json`).
+1. Read the skill's current file (path is in `inventory.json`). If that path is an installed copy, such as a Nix store path or a link into another checkout, read the skill's source repository on its latest default branch instead, and draft against that.
 2. Write the full improved version to `$REPORT_DIR/proposed/<skill-name>/SKILL.md`, changing only what the evidence justifies. Improve the parts the sessions actually exercised: the trigger description that failed to fire, the missing preflight check, the step the agent had to figure out by trial and error.
 3. Produce a unified diff between current and proposed (`diff -u <current> <proposed>`) and put it in the suggestion's `diff` field so it renders in the report.
 

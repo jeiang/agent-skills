@@ -10,6 +10,7 @@ This file is the single source of truth for harness support in `warp-skill-docto
 | Claude Code | `claude` | Project-history JSONL |
 | Codex | `codex` | Rollout JSONL |
 | Pi | `pi` | Pi agent JSONL (`~/.pi/agent/sessions`) |
+| Oh My Pi (`omp`) | `pi` with `--pi-home ~/.omp/agent --skills-dir ~/.omp/agent/skills` | omp agent JSONL (`~/.omp/agent/sessions`); top-level sessions only, subagent transcripts are not collected |
 | Grok Build | `grok` | Grok Build chat_history JSONL (`~/.grok/sessions`) |
 | ZCode | `zcode` | ZCode model-io rollout (`~/.zcode/cli/rollout`) |
 | Hermes | `hermes` | Hermes Agent state.db (SQLite: `sessions` + `messages`) |
@@ -18,7 +19,7 @@ At startup, identify the harness executing the skill from the runtime context. D
 
 If the executing harness is not listed above, or cannot be identified confidently, stop before creating a report directory or reading conversation history. Tell the user:
 
-> warp-skill-doctor currently supports Warp, Claude Code, Codex, Pi, Grok Build, ZCode, and Hermes. This run appears to be using an unsupported harness, so no conversations were read.
+> warp-skill-doctor currently supports Warp, Claude Code, Codex, Pi, Oh My Pi, Grok Build, ZCode, and Hermes. This run appears to be using an unsupported harness, so no conversations were read.
 
 ## Collector source selection
 

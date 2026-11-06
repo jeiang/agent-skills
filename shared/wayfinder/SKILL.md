@@ -22,7 +22,7 @@ The map is a single issue on this repo's issue tracker, labelled `wayfinder:map`
 
 The map is an **index**, not a store. It lists the decisions made and points at the tickets that hold their detail; a decision lives in exactly one place, its ticket, so the map never restates it, only gists it and links.
 
-**Where the map, its child tickets, blocking, and frontier queries physically live is tracker-specific.** The issue tracker doc should have been provided to you. If not, pick the matching doc from this skill's [trackers/](trackers/) directory. Consult the tracker doc's "Wayfinding operations" section for how _this_ repo expresses them. If no tracker has been provided, default to the local-markdown tracker ([trackers/issue-tracker-local.md](trackers/issue-tracker-local.md)).
+**Where the map, its child tickets, blocking, and frontier queries physically live is tracker-specific.** The issue tracker doc should have been provided to you. If not, pick the matching doc from this skill's [trackers/](trackers/) directory. Consult the tracker doc's "Wayfinding operations" section for how _this_ repo expresses them. If no tracker has been provided, use the GitHub tracker ([trackers/issue-tracker-github.md](trackers/issue-tracker-github.md)) when `gh repo view` works in this directory; otherwise ask the user which tracker to use, offering a new private GitHub repository and the local-markdown tracker ([trackers/issue-tracker-local.md](trackers/issue-tracker-local.md)).
 
 ### The map body
 
@@ -122,7 +122,7 @@ User invokes with a map (URL or number). A ticket is **optional**: without one, 
 1. Load the **map**: the low-res view, not every ticket body.
 2. Choose the ticket. If the user named one, use it. Otherwise take the first frontier ticket in order. **Claim it**: assign it to yourself before any work.
 3. Resolve it as the type its `wayfinder:<type>` label names (see [Ticket Types](#ticket-types)). Read the label, not just the body: the body never states the type. **Zoom as needed**: fetch the full body of any related or closed ticket on demand; call the Skill tool for whichever skills the `## Notes` block names. If in doubt, call the Skill tool twice, for "grilling" and "domain-modeling". A map's research fact sheets routinely run to tens of kilobytes: read them with the harness's file-reading tool, not a shell `cat`, and when a read comes back truncated, change tools rather than re-issuing it.
-4. Record the resolution: post the answer as a **resolution comment**, **close** the issue, and **append a context pointer** to the map's Decisions-so-far.
+4. Record the resolution: post the answer as a **resolution comment**, **close** the issue, and **append a context pointer** to the map's Decisions-so-far. When a subagent reports that it resolved a ticket, confirm the comment and closed state on the tracker before you record it.
 5. Add newly-surfaced tickets (create-then-wire); graduate any fog the answer has made specifiable, clearing each graduated patch from **Not yet specified** so it lives only as its new ticket. If the answer reveals that a ticket (this one or another) sits beyond the destination, **rule it out of scope** rather than resolving it on the route. If the decision invalidates other parts of the map, update or delete those tickets.
 
 The user may run unblocked tickets in parallel, so expect other sessions to be editing the tracker concurrently.

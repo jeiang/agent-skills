@@ -205,6 +205,10 @@ glob argument, such as `--include='*.nix'`. Wrap POSIX constructs such as
 `for` loops, `$(...)`, and heredocs in `bash -c '...'` when a command runs
 over `ssh`.
 
+macOS has BSD userland: `timeout` is absent (use the shell tool's own
+timeout), and `sed -i`, `readlink -f`, and `date` take different arguments
+than on Linux.
+
 Use `devshell-preflight` when Nix is available and the repository declares a
 Nix development environment. Resolve that environment before running its
 commands. Use `nixos-change-validation` for changes to Nix configuration,

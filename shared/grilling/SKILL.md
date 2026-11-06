@@ -17,7 +17,7 @@ A question whose answer depends on another question still open in this round bel
 
 When the harness has a structured question tool (Claude Code's `AskUserQuestion`, or an equivalent that presents selectable options), put the round's **closed** questions in it:
 
-- One tool call per round when the frontier fits the tool's limit (four questions in Claude Code). A larger frontier goes into several calls in the same round, most consequential first.
+- One tool call per round when the frontier fits the tool's limit (four questions in Claude Code; omp's `ask` has no fixed limit). A larger frontier goes into several calls in the same round, most consequential first.
 - Two to four concrete options per question. Each option label names a choice; its description states the material trade-off in a line.
 - Your recommendation first, marked as recommended. The user can still type their own answer.
 - Use multi-select only when the options are independent and several can hold at once.

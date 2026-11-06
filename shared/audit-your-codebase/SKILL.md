@@ -1,6 +1,6 @@
 ---
 name: audit-your-codebase
-description: Run a read-only, agent-orchestrated audit of an entire codebase for materially useful simplifications in data structures, state representation, control flow, algorithms, and ownership. Use when the user asks to audit a codebase, find simplification or refactoring opportunities across a whole repository, or review state modeling and structural complexity. Do NOT use for reviewing a single diff or implementing changes.
+description: Run a read-only, agent-orchestrated audit of an entire codebase for materially useful simplifications in data structures, state representation, control flow, algorithms, and ownership. Use when the user asks to audit a codebase, find simplification or refactoring opportunities across a whole repository, or review state modeling and structural complexity. Do NOT use for reviewing a single diff or implementing changes, or inside a subagent assigned one slice, inventory, or review; the brief it received is its instruction.
 ---
 
 Audit this entire codebase for materially useful simplifications in its data structures, state representation, control flow, algorithms, and ownership.

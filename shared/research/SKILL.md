@@ -1,6 +1,6 @@
 ---
 name: research
-description: Investigate a question against high-trust primary sources and return source-cited findings, saving research notes only when the requested deliverable requires them. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent.
+description: Investigate a question against high-trust primary sources and return source-cited findings, saving research notes only when the requested deliverable requires them. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent. Not for code or PR review, comparing code within the repository, auditing session logs, or a single fact lookup during other work.
 ---
 
 Research directly for a small question. Use a background agent when the

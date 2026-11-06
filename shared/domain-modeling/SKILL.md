@@ -1,6 +1,6 @@
 ---
 name: domain-modeling
-description: Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a GLOSSARY.md, or recording or editing an ADR.
+description: Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a codebase's GLOSSARY.md, or recording or editing an ADR. Not for translation or content glossaries.
 ---
 
 # Domain Modeling
@@ -37,7 +37,7 @@ If a `GLOSSARY-MAP.md` exists at the root, the repo has multiple contexts. The m
 │       └── docs/adr/
 ```
 
-Create files lazily: only when you have something to write. If no `GLOSSARY.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed.
+Create files lazily: only when you have something to write. If no `GLOSSARY.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed. A legacy `CONTEXT.md` or `CONTEXT-MAP.md` is the glossary or map under its old name: edit it rather than creating a second file, and offer to `git mv` it to its `GLOSSARY` name.
 
 ## During the session
 
