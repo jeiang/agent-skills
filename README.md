@@ -227,7 +227,7 @@ skill directory rather than creating another global discovery path.
 | `anatomy` | Detailed interactive isometric SVG explainers, with optional WebGL and 3D |
 | `audit-your-codebase` | A requested whole-repository simplification audit |
 | `warp-skill-doctor` | Evaluation from supported local agent histories |
-| `wayfinder`, `i-have-adhd` | Explicit invocation only, consistently across all platforms |
+| `wayfinder`, `i-have-adhd`, `untangle-codebase` | Explicit invocation only, consistently across all platforms |
 
 Descriptions define automatic relevance. Claude/Copilot/omp use
 `disable-model-invocation` in skill frontmatter; Codex uses the inverse
