@@ -52,6 +52,7 @@ still answering the request through a suitable path.
 | prototype | Build a disposable demonstration to answer a design question | Implement a settled production design |
 | research | Investigate an API constraint from official sources | Reword supplied text without needing research |
 | warp-skill-doctor | Evaluate skills from supported personal agent histories | Research general skill practices or run in Copilot |
+| untangle-codebase | Explicitly refactor the whole codebase until changes land in one place | Refactor one module or review a diff |
 | wayfinder | Explicitly map a large effort into decision tickets | Plan a small task in the current conversation |
 
 ## Installed-source checks

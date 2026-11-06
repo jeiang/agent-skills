@@ -1,0 +1,5 @@
+interface:
+  display_name: "Untangle Codebase"
+  short_description: "Refactor a whole codebase so changes land in one place"
+policy:
+  allow_implicit_invocation: false
