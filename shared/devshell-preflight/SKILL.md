@@ -1,14 +1,16 @@
 ---
 name: devshell-preflight
-description: Resolve repository commands inside a declared Nix development environment on personal macOS or Linux systems with Nix available. Use at the start of any task in a repository that has devenv.nix, flake.nix, shell.nix, or .envrc, before the first just, statix, formatter, build, or test command, and when diagnosing that environment. Do not use on the work machine, in environments without Nix, or for arbitrary missing commands.
+description: Resolve repository commands inside a declared Nix development environment on macOS or Linux systems with Nix available. Use at the start of any task in a repository that has devenv.nix, flake.nix, shell.nix, or .envrc, before the first just, statix, formatter, build, or test command, and when diagnosing that environment. Skip it when the assignment or the repository's AGENTS.md already names the command prefix. Do not use on the work machine, in environments without Nix, or for arbitrary missing commands.
 ---
 
 # Devshell Preflight
 
-First confirm the personal environment policy applies, the system is macOS
-or Linux, Nix is available, and the repository declares a Nix environment.
+First confirm the environment policy allows Nix, the system is macOS or
+Linux, Nix is available, and the repository declares a Nix environment.
 Otherwise this skill does not apply. A missing command alone is not a trigger.
-Resolve the entry point once and reuse it for the affected checkout.
+If the assignment or the repository's AGENTS.md already names the entry
+point, use it and skip resolution. Otherwise resolve it once and reuse it for
+the affected checkout.
 
 ## Resolve the entry point
 
@@ -27,7 +29,10 @@ Check in this order and stop at the first that matches:
 A repo can have `devenv.nix` without `flake.nix`. `nix develop` fails there
 with "not part of a flake"; that is the wrong entry point, not a broken repo.
 
-Record the resolved prefix and use it for every repo command in the session.
+Record the resolved prefix and use it for toolchain commands: builds, tests,
+linters, formatters, and `just` recipes. Do not wrap commands that do not
+need the shell, such as `git status`, `git fetch`, `git worktree`, `gh`, or
+`ssh`; each wrapper costs a shell start.
 When a repo command still fails inside the prefix, read its `--help` or the
 `justfile` recipe once instead of guessing argument order.
 
@@ -40,12 +45,11 @@ worktree cannot be checked.
 
 ## One-off tools the repo does not provide
 
-Get user approval before fetching tools outside the declared repository
-environment or creating an ad hoc substitute, unless that use is already
-authorized. Prefer `nix shell nixpkgs#<pkg> -c <cmd>` to permanent installation.
-For an approved Python interpreter that needs a library, the package
-attribute alone does not put the module on the interpreter's path. Use the
-wrapper form:
+Follow the environment policy for tools outside the declared repository
+environment or an ad hoc substitute. Use temporary Nix tooling such as
+`nix shell nixpkgs#<pkg> -c <cmd>`, never a permanent installation. For a
+Python interpreter that needs a library, the package attribute alone does not
+put the module on the interpreter's path. Use the wrapper form:
 
 ```sh
 nix-shell -p "python3.withPackages(p: [p.pyyaml])" --run '<cmd>'
@@ -55,7 +59,5 @@ nix-shell -p "python3.withPackages(p: [p.pyyaml])" --run '<cmd>'
 
 - Do not run the bare command first to see whether it happens to work, when
   any marker above is present.
-- Do not treat disclosure as approval for a substitute. Explain its limits;
-  do not claim it is equivalent to the intended check without evidence.
-- Do not assume GNU coreutils on macOS. `timeout` is absent, and `sed -i`,
-  `readlink -f`, and `date` take different arguments.
+- Do not claim a substitute is equivalent to the intended check without
+  evidence; state its limits.

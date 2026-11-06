@@ -290,6 +290,7 @@ def detect_skill_candidates(text: str):
     """Extract possible installed-skill names from one tool argument payload."""
     normalized = text.replace("\\", "/")
     candidates = set(re.findall(r"(?:^|/)skills/+([^/]+)/+", normalized))
+    candidates.update(re.findall(r"skill://([A-Za-z0-9_.-]+)", normalized))
     candidates.update(re.findall(
         r'"(?:skill|name|bundled_skill_id)"\s*:\s*"([^"]+)"',
         normalized,
@@ -1088,12 +1089,16 @@ def parse_warp_conversation(record, skill_names, include_subagents):
     return meta, stats, entries, sorted(skills_used)
 
 
-def find_pi_session_files(pi_home: Path, cutoff: datetime):
+def find_pi_session_files(pi_home: Path, cutoff: datetime, include_subagents: bool = False):
     root = pi_home / "sessions"
     if not root.is_dir():
         return []
+    candidates = list(root.glob("*/*.jsonl"))
+    if include_subagents:
+        # omp nests subagent sessions under <project>/<parent-session>/, at any depth.
+        candidates.extend(root.glob("*/*/**/*.jsonl"))
     files = []
-    for path in root.glob("*/*.jsonl"):
+    for path in candidates:
         try:
             mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
         except OSError:
@@ -1107,8 +1112,10 @@ def find_pi_session_files(pi_home: Path, cutoff: datetime):
 def parse_pi_session(path: Path, skill_names, include_subagents: bool):
     """Normalize one Pi agent JSONL session to the shared transcript shape.
 
-    Pi has no subagent sessions; include_subagents is accepted for signature
-    compatibility with the Claude parser and ignored.
+    Pi itself has no subagents. omp, a Pi fork, writes subagent sessions whose
+    session header names a `parentSession`; those are skipped unless
+    include_subagents is set. omp slash invocations arrive as `skill-prompt`
+    custom messages and count as skill use.
     """
     try:
         records = iter_jsonl_records(path)
@@ -1132,17 +1139,25 @@ def parse_pi_session(path: Path, skill_names, include_subagents: bool):
             last_ts = ts
 
         if record_type == "session":
+            if obj.get("parentSession") and not include_subagents:
+                return None
             if not meta:
                 meta = {
                     "id": obj.get("id") or path.stem,
                     "cwd": obj.get("cwd"),
                     "started_at": ts,
                     "originator": "pi",
-                    "thread_source": None,
+                    "thread_source": "subagent" if obj.get("parentSession") else None,
                 }
             else:
                 meta["cwd"] = meta.get("cwd") or obj.get("cwd")
                 meta["started_at"] = meta.get("started_at") or ts
+            continue
+
+        if record_type == "custom_message" and obj.get("customType") == "skill-prompt":
+            match = re.search(r'invoked the "([^"]+)" skill', str(obj.get("content") or ""))
+            if match:
+                skills_used.add(match.group(1))
             continue
 
         if record_type != "message":
@@ -1689,7 +1704,7 @@ def main():
 
     requested_pi = args.harness in ("auto", "all", "pi")
     if requested_pi and (pi_home / "sessions").is_dir():
-        pi_files = find_pi_session_files(pi_home, cutoff)
+        pi_files = find_pi_session_files(pi_home, cutoff, args.include_subagents)
         sources["pi"] = {"home": str(pi_home), "records_in_window": len(pi_files)}
         scanned_count += len(pi_files)
         for mtime, path in pi_files:

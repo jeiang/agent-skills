@@ -1,0 +1,3 @@
+azure-pipelines-maintenance
+kubernetes-delivery
+kubernetes-diagnose

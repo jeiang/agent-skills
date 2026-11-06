@@ -39,7 +39,6 @@ still answering the request through a suitable path.
 | --- | --- | --- |
 | ponytail | Switch to ponytail ultra | Fix this parser bug (the rules are already in the instructions) |
 | grilling | Make builds faster using Redis, with no clear performance goal | Change the specified image tag |
-| grill-with-docs | Explicitly invoke an interview that records ADRs and domain terms | Clarify one requirement without requesting docs |
 | devshell-preflight | Run checks in a personal Nix/devenv repository | A command is missing on the work machine |
 | nixos-change-validation | Change or format Nix configuration on the personal system | Explain a Kubernetes incident |
 | kubernetes-delivery | Change a Helm chart's workload configuration | Explain what Helm is |

@@ -135,6 +135,7 @@ mkdir -p "$agent_root/skills"
 remove_owned_link "$agent_root/skills/start-task"
 remove_owned_link "$agent_root/skills/start-feature"
 remove_owned_link "$agent_root/skills/actual-budget-import"
+remove_owned_link "$agent_root/skills/grill-with-docs"
 while IFS= read -r excluded_skill; do
   [ -n "$excluded_skill" ] || continue
   remove_owned_link "$agent_root/skills/$excluded_skill"

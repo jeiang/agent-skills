@@ -376,6 +376,37 @@ class PiSessionTests(unittest.TestCase):
 
             self.assertEqual([path for _, path in files], [recent])
 
+    def test_omp_subagents_and_skill_uses(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            pi_home = Path(tmp)
+            project = pi_home / "sessions" / "-tmp-repo"
+            parent = project / "parent.jsonl"
+            child = project / "parent" / "Worker" / "Worker.Nested.jsonl"
+            write_jsonl(parent, [
+                {"type": "session", "id": "parent", "cwd": "/tmp/repo",
+                 "timestamp": "2026-08-20T10:00:00.000Z"},
+                {"type": "custom_message", "customType": "skill-prompt",
+                 "content": '[IMPORTANT: User invoked the "grilling" skill; follow its instructions.]'},
+                {"type": "message", "timestamp": "2026-08-20T10:00:01.000Z",
+                 "message": {"role": "assistant", "content": [
+                     {"type": "toolCall", "name": "read", "arguments": {"path": "skill://research"}},
+                 ]}},
+            ])
+            write_jsonl(child, [
+                {"type": "session", "id": "child", "cwd": "/tmp/repo",
+                 "parentSession": str(parent), "timestamp": "2026-08-20T10:00:02.000Z"},
+            ])
+            cutoff = datetime.now(timezone.utc) - timedelta(days=1)
+
+            self.assertEqual([p for _, p in find_pi_session_files(pi_home, cutoff)], [parent])
+            self.assertEqual(
+                {p for _, p in find_pi_session_files(pi_home, cutoff, True)}, {parent, child}
+            )
+            self.assertIsNone(parse_pi_session(child, set(), False))
+            self.assertEqual(parse_pi_session(child, set(), True)[0]["thread_source"], "subagent")
+            skills = parse_pi_session(parent, {"grilling", "research", "eli5"}, False)[3]
+            self.assertEqual(skills, ["grilling", "research"])
+
 
 class GrokSessionTests(unittest.TestCase):
     def test_parses_tool_calls_and_skips_synthetic_messages(self):

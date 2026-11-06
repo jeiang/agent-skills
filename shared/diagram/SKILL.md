@@ -79,6 +79,8 @@ Include one or two sentences above the diagram stating the question it
 answers, and below it the paths you derived it from, so the next reader can
 check it against the code.
 
-Confirm the diagram parses before handing it over. If a renderer is
-available, render it; otherwise re-read it against the syntax rules above.
-Shipping a diagram that fails to render is worse than shipping none.
+Confirm the diagram parses before handing it over. Render it with
+`mmdc` (nixpkgs `mermaid-cli`) or another available renderer, following the
+environment policy for missing tools; re-reading it against the syntax rules
+above is the fallback only when no renderer can run. Shipping a diagram that
+fails to render is worse than shipping none.

@@ -43,6 +43,15 @@
 
 ### Changed
 
+- Skill fixes from a review of omp session transcripts:
+  - `devshell-preflight` defers tool approval to the environment policy instead of always asking, which contradicted the personal profile. It skips resolution when the assignment or AGENTS.md names the prefix, and it does not wrap `git`, `gh`, or `ssh` in the shell. The macOS userland note moves to the personal profile, where sessions without the skill also see it.
+  - `nixos-change-validation` reads its activation reference only for host-affecting changes. It defers shell entry to `devshell-preflight` and keeps full check output in a log file. It asks before a large prebuild and does not re-ask for a deploy the user already requested.
+  - `research` and `audit-your-codebase` descriptions exclude the reviews, comparisons, and subagent slices that loaded them without effect. `domain-modeling` excludes content glossaries and edits a legacy `CONTEXT.md` in place.
+  - `wayfinder` defaults to the GitHub tracker and confirms that a subagent's reported close took effect. `grilling` notes that omp's `ask` has no four-question limit. `diagram` renders with `mmdc` instead of skipping the check.
+  - `warp-skill-doctor` lists Oh My Pi through the Pi collector. Its edits are drafted against the skill's source repository rather than an installed copy. The collector detects `skill://` reads and omp slash invocations, and with `--include-subagents` it collects omp's nested subagent sessions.
+  - `anatomy` builds a Hero version in the same turn when a request is Epic-sized, and documents a harness-browser fallback with an injected line-end check for when its scripts cannot start Chrome.
+- The personal profile no longer installs `kubernetes-delivery`, `kubernetes-diagnose`, or `azure-pipelines-maintenance`, which no personal session used; the work profile keeps them.
+- Refreshed the six mattpocock/skills copies and bundled tracker docs to `4ae2317`. Research, grilling lookups, and wayfinder research tickets start subagents with a fresh context window; the GitHub tracker uses `gh` 2.94 sub-issue and blocked-by flags, counts open blockers, comments before closing, and checks the target repository before the first issue; the GitLab tracker links children to the map. Ponytail's recorded upstream moves to v5.3.3, whose skill file is unchanged.
 - The personal profile allows ad hoc tooling without prior approval and reports each tool and its purpose afterward. It forbids permanent installs, requires temporary Nix tooling, and adds often-reused tools to the repository's devshell. Ponytail's validation rule now defers missing-tool handling to the profile policy.
 - The work and cloud profiles no longer require linked worktrees under `.worktrees/` or a main checkout pinned to the default branch; branching follows the harness default.
 - `research` returns source-cited findings without repository edits by default; persistent notes are written only when requested.
@@ -89,6 +98,7 @@
 
 ### Removed
 
+- The `grill-with-docs` skill, which no session invoked; `wayfinder` already calls `grilling` and `domain-modeling` directly. Both installers remove their owned skill links on reinstall.
 - The `actual-budget-import` skill and CLI reference. Both installers remove their owned legacy skill links on reinstall.
 
 - The `start-task` and `start-feature` launchers, mandatory task coordinator, and automatic Codex concurrency configuration. Ordinary requests use the shared dynamic workflow.

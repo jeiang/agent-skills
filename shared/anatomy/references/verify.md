@@ -5,6 +5,8 @@ Look at the figure the way a demanding reviewer would, before anyone else does. 
 ## Capture
 `scripts/capture.mjs` starts its own headless Chrome (set `CHROME_PATH` if it can't find one), loads a file or URL, and clips to `.iso-plate` by default. It also prints the readout, any console errors or exceptions, and whether the page scrolls sideways.
 
+If the scripts cannot start Chrome ("Chrome did not start" even with `CHROME_PATH` set, as in some sandboxed harnesses), use the harness's own browser tool when it has one: open the page, take the same desktop, phone, hover and motion screenshots, and run the line-end check by evaluating `LINE_ENDS` from `scripts/line-ends.mjs` in the page (`(${LINE_ENDS})()` returns `{ ends, lines, problems }`; `problems` lists the floating ends). Report which checks ran this way and which could not run.
+
 ```sh
 node scripts/capture.mjs page.html --out shots/desk.png                         # desktop 1440, dpr 2
 node scripts/capture.mjs page.html --out shots/phone.png --width 390            # phone

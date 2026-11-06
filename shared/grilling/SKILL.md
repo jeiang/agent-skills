@@ -17,7 +17,7 @@ A question whose answer depends on another question still open in this round bel
 
 When the harness has a structured question tool (Claude Code's `AskUserQuestion`, or an equivalent that presents selectable options), put the round's **closed** questions in it:
 
-- One tool call per round when the frontier fits the tool's limit (four questions in Claude Code). A larger frontier goes into several calls in the same round, most consequential first.
+- One tool call per round when the frontier fits the tool's limit (four questions in Claude Code; omp's `ask` has no fixed limit). A larger frontier goes into several calls in the same round, most consequential first.
 - Two to four concrete options per question. Each option label names a choice; its description states the material trade-off in a line.
 - Your recommendation first, marked as recommended. The user can still type their own answer.
 - Use multi-select only when the options are independent and several can hold at once.
@@ -44,7 +44,7 @@ Word each question so "yes" accepts your recommended answer.
 
 Finding _facts_ is your job, never the user's. If a fact can be found by exploring the environment (filesystem, tools, etc.), look it up rather than asking. Look it up again before _asserting_ it, in a question, a recommendation, or anything you write down for the user to keep. A remembered fact, including one from your own notes, is a guess until the repository confirms it.
 
-Don't block a round on a lookup: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait; ask the rest of the frontier now. Delegate the lookup to a sub-agent when one is available and the search is large enough to justify it.
+Don't block a round on a lookup: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait; ask the rest of the frontier now. Delegate the lookup to a sub-agent with a fresh context window when one is available and the search is large enough to justify it.
 
 Closing a branch as impossible or infeasible is itself an assertion. Name the file, command, or source you checked before recording it, or leave the branch open.
 

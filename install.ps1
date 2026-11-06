@@ -110,6 +110,7 @@ New-Item -ItemType Directory -Force -Path $skillsRoot | Out-Null
 Remove-OwnedLink (Join-Path $skillsRoot 'start-task')
 Remove-OwnedLink (Join-Path $skillsRoot 'start-feature')
 Remove-OwnedLink (Join-Path $skillsRoot 'actual-budget-import')
+Remove-OwnedLink (Join-Path $skillsRoot 'grill-with-docs')
 $excludedSkills = @(Get-Content -LiteralPath (Join-Path $profileDir 'excluded-skills.txt') | Where-Object { $_ })
 foreach ($skill in $excludedSkills) {
   Remove-OwnedLink (Join-Path $skillsRoot $skill)
