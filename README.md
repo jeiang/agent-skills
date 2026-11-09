@@ -250,10 +250,14 @@ parent session's model at `thinking-level: high` with read-only tools
 omp `designer` is the UI/UX subagent omp bundled until upstream removed it
 (can1357/oh-my-pi `2493ba99c4`, MIT); it keeps that prompt, runs on the
 parent session's model in place of the removed `@designer` role, and can
-edit files. The omp `fast`, `smol`, and `max-reasoning` agents are
-general-purpose workers that run on the model role of the same name
-(`model: "@<role>"`); the consumer assigns each role a model and thinking
-level in `modelRoles`.
+edit files. The omp `fast` and `smol` agents are general-purpose workers
+that run on the model role of the same name (`model: "@<role>"`); the
+consumer assigns each role a model and thinking level in `modelRoles`. The
+omp `max-reasoning` agent runs on the `@max-reasoning` role the same way,
+but is read-only and limited to the narrow reasoning-heavy part of a task
+(a plan that must be correct, a complex design check); its description
+tells the parent to get the user's approval of the call and its scope
+before spawning it, because that role is meant for an expensive model.
 
 Copilot installs exactly two agents, `reviewer` and `researcher`. Both are
 pinned to GPT-6 Luna, cannot spawn further subagents, and use read-only
