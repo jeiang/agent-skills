@@ -166,6 +166,10 @@ for agent_source in "$repo_dir/agents/$agent" "$repo_dir/dist/agents/$agent"; do
     link_path "$source_path" "$agent_root/agents/$(basename -- "$source_path")"
   done
 done
+# omp task subagents drop AGENTS.md but keep RULES.md.
+if [ "$agent" = omp ]; then
+  link_path "$repo_dir/instructions/omp-rules.md" "$agent_root/RULES.md"
+fi
 
 mkdir -p "$(dirname -- "$instruction_file")"
 if [ -L "$instruction_file" ] || ! cmp -s "$scratch/instructions" "$instruction_file"; then

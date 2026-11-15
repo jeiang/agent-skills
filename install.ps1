@@ -137,6 +137,10 @@ foreach ($agentSource in (Join-Path $repoDir "agents/$Agent"), (Join-Path $repoD
     New-AgentLink $source.FullName (Join-Path $agentsRoot $source.Name)
   }
 }
+# omp task subagents drop AGENTS.md but keep RULES.md.
+if ($Agent -eq 'omp') {
+  New-AgentLink (Join-Path $repoDir 'instructions/omp-rules.md') (Join-Path $agentRoot 'RULES.md')
+}
 
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $instructionFile) | Out-Null
 if ($instructionItem.LinkType -or -not (Test-Path -LiteralPath $instructionFile) -or [IO.File]::ReadAllText($instructionFile) -cne $rendered) {

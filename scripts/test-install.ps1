@@ -103,6 +103,7 @@ try {
         Assert-Link (Join-Path $agentRoot 'agents/change-reviewer.md') (Join-Path $repoDir 'dist/agents/omp/change-reviewer.md')
         Assert-Link (Join-Path $agentRoot 'agents/researcher.md') (Join-Path $repoDir 'dist/agents/omp/researcher.md')
         Assert (@(Get-ChildItem -LiteralPath (Join-Path $agentRoot 'agents') -Force).Count -eq 6) 'omp has exactly six agents'
+        Assert-Link (Join-Path $agentRoot 'RULES.md') (Join-Path $repoDir 'instructions/omp-rules.md')
       }
     }
     $first = [IO.File]::ReadAllText($instructionFile)

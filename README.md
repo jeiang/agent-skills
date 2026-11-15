@@ -93,6 +93,12 @@ hidden from the skill list; invoke them with `/skill:<name>`. The installer
 does not honor `PI_CODING_AGENT_DIR`: `omp` relocates skills and context
 files with it, but task-agent discovery still reads `~/.omp/agent/agents`.
 
+`omp` task subagents do not receive `AGENTS.md`, so the few tool-choice
+rules they must follow are in `instructions/omp-rules.md`, linked as
+`~/.omp/agent/RULES.md`. `omp` loads that file as an always-applied rule in
+every session, subagents included. Keep it short: its whole text goes into
+every request.
+
 This repository retains the Codex skill directory observed in the installed
 client. Current OpenAI documentation lists `~/.agents/skills/`; verify
 discovery in your client before moving the links. Do not install the same
@@ -107,8 +113,8 @@ package is a store path with the layout the installer creates under the
 harness home: the instruction file (`CLAUDE.md`, `AGENTS.md`, or
 `instructions/agent-skills.instructions.md`), `skills/`, and `agents/`, with
 the profile's excluded skills left out. The `omp` harness home is
-`~/.omp/agent`. Link its entries into place, for
-example with home-manager:
+`~/.omp/agent`, and its package also holds `RULES.md`. Link its entries into
+place, for example with home-manager:
 
 ```nix
 let
@@ -125,7 +131,8 @@ A client that keeps its own entries in these directories (Claude Code syncs
 plugin skills into `~/.claude/skills`, Codex ships `~/.codex/skills/.system`)
 needs the directory itself to stay writable, so link one entry at a time.
 `lib.entries.<harness>.<profile>` lists the entry names for that, alongside
-the harness instruction path, without building the package:
+the harness instruction path and, for `omp`, the `rules` file, without
+building the package:
 
 ```nix
 let
