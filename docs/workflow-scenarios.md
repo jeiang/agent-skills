@@ -45,16 +45,26 @@ still answering the request through a suitable path.
 | kubernetes-diagnose | Investigate a workload failing to become ready | Add a new chart setting without a failure to diagnose |
 | azure-pipelines-maintenance | Change a pipeline template output variable | Edit an unrelated YAML application setting |
 | audit-your-codebase | Audit the whole repository for structural simplifications | Review one diff or fix one function |
+| diagnosing-bugs | The app crashes on launch and the cause is unknown | Fix a typo the user pointed at |
 | diagram | Draw the repository's request path in its docs | Answer a one-step factual question |
 | domain-modeling | Resolve domain terminology or record a material design decision | Read a glossary to explain existing code |
 | eli5 | Explain this code in plain terms | Implement a specified edit |
+| frontend-design | Redesign this landing page so it does not look templated | Fix a CSS overflow bug |
+| gha-security-review | Audit this repository's release workflows before making it public | Fix a failing build step |
 | i-have-adhd | Explicitly invoke the output mode | Infer a communication mode from unrelated conversation |
+| iterate-pr | The pull request's CI is red; fix it until the checks pass | Open a pull request for finished work |
 | modern-web-guidance | Add a modal dialog or a responsive layout to a web page | Change an API route, a build config, or a native app |
 | prototype | Build a disposable demonstration to answer a design question | Implement a settled production design |
 | research | Investigate an API constraint from official sources | Reword supplied text without needing research |
+| swift-concurrency | Fix a Swift 6 data-race diagnostic | Lay out a SwiftUI view |
+| swiftui-pro | Review this SwiftUI screen | Write a UIKit-free Swift package algorithm |
+| tigerstyle | Add the TigerStyle guide to this repository | Format a Zig file |
 | warp-skill-doctor | Evaluate skills from supported personal agent histories | Research general skill practices or run in Copilot |
 | untangle-codebase | Explicitly refactor the whole codebase until changes land in one place | Refactor one module or review a diff |
 | wayfinder | Explicitly map a large effort into decision tickets | Plan a small task in the current conversation |
+| wizard | Walk me through creating the App Store Connect key and CI secrets | Set a secret the agent can already read from the environment |
+| writing-for-agents | Tighten this skill's description and steps | Write a README for people |
+| zig | Port this build.zig to Zig 0.17 | Edit a Rust crate in the same repository |
 
 ## Installed-source checks
 
