@@ -1,8 +1,8 @@
 # Upstream
 
 - Repository: https://github.com/mattpocock/skills
-- Version: 4ae2317ddb22b046e26455e4f9c9b3aaaf62212d
-- Skill source: https://github.com/mattpocock/skills/tree/4ae2317ddb22b046e26455e4f9c9b3aaaf62212d/skills/productivity/grilling
+- Version: 5863806dd4e15c63174bee4e7515a4256792ecfa
+- Skill source: https://github.com/mattpocock/skills/tree/5863806dd4e15c63174bee4e7515a4256792ecfa/skills/productivity/grilling
 - Used by: `wayfinder`.
 - Local changes: the look-up-the-fact rule is extended to facts the interview *asserts*, not only ones it would otherwise ask about, and closing a branch as infeasible now requires naming the source checked.
 - Local changes: a round's closed questions are asked through the harness's structured question tool when one exists (Claude Code's `AskUserQuestion`), each with two to four options, a one-line trade-off each, and the recommendation first. Open-ended questions use upstream's chat format. Sub-agent fact finding is optional rather than required.

@@ -1,8 +1,8 @@
 # Upstream
 
 - Repository: https://github.com/warpdotdev/common-skills
-- Version: acb107ab1096bd62243952878d8a09a40cc9e1b9
-- Skill source: https://github.com/warpdotdev/common-skills/tree/acb107ab1096bd62243952878d8a09a40cc9e1b9/.agents/skills/skill-doctor
+- Version: 8792394ff1b655e0af451b8fabb68ef0cfcbd208
+- Skill source: https://github.com/warpdotdev/common-skills/tree/8792394ff1b655e0af451b8fabb68ef0cfcbd208/.agents/skills/skill-doctor
 - License: MIT; see `LICENSE` in this directory.
 
 ## Local adaptation
