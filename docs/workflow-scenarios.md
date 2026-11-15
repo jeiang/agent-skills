@@ -56,8 +56,6 @@ still answering the request through a suitable path.
 | modern-web-guidance | Add a modal dialog or a responsive layout to a web page | Change an API route, a build config, or a native app |
 | prototype | Build a disposable demonstration to answer a design question | Implement a settled production design |
 | research | Investigate an API constraint from official sources | Reword supplied text without needing research |
-| swift-concurrency | Fix a Swift 6 data-race diagnostic | Lay out a SwiftUI view |
-| swiftui-pro | Review this SwiftUI screen | Write a UIKit-free Swift package algorithm |
 | tigerstyle | Add the TigerStyle guide to this repository | Format a Zig file |
 | warp-skill-doctor | Evaluate skills from supported personal agent histories | Research general skill practices or run in Copilot |
 | untangle-codebase | Explicitly refactor the whole codebase until changes land in one place | Refactor one module or review a diff |
