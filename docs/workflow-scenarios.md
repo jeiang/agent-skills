@@ -49,6 +49,7 @@ still answering the request through a suitable path.
 | domain-modeling | Resolve domain terminology or record a material design decision | Read a glossary to explain existing code |
 | eli5 | Explain this code in plain terms | Implement a specified edit |
 | i-have-adhd | Explicitly invoke the output mode | Infer a communication mode from unrelated conversation |
+| modern-web-guidance | Add a modal dialog or a responsive layout to a web page | Change an API route, a build config, or a native app |
 | prototype | Build a disposable demonstration to answer a design question | Implement a settled production design |
 | research | Investigate an API constraint from official sources | Reword supplied text without needing research |
 | warp-skill-doctor | Evaluate skills from supported personal agent histories | Research general skill practices or run in Copilot |

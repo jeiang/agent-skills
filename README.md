@@ -15,7 +15,7 @@ not installed for it:
 | Profile | Environment | Excluded skills |
 | --- | --- | --- |
 | `personal` | macOS and Linux with Nix, the personal stack and cluster | `azure-pipelines-maintenance`, `kubernetes-delivery`, `kubernetes-diagnose` |
-| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; no worktree rule; existing delivery patterns over general best practices | `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor` |
+| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; no worktree rule; existing delivery patterns over general best practices | `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor`, `modern-web-guidance` |
 | `generic` | No assumed OS, stack, or tools; ask before installing tools | `devshell-preflight`, `nixos-change-validation` |
 | `cloud` | Disposable Claude Code on the web container with Nix; no cluster or host access; no worktree rule; temporary Nix tooling allowed | `warp-skill-doctor` |
 
@@ -177,8 +177,9 @@ The work profile receives common + work policy only. It receives no
 personal-policy file, import, reference, or symlink. The full repository can
 remain checked out on the work machine.
 
-`profiles/work/excluded-skills.txt` excludes devshell, NixOS validation, and
-Warp Skill Doctor from a work installation. The remaining
+`profiles/work/excluded-skills.txt` excludes devshell, NixOS validation,
+Warp Skill Doctor, and Modern Web Guidance (which fetches its CLI through
+`npx`) from a work installation. The remaining
 skills use the work policy: no missing-tool installation and no ad hoc
 replacement validators. Edits can continue with available checks and tests;
 the agent identifies testing still needed instead of claiming it ran.
@@ -232,6 +233,7 @@ skill directory rather than creating another global discovery path.
 | `devshell-preflight`, `nixos-change-validation` | Personal Nix environments and Nix configuration changes |
 | `research`, `prototype`, `domain-modeling`, `diagram`, `eli5` | The specific research, design, documentation, or explanation request |
 | `anatomy` | Detailed interactive isometric SVG explainers, with optional WebGL and 3D |
+| `modern-web-guidance` | HTML, CSS, and client-side JavaScript work: retrieves current web platform guides through `npx`; not installed by the work profile |
 | `audit-your-codebase` | A requested whole-repository simplification audit |
 | `warp-skill-doctor` | Evaluation from supported local agent histories |
 | `wayfinder`, `i-have-adhd`, `untangle-codebase` | Explicit invocation only, consistently across all platforms |

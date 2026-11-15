@@ -1,0 +1,3 @@
+interface:
+  display_name: "Modern Web Guidance"
+  short_description: "Retrieve current web platform best practices before writing HTML, CSS, or client-side JS"
