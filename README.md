@@ -258,7 +258,9 @@ The reviewer and researcher subagents have one body each under
 `dist/agents/<harness>/`. Harness-specific agents that are not shared stay
 as plain files under `agents/codex/` (implementer, planner, plan reviewer,
 documentation author), `agents/claude/` (implementer), and `agents/omp/`
-(designer, fast, smol, max-reasoning). Claude and Codex agents keep their
+(designer, docs-author, fast, smol, max-reasoning). The omp `docs-author`
+carries the Codex documentation author's instructions and pins no model.
+Claude and Codex agents keep their
 platform model defaults. The
 omp `change-reviewer` and `researcher` pin no model, so they run on the
 parent session's model at `thinking-level: high` with read-only tools
