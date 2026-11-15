@@ -4,6 +4,7 @@
 
 ### Added
 
+- An omp sticky rules file, `instructions/omp-rules.md`, installed as `~/.omp/agent/RULES.md` by both installers and the `omp-<profile>` flake packages, with its name exposed as `lib.entries.omp.<profile>.rules`. `omp` task subagents do not receive `AGENTS.md` but do receive `RULES.md`. The rules send file changes to `edit` and `write` and ad hoc Python to `eval` instead of Python scripts in `bash`: in 4,009 recorded sessions, 12,400 of 14,500 `python3 - <<EOF` calls were in-place file edits, most of them from subagents.
 - A `cloud` profile for Claude Code on the web sandboxes: Nix available, no cluster or host access, temporary Nix tooling without approval, and activation handed back to the user. It excludes `warp-skill-doctor`. Install it from the environment's setup script with `install.sh claude cloud`.
 - `untangle-codebase` vendored from `caldoai/skills` at `f3cf477` with its MIT license: an explicit-invocation, whole-codebase refactor that lists hidden links, needless links, surplus, and special cases, redesigns from first principles, and repeats until subagents find nothing worth fixing. Local change: it stops after the decision log, and again before each new round of fixes, so the user can review before any code changes.
 - `anatomy` vendored from `wheresryan22/anatomy` at `bc943e4`, including its rendering kit, reference guides, scripts, eight examples, Codex display metadata, and MIT license.

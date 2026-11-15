@@ -83,6 +83,7 @@
           ${lib.concatStringsSep "\n" (
             lib.mapAttrsToList (name: path: ''cp ${path} "$out/agents/${name}"'') (agentsFor harness)
           )}
+          ${lib.optionalString (harness == "omp") ''cp ${./instructions/omp-rules.md} "$out/RULES.md"''}
         '';
     in
     {
@@ -92,11 +93,16 @@
         inherit harnesses;
         entries = lib.mapAttrs (
           harness: instructions:
-          lib.genAttrs profiles (profile: {
-            inherit instructions;
-            skills = builtins.attrNames (skillsFor harness profile);
-            agents = builtins.attrNames (agentsFor harness);
-          })
+          lib.genAttrs profiles (
+            profile:
+            {
+              inherit instructions;
+              skills = builtins.attrNames (skillsFor harness profile);
+              agents = builtins.attrNames (agentsFor harness);
+            }
+            # omp task subagents drop AGENTS.md but keep RULES.md.
+            // lib.optionalAttrs (harness == "omp") { rules = "RULES.md"; }
+          )
         ) harnesses;
       };
 

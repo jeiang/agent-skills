@@ -103,6 +103,7 @@ for agent in codex claude copilot omp; do
       assert_link "$agent_root/agents/change-reviewer.md" "$repo_dir/dist/agents/omp/change-reviewer.md"
       assert_link "$agent_root/agents/researcher.md" "$repo_dir/dist/agents/omp/researcher.md"
       [ "$(find "$agent_root/agents" -mindepth 1 | wc -l)" -eq 6 ]
+      assert_link "$agent_root/RULES.md" "$repo_dir/instructions/omp-rules.md"
       ;;
   esac
 
