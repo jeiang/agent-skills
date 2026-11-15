@@ -1,3 +1,8 @@
 devshell-preflight
 nixos-change-validation
 warp-skill-doctor
+modern-web-guidance
+iterate-pr
+gha-security-review
+zig
+tigerstyle
