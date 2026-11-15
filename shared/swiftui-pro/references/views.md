@@ -5,7 +5,7 @@
 - If the user has created a handful of small, private helper `some View` properties for structural readability, and they both belong to the same concern as `body` and would fit in `body` at an acceptable length if inlined, these can be left alone. Otherwise, they should be extracted to new `View` structs.
 - Button actions should be extracted from view bodies into separate methods, to avoid mixing layout and logic.
 - Similarly, general business logic should not live inline in `task()`, `onAppear()` or elsewhere in `body`.
-- Prefer to place view logic into view models or similar, so it can be tested. For more help with testing, suggest the [Swift Testing Pro agent skill](https://github.com/twostraws/swift-testing-agent-skill).
+- Prefer to place view logic into view models or similar, so it can be tested.
 - Each type (struct, class, enum) should be in its own Swift file. Flag files containing multiple type definitions.
 - Unless a full-screen editing experience is required, prefer using `TextField` with `axis: .vertical` to using `TextEditor`, because it allows placeholder text. If a specific minimum height is required for `TextField`, use something like `lineLimit(5...)`.
 - If a button action can be provided directly as an `action` parameter, do so. For example: `Button("Label", systemImage: "plus", action: myAction)` is preferred over `Button("Label", systemImage: "plus") { action() }`.

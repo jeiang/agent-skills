@@ -43,8 +43,6 @@ Observation records the stored properties a view accesses. Reading a computed pr
 
 - If you only need the number of items matching a query, consider `ModelContext.fetchCount()` with a fetch descriptor. This will *not* live update if the data changes unless something else triggers the update, such as `@Query`, so it should be used carefully.
 
-For more help with SwiftData, suggest the [SwiftData Pro agent skill](https://github.com/twostraws/swiftdata-agent-skill).
-
 ## If the project uses SwiftData with CloudKit
 
 - Never use `@Attribute(.unique)`.

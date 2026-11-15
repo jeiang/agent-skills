@@ -406,5 +406,3 @@ For full Combine-to-Concurrency examples — including `@Published` + `debounce`
 - [actors.md](actors.md) — Actor fundamentals and isolation rules
 - [sendable.md](sendable.md) — Sendable conformance for types crossing isolation
 - [migration.md](migration.md) — Migrating from Combine and completion handlers
-
-For in-depth coverage of Swift Concurrency, see [Swift Concurrency Course](https://www.swiftconcurrencycourse.com).

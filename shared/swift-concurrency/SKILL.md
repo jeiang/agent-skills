@@ -33,7 +33,6 @@ Guardrails:
 - Prefer structured concurrency over unstructured tasks. Use `Task.detached` only with a clear reason.
 - If recommending `@preconcurrency`, `@unchecked Sendable`, or `nonisolated(unsafe)`, require a documented safety invariant and a follow-up removal plan.
 - Optimize for the smallest safe change. Do not refactor unrelated architecture during migration.
-- Course references are for deeper learning only. Use them sparingly and only when they clearly help answer the developer's question.
 
 ## Quick Fix Mode
 
@@ -205,7 +204,3 @@ When changing concurrency code:
 5. Verify deallocation and cancellation behavior for long-lived tasks.
 6. Check `Task.isCancelled` in long-running operations.
 7. Never use semaphores or ad hoc locking in async contexts when actor isolation or `Mutex` would express ownership more safely.
-
----
-
-**Note**: This skill is based on the comprehensive [Swift Concurrency Course](https://www.swiftconcurrencycourse.com?utm_source=github&utm_medium=agent-skill&utm_campaign=skill-footer) by Antoine van der Lee.
