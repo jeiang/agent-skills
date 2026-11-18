@@ -2,6 +2,7 @@
 name: ponytail
 description: Select a Ponytail level (lite, full, or ultra), or turn Ponytail back on after it was stopped. Its full-mode rules are already in the working agreements, so do not load this skill for ordinary coding.
 argument-hint: "[lite|full|ultra]"
+disable-model-invocation: true
 license: MIT
 ---
 

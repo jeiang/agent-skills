@@ -29,6 +29,7 @@ HARNESSES = {
     "codex": ("codex.toml", "{name}.toml"),
     "copilot": ("copilot.agent.md", "{name}.agent.md"),
     "omp": ("omp.md", "{name}.md"),
+    "pi": ("pi.md", "{name}.md"),
 }
 
 env = jinja2.Environment(

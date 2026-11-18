@@ -1,8 +1,8 @@
 # Agent Skills
 
 Shared skills, subagents, and working instructions for Codex, Claude Code,
-Copilot Chat in VS Code, and Oh My Pi (`omp`), installed as one harness plus
-one profile.
+Copilot Chat in VS Code, Oh My Pi (`omp`), and pi, installed as one harness
+plus one profile.
 
 ## Instructions, profiles, and rendering
 
@@ -63,6 +63,7 @@ any harness accepts any profile:
 | Another person's machine | `./install.sh claude generic` | `./install.ps1 claude generic` |
 | Claude Code on the web | `./install.sh claude cloud` | n/a |
 | Personal Oh My Pi | `./install.sh omp personal` | `./install.ps1 omp personal` |
+| Personal pi | `./install.sh pi personal` | `./install.ps1 pi personal` |
 
 Reinstalling with a different profile regenerates the instruction file and
 removes links to skills that the new profile excludes. Installations made
@@ -79,6 +80,7 @@ selected model, reasoning effort, VS Code settings, or Codex agent limits.
 | Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/skills/` | `~/.claude/agents/` |
 | Copilot | `~/.copilot/instructions/agent-skills.instructions.md` | `~/.copilot/skills/` | `~/.copilot/agents/` |
 | Oh My Pi | `~/.omp/agent/AGENTS.md` | `~/.omp/agent/skills/` | `~/.omp/agent/agents/` |
+| pi | `~/.pi/agent/AGENTS.md` | `~/.pi/agent/skills/` | `~/.pi/agent/agents/` |
 
 Codex honors `CODEX_HOME` when set. `--home DIR` (PowerShell:
 `-InstallHome DIR`) selects an isolated installation home and takes
@@ -98,6 +100,13 @@ rules they must follow are in `instructions/omp-rules.md`, linked as
 `~/.omp/agent/RULES.md`. `omp` loads that file as an always-applied rule in
 every session, subagents included. Keep it short: its whole text goes into
 every request.
+
+`instructions/<harness>-<profile>.md`, when present, replaces the rendered
+profile instructions for that harness. `instructions/pi-personal.md` is the
+shorter text for pi, whose extensions enforce the worktree, devshell, and
+command guard rules that the common instructions spell out. A skill under
+the harness directory (`pi/devshell-preflight/`) replaces the shared skill
+of the same name.
 
 This repository retains the Codex skill directory observed in the installed
 client. Current OpenAI documentation lists `~/.agents/skills/`; verify
@@ -277,6 +286,15 @@ but is read-only and limited to the narrow reasoning-heavy part of a task
 (a plan that must be correct, a complex design check); its description
 tells the parent to get the user's approval of the call and its scope
 before spawning it, because that role is meant for an expensive model.
+
+The pi agents are pi-subagents definitions: `agents/pi/` (scout, worker,
+security-reviewer, max-reasoning) and the rendered `change-reviewer` and
+`researcher`. Each lists its tools and loads its extensions from
+`~/.pi/agent/extensions/<name>`, which the consumer provides: `chains` for
+the `chain/<name>` virtual models, `workspace` for the hashline file tools,
+`shell`, and the worktree, `guards`, and per agent `lint`, `pi-lsp`, or
+`pi-web-access`. scout and worker run on `chain/light`, the reviewers and
+researcher on `chain/task`, and max-reasoning on Fable 5.2 at `medium`.
 
 Copilot installs exactly two agents, `reviewer` and `researcher`. Both are
 pinned to GPT-6 Luna, cannot spawn further subagents, and use read-only

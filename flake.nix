@@ -14,14 +14,24 @@
         "aarch64-darwin"
       ];
       # Instruction file path inside each harness home, as in install.sh. The
-      # omp home is ~/.omp/agent rather than ~/.omp.
+      # omp and pi homes are ~/.omp/agent and ~/.pi/agent.
       harnesses = {
         claude = "CLAUDE.md";
         codex = "AGENTS.md";
         copilot = "instructions/agent-skills.instructions.md";
         omp = "AGENTS.md";
+        pi = "AGENTS.md";
       };
       profiles = builtins.attrNames (builtins.readDir ./profiles);
+
+      # instructions/<harness>-<profile>.md replaces the rendered profile
+      # instructions for that harness.
+      instructionsFor =
+        harness: profile:
+        let
+          own = ./instructions + "/${harness}-${profile}.md";
+        in
+        if builtins.pathExists own then own else ./dist/instructions + "/${profile}.md";
 
       entriesOf =
         type: dir:
@@ -47,10 +57,12 @@
                 lib.filter (keep root) (entriesOf "directory" root)
               )
             )
+            # A harness skill replaces a shared one of the same name; the
+            # first entry of a name wins.
             [
+              (./. + "/${harness}")
               ./shared
               ./generic
-              (./. + "/${harness}")
             ]
         );
 
@@ -75,7 +87,7 @@
           mkdir -p "$out/skills" "$out/agents" "$(dirname "$instructions")"
           {
             ${lib.optionalString (harness == "copilot") ''printf '%s\n' '---' 'applyTo: "**"' '---' ""''}
-            cat ${./dist/instructions}/${profile}.md
+            cat ${instructionsFor harness profile}
           } >"$instructions"
           ${lib.concatStringsSep "\n" (
             lib.mapAttrsToList (name: path: ''cp -r ${path} "$out/skills/${name}"'') (skillsFor harness profile)

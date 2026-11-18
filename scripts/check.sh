@@ -5,7 +5,7 @@ repo_dir=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$repo_dir"
 
 set --
-for skill_dir in codex/* shared/* claude/* generic/*; do
+for skill_dir in codex/* shared/* claude/* generic/* pi/*; do
   [ -f "$skill_dir/SKILL.md" ] || continue
   set -- "$@" "$skill_dir"
 done
@@ -64,6 +64,19 @@ for path in sorted(Path("agents/omp").glob("*.md")):
         sys.exit(f"{path}: name {data.get('name')!r} must match filename")
     if not isinstance(data.get("description"), str) or not data["description"].strip():
         sys.exit(f"{path}: description must be a nonempty string")
+
+pi_agents = sorted(Path("agents/pi").glob("*.md")) + sorted(Path("dist/agents/pi").glob("*.md"))
+for path in pi_agents:
+    data = frontmatter(path)
+    for field in ("name", "description", "model", "tools", "extensions"):
+        value = data.get(field)
+        if not isinstance(value, str) or not value.strip():
+            sys.exit(f"{path}: frontmatter field {field!r} must be a nonempty string")
+    if data["name"] != path.stem:
+        sys.exit(f"{path}: name {data['name']!r} must match filename")
+    tools = [tool.strip() for tool in data["tools"].split(",")]
+    if path.stem != "worker" and any(tool in ("edit", "write", "subagent") for tool in tools):
+        sys.exit(f"{path}: read-only agent must not use edit, write, or subagent")
 
 copilot_model = yaml.safe_load(Path("agents/agents.yaml").read_text(encoding="utf-8"))["copilot"]["model"]
 copilot_agents = sorted(Path("dist/agents/copilot").glob("*.agent.md"))

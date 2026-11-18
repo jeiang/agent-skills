@@ -33,6 +33,12 @@ agents:
       name: change-reviewer
       effort: high
       tools: [bash, read, grep, glob]
+    pi:
+      name: change-reviewer
+      model: chain/task
+      tools: [read, grep, find, ls, shell]
+      extensions: [chains, workspace, guards]
+      inheritProjectContext: true
 
   researcher:
     body: researcher.md
@@ -58,3 +64,8 @@ agents:
       name: researcher
       effort: high
       tools: [bash, read, grep, glob, web_search]
+    pi:
+      name: researcher
+      model: chain/task
+      tools: [read, grep, find, ls, shell, web_search, fetch_content, get_search_content]
+      extensions: [chains, workspace, guards, pi-web-access]
