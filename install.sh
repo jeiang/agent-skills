@@ -2,7 +2,7 @@
 set -eu
 
 usage() {
-  echo "Usage: $0 codex|claude|copilot|omp personal|work|generic [--home DIR] [--replace-instructions]" >&2
+  echo "Usage: $0 codex|claude|copilot|omp|pi personal|work|generic [--home DIR] [--replace-instructions]" >&2
   exit 2
 }
 
@@ -56,8 +56,16 @@ case $agent in
     agent_root="$home_dir/.omp/agent"
     instruction_file="$agent_root/AGENTS.md"
     ;;
+  pi)
+    agent_root="$home_dir/.pi/agent"
+    instruction_file="$agent_root/AGENTS.md"
+    ;;
   *) usage ;;
 esac
+# instructions/<harness>-<profile>.md replaces the rendered profile instructions for that harness.
+if [ -f "$repo_dir/instructions/$agent-$profile.md" ]; then
+  rendered_instructions="$repo_dir/instructions/$agent-$profile.md"
+fi
 
 scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT HUP INT TERM

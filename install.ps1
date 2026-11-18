@@ -2,7 +2,7 @@
 #Requires -Version 7
 param(
   [Parameter(Mandatory, Position = 0)]
-  [ValidateSet('codex', 'claude', 'copilot', 'omp')]
+  [ValidateSet('codex', 'claude', 'copilot', 'omp', 'pi')]
   [string] $Agent,
   [Parameter(Mandatory, Position = 1)]
   [ValidateSet('personal', 'work', 'generic')]
@@ -26,7 +26,7 @@ $customHome = $PSBoundParameters.ContainsKey('InstallHome')
 if (-not $customHome) {
   $InstallHome = if ($env:USERPROFILE) { $env:USERPROFILE } else { $env:HOME }
 }
-$agentRoot = if ($Agent -eq 'omp') { Join-Path $InstallHome '.omp/agent' } else { Join-Path $InstallHome ".$Agent" }
+$agentRoot = if ($Agent -in 'omp', 'pi') { Join-Path $InstallHome ".$Agent/agent" } else { Join-Path $InstallHome ".$Agent" }
 switch ($Agent) {
   'codex' {
     if (-not $customHome -and $env:CODEX_HOME) { $agentRoot = $env:CODEX_HOME }
@@ -38,10 +38,13 @@ switch ($Agent) {
   'copilot' {
     $instructionFile = Join-Path $agentRoot 'instructions/agent-skills.instructions.md'
   }
-  'omp' {
+  { $_ -in 'omp', 'pi' } {
     $instructionFile = Join-Path $agentRoot 'AGENTS.md'
   }
 }
+# instructions/<harness>-<profile>.md replaces the rendered profile instructions for that harness.
+$ownInstructions = Join-Path $repoDir "instructions/$Agent-$Profile.md"
+if (Test-Path -LiteralPath $ownInstructions -PathType Leaf) { $renderedInstructions = $ownInstructions }
 
 $lf = [string][char]10
 $marker = '<!-- Managed by agent-skills; rerun the installer to update. -->'
