@@ -2,7 +2,7 @@
 name: worker
 description: Implements one bounded, well-specified change and commits it. Use for delegated implementation with clear files, steps, and acceptance; give parallel workers their own worktrees.
 model: chain/light
-tools: read, grep, find, ls, shell, edit, write, lsp
+tools: read, grep, find, ls, shell, edit, write, lsp_diagnostics, lsp_hover, lsp_goto_definition, lsp_find_references
 extensions: ~/.pi/agent/extensions/chains, ~/.pi/agent/extensions/workspace, ~/.pi/agent/extensions/guards, ~/.pi/agent/extensions/lint, ~/.pi/agent/extensions/pi-lsp
 inheritProjectContext: true
 ---
