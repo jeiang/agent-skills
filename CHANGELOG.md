@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Scope changes
+
+- Keep five explicit flake outputs: omp-personal, omp-work, copilot-work, claude-cloud, and skills-only pi-personal. Remove Codex, generic, and pi installer machinery. pi instructions and agents move to pi-extensions.
+
 ### Added
 
 - A `pi` harness (home `~/.pi/agent`) in both installers and as `pi-<profile>` flake packages. Its personal instructions are `instructions/pi-personal.md`, a shorter text that leaves the worktree, devshell, and command guard rules to pi extensions; any `instructions/<harness>-<profile>.md` replaces the rendered profile text for that harness. Its agents are pi-subagents definitions: scout, worker, security-reviewer, and max-reasoning under `agents/pi/`, plus the rendered change-reviewer and researcher, each loading its extensions from `~/.pi/agent/extensions/`. A diagnosis-only `devshell-preflight` under `pi/` replaces the shared one for pi, because pi's devshell extension already runs commands in the environment.

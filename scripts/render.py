@@ -26,10 +26,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
 HARNESSES = {
     "claude": ("claude.md", "{name}.md"),
-    "codex": ("codex.toml", "{name}.toml"),
     "copilot": ("copilot.agent.md", "{name}.agent.md"),
     "omp": ("omp.md", "{name}.md"),
-    "pi": ("pi.md", "{name}.md"),
 }
 
 env = jinja2.Environment(
@@ -80,8 +78,6 @@ def render_agents() -> dict[Path, str]:
             if harness_config is None:
                 continue
             body = env.get_template(f"agents/bodies/{agent['body']}").render(harness=harness)
-            if harness == "codex" and "'''" in body:
-                sys.exit(f"{agent_id}: body cannot contain ''' inside a TOML literal string")
             template = env.get_template(f"agents/templates/{template_name}")
             rendered = template.render(
                 agent=agent,

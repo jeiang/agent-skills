@@ -2,7 +2,7 @@
 set -eu
 
 usage() {
-  echo "Usage: $0 codex|claude|copilot|omp|pi personal|work|generic [--home DIR] [--replace-instructions]" >&2
+  echo "Usage: $0 claude|copilot|omp personal|work|cloud [--home DIR] [--replace-instructions]" >&2
   exit 2
 }
 
@@ -11,14 +11,12 @@ agent=$1
 profile=$2
 shift 2
 home_dir=$HOME
-home_override=false
 replace_instructions=false
 while [ "$#" -gt 0 ]; do
   case $1 in
     --home)
       [ "$#" -ge 2 ] && [ -n "$2" ] || usage
       home_dir=$2
-      home_override=true
       shift 2
       ;;
     --replace-instructions)
@@ -36,14 +34,11 @@ case $profile in
   */* | .*) usage ;;
 esac
 [ -f "$profile_dir/excluded-skills.txt" ] && [ -f "$rendered_instructions" ] || usage
+case "$agent-$profile" in
+  omp-personal | omp-work | copilot-work | claude-cloud) ;;
+  *) usage ;;
+esac
 case $agent in
-  codex)
-    agent_root="$home_dir/.codex"
-    if [ "$home_override" = false ] && [ -n "${CODEX_HOME:-}" ]; then
-      agent_root=$CODEX_HOME
-    fi
-    instruction_file="$agent_root/AGENTS.md"
-    ;;
   claude)
     agent_root="$home_dir/.claude"
     instruction_file="$agent_root/CLAUDE.md"
@@ -54,10 +49,6 @@ case $agent in
     ;;
   omp)
     agent_root="$home_dir/.omp/agent"
-    instruction_file="$agent_root/AGENTS.md"
-    ;;
-  pi)
-    agent_root="$home_dir/.pi/agent"
     instruction_file="$agent_root/AGENTS.md"
     ;;
   *) usage ;;
@@ -149,7 +140,7 @@ while IFS= read -r excluded_skill; do
   remove_owned_link "$agent_root/skills/$excluded_skill"
 done <"$profile_dir/excluded-skills.txt"
 
-for source_root in "$repo_dir/shared" "$repo_dir/generic" "$repo_dir/$agent"; do
+for source_root in "$repo_dir/shared" "$repo_dir/$agent"; do
   [ -d "$source_root" ] || continue
   for source_path in "$source_root"/*; do
     [ -f "$source_path/SKILL.md" ] || continue
@@ -162,11 +153,6 @@ for source_root in "$repo_dir/shared" "$repo_dir/generic" "$repo_dir/$agent"; do
 done
 
 mkdir -p "$agent_root/agents"
-if [ "$agent" = codex ]; then
-  for retired_name in task-orchestrator.toml prompt-validator.toml agents-md-author.toml; do
-    remove_owned_link "$agent_root/agents/$retired_name"
-  done
-fi
 for agent_source in "$repo_dir/agents/$agent" "$repo_dir/dist/agents/$agent"; do
   [ -d "$agent_source" ] || continue
   for source_path in "$agent_source"/*; do

@@ -21,11 +21,6 @@ agents:
       model: sonnet
       effort: high
       tools: [Bash, Read, Grep, Glob]
-    codex:
-      name: feature_reviewer
-      model: gpt-5.6-sol
-      effort: medium
-      sandbox: read-only
     copilot:
       name: reviewer
       tools: [codebase, search, readFile, listDirectory, usages, changes, problems, runInTerminal]
@@ -33,12 +28,6 @@ agents:
       name: change-reviewer
       effort: high
       tools: [bash, read, grep, glob]
-    pi:
-      name: change-reviewer
-      model: chain/task
-      tools: [read, grep, find, ls, shell]
-      extensions: [chains, workspace, guards]
-      inheritProjectContext: true
 
   researcher:
     body: researcher.md
@@ -52,11 +41,6 @@ agents:
       model: sonnet
       effort: high
       tools: [Bash, Read, Grep, Glob, WebSearch, WebFetch]
-    codex:
-      name: task_researcher
-      model: gpt-5.6-luna
-      effort: high
-      sandbox: read-only
     copilot:
       name: researcher
       tools: [codebase, search, readFile, listDirectory, usages, fetch, githubRepo, runInTerminal]
@@ -64,8 +48,3 @@ agents:
       name: researcher
       effort: high
       tools: [bash, read, grep, glob, web_search]
-    pi:
-      name: researcher
-      model: chain/task
-      tools: [read, grep, find, ls, shell, web_search, fetch_content, get_search_content]
-      extensions: [chains, workspace, guards, pi-web-access]

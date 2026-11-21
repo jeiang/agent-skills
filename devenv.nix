@@ -10,7 +10,6 @@
     ]))
     shellcheck
     shfmt
-    taplo
   ];
 
   scripts.check.exec = "./scripts/check.sh";

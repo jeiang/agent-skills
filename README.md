@@ -1,333 +1,102 @@
 # Agent Skills
 
-Shared skills, subagents, and working instructions for Codex, Claude Code,
-Copilot Chat in VS Code, Oh My Pi (`omp`), and pi, installed as one harness
-plus one profile.
+Shared skills and four full installations: omp personal, omp work, Copilot
+work, and Claude cloud. pi consumes shared skills only. Its instructions,
+agents, and harness-specific skills live in pi-extensions.
 
-## Instructions, profiles, and rendering
+## Packages and entries
 
-`instructions/common.md` owns behavior, communication, skill selection,
-validation, and Git policy. It is a Jinja2 template; its variables are the
-profile and the Ponytail rules. Each profile under `profiles/<name>/` supplies `environment.md`
-with the environment rules and `excluded-skills.txt` with skills that are
-not installed for it:
+The flake lists exactly these packages for each supported system:
 
-| Profile | Environment | Excluded skills |
-| --- | --- | --- |
-| `personal` | macOS and Linux with Nix, the personal stack and cluster | `azure-pipelines-maintenance`, `kubernetes-delivery`, `kubernetes-diagnose` |
-| `work` | Copilot Chat, no Nix, no tool installation; Ponytail always on; no worktree rule; existing delivery patterns over general best practices | `devshell-preflight`, `nixos-change-validation`, `warp-skill-doctor`, `modern-web-guidance`, `iterate-pr`, `gha-security-review`, `zig`, `tigerstyle` |
-| `generic` | No assumed OS, stack, or tools; ask before installing tools | `devshell-preflight`, `nixos-change-validation` |
-| `cloud` | Disposable Claude Code on the web container with Nix; no cluster or host access; no worktree rule; temporary Nix tooling allowed | `warp-skill-doctor` |
-
-`scripts/render.py` renders the combined instructions and the shared
-subagents into `dist/`, which is committed. The installers copy or link
-rendered files and need no runtime beyond a shell. After editing a template,
-profile, or agent source, run the renderer inside the devenv shell and commit
-`dist/` with the change; `check` and CI fail when `dist/` is stale:
-
-```sh
-devenv shell -- python scripts/render.py
-```
-
-Ordinary coding uses Ponytail, whose rules the renderer inlines from
-`shared/ponytail/SKILL.md` into the instructions, so no session spends a
-turn loading the skill. Grilling applies when intent is unclear or a
-decision materially affects scope, design, compatibility, or risk. It
-distinguishes goals from proposed tools and interviews round by round.
-Clear, reversible changes proceed directly; consequential changes need a
-short approved plan. Research, implementation, and review use subagents only
-when a separate context or parallel work will help.
-Research returns source-cited findings by default; repository notes are
-written only when the requested deliverable includes them.
-
-Implementation requests authorize local commits unless the user says
-otherwise. Each commit is a usable checkpoint in dependency order, not an
-arbitrary module slice. Implementers commit their own checkpoints as work
-progresses. Coordinators cannot defer commits on their own or rebuild a
-commit sequence from a large uncommitted diff.
-
-The retired `start-task`, `start-feature`, and `task_orchestrator` are no
-longer needed. Use ordinary requests, or invoke a focused skill directly.
-
-## Install one harness with one profile
-
-Use a stable checkout. Skill and custom-agent symlinks point to this checkout,
-so moving or deleting it breaks those links. Both arguments are required, and
-any harness accepts any profile:
-
-| Machine and harness | POSIX shell | PowerShell 7 |
-| --- | --- | --- |
-| Personal Codex | `./install.sh codex personal` | `./install.ps1 codex personal` |
-| Personal Claude Code | `./install.sh claude personal` | `./install.ps1 claude personal` |
-| Work Copilot Chat in VS Code | `./install.sh copilot work` | `./install.ps1 copilot work` |
-| Another person's machine | `./install.sh claude generic` | `./install.ps1 claude generic` |
-| Claude Code on the web | `./install.sh claude cloud` | n/a |
-| Personal Oh My Pi | `./install.sh omp personal` | `./install.ps1 omp personal` |
-| Personal pi | `./install.sh pi personal` | `./install.ps1 pi personal` |
-
-Reinstalling with a different profile regenerates the instruction file and
-removes links to skills that the new profile excludes. Installations made
-before profiles existed upgrade in place: links that point at former agent
-locations inside this checkout are relinked to `dist/`.
-
-Windows symlink creation requires Developer Mode or an authorized
-administrator shell. The installer does not download tools or change the
-selected model, reasoning effort, VS Code settings, or Codex agent limits.
-
-| Harness | Installed instruction file | Skills | Agents |
-| --- | --- | --- | --- |
-| Codex | `~/.codex/AGENTS.md` | `~/.codex/skills/` | `~/.codex/agents/` |
-| Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/skills/` | `~/.claude/agents/` |
-| Copilot | `~/.copilot/instructions/agent-skills.instructions.md` | `~/.copilot/skills/` | `~/.copilot/agents/` |
-| Oh My Pi | `~/.omp/agent/AGENTS.md` | `~/.omp/agent/skills/` | `~/.omp/agent/agents/` |
-| pi | `~/.pi/agent/AGENTS.md` | `~/.pi/agent/skills/` | `~/.pi/agent/agents/` |
-
-Codex honors `CODEX_HOME` when set. `--home DIR` (PowerShell:
-`-InstallHome DIR`) selects an isolated installation home and takes
-precedence over it. Tests use this option without changing the real home.
-
-Oh My Pi reads its native user directory only. `~/.omp/agent/AGENTS.md`
-shadows every other user-level context file it would otherwise discover
-(`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and the like), so an `omp`
-install alongside a Claude or Codex install loads this repository's
-instructions once. Skills with `disable-model-invocation` stay loaded but are
-hidden from the skill list; invoke them with `/skill:<name>`. The installer
-does not honor `PI_CODING_AGENT_DIR`: `omp` relocates skills and context
-files with it, but task-agent discovery still reads `~/.omp/agent/agents`.
-
-`omp` task subagents do not receive `AGENTS.md`, so the few tool-choice
-rules they must follow are in `instructions/omp-rules.md`, linked as
-`~/.omp/agent/RULES.md`. `omp` loads that file as an always-applied rule in
-every session, subagents included. Keep it short: its whole text goes into
-every request.
-
-`instructions/<harness>-<profile>.md`, when present, replaces the rendered
-profile instructions for that harness. `instructions/pi-personal.md` is the
-shorter text for pi, whose extensions enforce the worktree, devshell, and
-command guard rules that the common instructions spell out. A skill under
-the harness directory (`pi/devshell-preflight/`) replaces the shared skill
-of the same name.
-
-This repository retains the Codex skill directory observed in the installed
-client. Current OpenAI documentation lists `~/.agents/skills/`; verify
-discovery in your client before moving the links. Do not install the same
-skills into both directories.
-
-### Nix flake
-
-Nix configurations can consume the same content without running the
-installer. The flake exposes one package per harness and profile,
-`packages.<system>.<harness>-<profile>`, for example `claude-personal`. Each
-package is a store path with the layout the installer creates under the
-harness home: the instruction file (`CLAUDE.md`, `AGENTS.md`, or
-`instructions/agent-skills.instructions.md`), `skills/`, and `agents/`, with
-the profile's excluded skills left out. The `omp` harness home is
-`~/.omp/agent`, and its package also holds `RULES.md`. Link its entries into
-place, for example with home-manager:
-
-```nix
-let
-  home = inputs.agent-skills.packages.${pkgs.system}.claude-personal;
-in
-{
-  home.file.".claude/CLAUDE.md".source = "${home}/CLAUDE.md";
-  home.file.".claude/skills".source = "${home}/skills";
-  home.file.".claude/agents".source = "${home}/agents";
-}
-```
-
-A client that keeps its own entries in these directories (Claude Code syncs
-plugin skills into `~/.claude/skills`, Codex ships `~/.codex/skills/.system`)
-needs the directory itself to stay writable, so link one entry at a time.
-`lib.entries.<harness>.<profile>` lists the entry names for that, alongside
-the harness instruction path and, for `omp`, the `rules` file, without
-building the package:
-
-```nix
-let
-  entries = inputs.agent-skills.lib.entries.claude.personal;
-  home = inputs.agent-skills.packages.${pkgs.system}.claude-personal;
-in
-lib.genAttrs (map (name: ".claude/skills/${name}") entries.skills) (...);
-```
-
-Set `inputs.agent-skills.inputs.nixpkgs.follows = "nixpkgs"` to avoid a
-second nixpkgs. The packages read the committed `dist/`, so render before
-committing as usual. Do not mix the flake and the installer in one harness
-home. `nix flake check` builds every package.
-
-### Existing installations
-
-Unmanaged instruction files are preserved by default. To adopt these
-instructions, explicitly request replacement, for example:
-
-```sh
-./install.sh codex --replace-instructions
-```
-
-The PowerShell equivalent is
-`./install.ps1 codex -ReplaceInstructions`. Replacement and later managed
-updates create a backup beside the instruction file. Repeat installation
-with identical content does not create another backup. Edit source policies,
-not the generated installed file; managed local edits are backed up when
-regenerated.
-
-The installer updates only the selected harness. It relinks moved skills and
-agents and removes retired launchers or excluded skills only when their
-symlinks point inside this checkout. Conflicting files, external symlinks,
-and unmanaged retired entries are left intact with an error. Review those
-entries before removing them. The POSIX installer can also migrate identical
-copied skill directories into links, with a backup; PowerShell refuses
-copied skill directories, which its previous installer did not create.
-
-### Work boundary
-
-The work profile receives common + work policy only. It receives no
-personal-policy file, import, reference, or symlink. The full repository can
-remain checked out on the work machine.
-
-`profiles/work/excluded-skills.txt` excludes devshell, NixOS validation,
-Warp Skill Doctor, Modern Web Guidance (which fetches its CLI through
-`npx`), and the two GitHub skills, `iterate-pr` (needs `gh` and `uv`) and
-`gha-security-review`, and the two Zig skills, which no work task
-uses, from a work installation. The remaining
-skills use the work policy: no missing-tool installation and no ad hoc
-replacement validators. Edits can continue with available checks and tests;
-the agent identifies testing still needed instead of claiming it ran.
-
-VS Code can also discover existing `~/.claude/CLAUDE.md`,
-`~/.claude/rules/`, and other configured instruction roots. A Copilot-only
-install does not remove unrelated prior configuration. Use Chat Diagnostics
-to verify loaded sources. If that home also contains personal Claude
-instructions, review `chat.useClaudeMdFile` and
-`chat.instructionsFilesLocations` in work settings. Disabling Claude-file
-discovery also affects useful project Claude instructions. The installer
-does not link personal policy into the repository root or modify settings.
-See [VS Code instruction discovery](https://code.visualstudio.com/docs/agent-customization/custom-instructions).
-
-### Claude Code on the web
-
-Each cloud session starts in a fresh container, so the installation runs from
-the environment's setup script (environment menu, Edit, Setup script). The
-checkout lives outside the session's working directory so the skill links
-stay valid whichever repository the session opens:
-
-```sh
-#!/bin/sh
-set -eu
-ref=main
-dir=/opt/agent-skills
-if [ ! -d "$dir/.git" ]; then
-  git clone --depth 1 --branch "$ref" https://github.com/jeiang/agent-skills "$dir"
-else
-  git -C "$dir" fetch --depth 1 origin "$ref"
-  git -C "$dir" checkout -q --detach FETCH_HEAD
-fi
-"$dir/install.sh" claude cloud
-```
-
-Every new session installs whatever `ref` names at that moment; set it to a
-tag to update deliberately. The environment's network policy must allow
-github.com.
-
-## Skills and optional agents
-
-Every maintained skill has one source under `shared/`. `generic/` remains
-available for portable additions; it is installed into the selected agent's
-skill directory rather than creating another global discovery path.
-
-| Skills | When they apply |
+| Package | Contents |
 | --- | --- |
-| `ponytail` | Explicit invocation to select a level; its full-mode rules are already in the instructions |
-| `grilling` | Unresolved intent or consequential decisions |
-| `kubernetes-delivery`, `kubernetes-diagnose`, `azure-pipelines-maintenance` | The matching delivery, incident, or pipeline task; not installed by the personal profile |
-| `devshell-preflight`, `nixos-change-validation` | Personal Nix environments and Nix configuration changes |
-| `research`, `prototype`, `domain-modeling`, `diagram`, `eli5` | The specific research, design, documentation, or explanation request |
-| `anatomy` | Detailed interactive isometric SVG explainers, with optional WebGL and 3D |
-| `modern-web-guidance` | HTML, CSS, and client-side JavaScript work: retrieves current web platform guides through `npx`; not installed by the work profile |
-| `frontend-design` | New or reshaped UI that needs a distinct visual direction |
-| `zig`, `tigerstyle` | Zig 0.17 code and build files; adding TigerBeetle's style guide to a repository, adapting it, or reviewing against it; not installed by the work profile |
-| `diagnosing-bugs` | A hard bug or performance regression: build a red-capable feedback loop before any hypothesis |
-| `iterate-pr`, `gha-security-review` | A pull request with failing CI or review feedback; a security review of GitHub Actions workflows; not installed by the work profile |
-| `wizard` | Steps only a person can do (credentials, CI secrets, third-party dashboards), as a generated interactive script |
-| `writing-for-agents` | Writing or editing a skill, `AGENTS.md`, or `CLAUDE.md` |
-| `audit-your-codebase` | A requested whole-repository simplification audit |
-| `warp-skill-doctor` | Evaluation from supported local agent histories |
-| `wayfinder`, `i-have-adhd`, `untangle-codebase` | Explicit invocation only, consistently across all platforms |
+| `omp-personal` | Personal instructions, skills, agents, and `RULES.md` |
+| `omp-work` | Work instructions, skills, agents, and `RULES.md` |
+| `copilot-work` | Work instructions, skills, and agents |
+| `claude-cloud` | Cloud instructions, skills, and agents |
+| `pi-personal` | `skills/` only, with personal exclusions |
 
-Descriptions define automatic relevance. Claude/Copilot/omp use
-`disable-model-invocation` in skill frontmatter; Codex uses the inverse
-`policy.allow_implicit_invocation` in `agents/openai.yaml`. Validation
-checks that these settings agree. Automatic discovery does not authorize
-external actions or override environment restrictions.
+`lib.entries.<harness>.<profile>` lists `instructions`, `skills`, and
+`agents`, plus `rules` for omp. `lib.entries.pi.personal` has only `skills`.
+Consumers can link individual entries so the client directories stay writable.
+The pi package includes shared `devshell-preflight`. The pi consumer skips
+that name and uses its harness-specific copy from pi-extensions.
 
-The reviewer and researcher subagents have one body each under
-`agents/bodies/`, with per-harness names, models, and tools in
-`agents/agents.yaml`, rendered through `agents/templates/` into
-`dist/agents/<harness>/`. Harness-specific agents that are not shared stay
-as plain files under `agents/codex/` (implementer, planner, plan reviewer,
-documentation author), `agents/claude/` (implementer), and `agents/omp/`
-(designer, docs-author, fast, smol, max-reasoning). The omp `docs-author`
-carries the Codex documentation author's instructions and pins no model.
-Claude and Codex agents keep their
-platform model defaults. The
-omp `change-reviewer` and `researcher` pin no model, so they run on the
-parent session's model at `thinking-level: high` with read-only tools
-(`bash` for inspection commands) and cannot spawn further subagents;
-`change-reviewer` is named to avoid shadowing omp's bundled `reviewer`. The
-omp `designer` is the UI/UX subagent omp bundled until upstream removed it
-(can1357/oh-my-pi `2493ba99c4`, MIT); it keeps that prompt, runs on the
-parent session's model in place of the removed `@designer` role, and can
-edit files. The omp `fast` and `smol` agents are general-purpose workers
-that run on the model role of the same name (`model: "@<role>"`); the
-consumer assigns each role a model and thinking level in `modelRoles`. The
-omp `max-reasoning` agent runs on the `@max-reasoning` role the same way,
-but is read-only and limited to the narrow reasoning-heavy part of a task
-(a plan that must be correct, a complex design check); its description
-tells the parent to get the user's approval of the call and its scope
-before spawning it, because that role is meant for an expensive model.
+Set `inputs.agent-skills.inputs.nixpkgs.follows = "nixpkgs"` to share nixpkgs.
+Packages read committed `dist/`; render source changes before committing.
+Do not mix a flake installation and the installer in one harness home.
 
-The pi agents are pi-subagents definitions: `agents/pi/` (scout, worker,
-security-reviewer, max-reasoning) and the rendered `change-reviewer` and
-`researcher`. Each lists its tools and loads its extensions from
-`~/.pi/agent/extensions/<name>`, which the consumer provides: `chains` for
-the `chain/<name>` virtual models, `workspace` for the hashline file tools,
-`shell`, and the worktree, `guards`, and per agent `lint`, `pi-lsp`, or
-`pi-web-access`. scout and worker run on `chain/light`, the reviewers and
-researcher on `chain/task`, and max-reasoning on Fable 5.2 at `medium`.
+## Install
 
-Copilot installs exactly two agents, `reviewer` and `researcher`. Both are
-pinned to GPT-6 Luna, cannot spawn further subagents, and use read-only
-tools plus the terminal for inspection commands. Reasoning effort is a
-global Copilot setting, not a per-agent field. The reviewer reports only
-demonstrable merge-blocking defects and is instructed not to be pedantic.
+Use a stable checkout because skill and agent symlinks point into it.
+Both arguments are required. Only these full installations are supported:
 
-Vendored skills retain their upstream notes and licenses beside the source.
-When updating one, upstream content wins unless the deviation is recorded in
-the skill's `UPSTREAM.md`. If upstream conflicts with a repository check or a
-local rule, ask before dropping either side; do not resolve it silently.
-`audit-your-codebase` has no stated upstream license; this existing
-redistribution limitation is recorded in its `UPSTREAM.md`.
+```sh
+./install.sh omp personal
+./install.sh omp work
+./install.sh copilot work
+./install.sh claude cloud
+```
+
+PowerShell 7 supports the same pairs through `install.ps1`. Windows needs
+Developer Mode or an authorized administrator shell for symlinks.
+`--home DIR` or `-InstallHome DIR` selects an isolated home.
+
+| Harness | Instructions | Skills and agents |
+| --- | --- | --- |
+| omp | `~/.omp/agent/AGENTS.md` | `~/.omp/agent/{skills,agents}/` |
+| Copilot | `~/.copilot/instructions/agent-skills.instructions.md` | `~/.copilot/{skills,agents}/` |
+| Claude | `~/.claude/CLAUDE.md` | `~/.claude/{skills,agents}/` |
+
+Unmanaged instructions require `--replace-instructions` or
+`-ReplaceInstructions`. Replacement and managed updates preserve a backup.
+Identical repeat installations make no backup. External symlinks and
+conflicting files are refused. Identical copied skill directories can migrate
+with a backup on POSIX; PowerShell refuses copied directories.
+
+omp task agents receive `RULES.md`, not `AGENTS.md`. Keep
+`instructions/omp-rules.md` short. The installer does not honor
+`PI_CODING_AGENT_DIR`, since task-agent discovery uses the native agent home.
+
+## Sources and profiles
+
+`instructions/common.md` owns shared behavior and communication.
+`profiles/<profile>/environment.md` supplies environment policy;
+`excluded-skills.txt` selects shared skills. Personal assumes macOS or Linux
+with Nix. Work forbids tool installation and personal policy. Cloud assumes
+a disposable Claude container with Nix and no host or cluster access.
+`instructions/<harness>-<profile>.md` can replace rendered instructions.
+
+`scripts/render.py` renders instructions and shared agents into committed
+`dist/`. Ponytail's body is inlined into instructions for ordinary coding.
+
+Every maintained skill lives under `shared/`. Descriptions define automatic
+relevance. `disable-model-invocation: true` makes a skill explicit-only.
+Invoke such skills directly through the harness. Discovery never authorizes
+external actions or overrides environment restrictions.
+
+Reviewer and researcher bodies live in `agents/bodies/`, with harness
+settings in `agents/agents.yaml`. Claude keeps its implementer and rendered
+agents. Copilot installs exactly reviewer and researcher with read-only tools
+and no nested agents. omp keeps its existing agents and model roles.
+
+Vendored skills retain `UPSTREAM.md` and required licenses beside the source.
+Local deviations belong in the upstream note. `audit-your-codebase` has no
+stated upstream license; its upstream note records that limitation.
 
 ## Development and verification
 
-Where the active environment policy permits Nix, run the repository checks
-through its Nix environment:
-
 ```sh
-devenv shell -- check
+devenv shell -- python scripts/render.py
+devenv shell -- scripts/check.sh
 ```
 
-If `devenv` is not on PATH, use
-`nix run nixpkgs#devenv -- shell -- check`. Inside the environment, run
-`check` directly. The checks validate skill and agent structure, invocation
-policy consistency, that `dist/` matches its sources, native installer
-isolation and migration, shell syntax and formatting, and the Git diff. The
-same checks run in GitHub Actions on pull requests and pushes to `main`. PowerShell execution runs when `pwsh` is
-available; otherwise the suite reports that check as skipped.
-The work profile must not fetch Nix or missing tools to run these commands;
-use available checks and the normal pipeline, and report checks still needed.
+When devenv is absent, prefix commands with
+`nix run nixpkgs#devenv -- shell --`. Checks validate skills and retained
+agents, rendered output, installer isolation and migration, shell syntax and
+formatting, and whitespace. PowerShell tests run only when `pwsh` is available.
+CI runs the same checks. Work machines must use available tools or the normal
+pipeline and report checks that could not run.
 
-Structural checks do not prove model behavior. Use the
-[workflow scenarios](docs/workflow-scenarios.md) in a fresh conversation and
-inspect tool use and artifacts, not only the final answer.
+Structural checks do not prove model behavior. See
+[workflow scenarios](docs/workflow-scenarios.md) for fresh-session checks.
