@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Skill discovery
+
+- Shorten all shared descriptions to one line, totaling 3,057 characters for personal. Make tigerstyle, wizard, frontend-design, and research explicit-only. Vendor explicit-only handoff and new-module codebase-design from mattpocock/skills at abeeaf95660. Keep devshell-preflight body unchanged.
+
 ### Communication
 
 - Remove i-have-adhd. Keep eli5 model-invocable, including simpler re-explanations when the user is lost. Clarify native Mermaid replies versus diagrams committed to docs.

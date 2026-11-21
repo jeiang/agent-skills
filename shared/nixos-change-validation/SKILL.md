@@ -1,6 +1,6 @@
 ---
 name: nixos-change-validation
-description: Prepare and validate NixOS and nix-darwin flake, module, package, host, home-manager, impermanence, and deploy-rs changes. Use whenever a task edits or removes anything under a .nix file, including nix-darwin hosts, darwin-rebuild, service removals, and repo-wide or mechanical edits such as formatting, comment, or refactor sweeps; evaluate or build affected outputs; or provide safe activation and rollback instructions for a NixOS or nix-darwin host.
+description: "Nix change validation. Use for .nix edits, flake changes, NixOS or Darwin builds, deployment, activation, or rollback guidance."
 ---
 
 # NixOS Change Validation

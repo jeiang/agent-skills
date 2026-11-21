@@ -1,6 +1,6 @@
 ---
 name: azure-pipelines-maintenance
-description: Maintain and validate Azure Pipelines YAML, templates, variables, conditions, stages, jobs, artifacts, container builds, environments, and deployment definitions. Use when the agent needs to change or diagnose azure-pipelines.yml or repository-managed Azure DevOps pipeline templates.
+description: "Azure Pipelines maintenance and validation. Use when changing or diagnosing pipeline YAML, templates, or delivery settings."
 ---
 
 # Azure Pipelines Maintenance

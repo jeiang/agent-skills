@@ -1,6 +1,6 @@
 ---
 name: grilling
-description: Resolve unclear intent or decisions that materially affect scope, design, compatibility, or risk through rounds of questions. Use when a goal is confused with a proposed method, consequential choices remain open, or the user asks to grill or stress-test an idea. Do not interview clear, reversible tasks or reopen settled decisions.
+description: "Resolve intent and consequential choices. Use for unclear goals, open design decisions, or requests to stress-test an idea."
 ---
 
 Interview the user until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it. Match the interview depth to uncertainty and consequences; do not invent decisions to extend it.

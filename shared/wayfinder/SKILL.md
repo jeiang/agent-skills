@@ -1,6 +1,6 @@
 ---
 name: wayfinder
-description: Plan a huge chunk of work (more than one agent session can hold) as a shared map of decision tickets on your issue tracker, and resolve them one at a time until the way to the destination is clear.
+description: "Map work too large for one session into decision tickets. Invoke to find and resolve the route before implementation begins."
 disable-model-invocation: true
 ---
 

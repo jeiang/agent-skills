@@ -1,6 +1,6 @@
 ---
 name: "warp-skill-doctor"
-description: "Grade skills from local Warp, Claude Code, Codex, Pi, or Oh My Pi conversation history and draft evidence-backed edits with a report. Use when the user requests evaluation of their setup from real sessions. Do not use for general skills research, a skill-file review, or Copilot sessions."
+description: "Evidence-led skill evaluation from real sessions. Use for local Warp, Claude Code, Codex, Pi, or Oh My Pi history audits."
 ---
 # warp-skill-doctor
 

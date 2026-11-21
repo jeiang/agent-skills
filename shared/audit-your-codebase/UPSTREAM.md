@@ -5,3 +5,5 @@
 - Skill source: https://gist.githubusercontent.com/aarondfrancis/8735edbe48532f97ee5ea818db4dbd47/raw/959a2a9c1ed1648f39872885b2686ce5b576e78c/audit-your-codebase.md
 - License: none stated upstream; the body is the gist text with skill frontmatter added.
 - Trigger scope: the added description excludes subagents assigned one slice, inventory, or review; they loaded the coordinator procedure and then ignored it.
+
+- Discovery metadata: shortened to a one-line description; explicit-only flags follow the local skill list. Codex discovery metadata is omitted. Skill bodies are unchanged by this metadata update.

@@ -1,6 +1,6 @@
 ---
 name: untangle-codebase
-description: Untangle a whole codebase in one pass, so agents working in it read less per change, break less without noticing, and debug faster.
+description: "Whole-codebase refactor planning for agent readability. Invoke to find hidden coupling, surplus, and avoidable special cases."
 disable-model-invocation: true
 argument-hint: "[optional area or concern to focus on]"
 ---

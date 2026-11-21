@@ -72,7 +72,11 @@ a disposable Claude container with Nix and no host or cluster access.
 
 Every maintained skill lives under `shared/`. Descriptions define automatic
 relevance. `disable-model-invocation: true` makes a skill explicit-only.
-Invoke such skills directly through the harness. Discovery never authorizes
+Invoke such skills directly through the harness. Explicit-only skills include
+ponytail, wayfinder, tigerstyle, wizard, handoff, frontend-design, and research.
+`handoff` preserves session context in a temporary document. `codebase-design`
+designs new module interfaces, with optional read-only design exploration.
+Personal skill descriptions total 3,057 characters. Discovery never authorizes
 external actions or overrides environment restrictions.
 
 Reviewer and researcher bodies live in `agents/bodies/`, with harness

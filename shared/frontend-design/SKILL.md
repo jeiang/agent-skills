@@ -1,7 +1,8 @@
 ---
 name: frontend-design
-description: Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one. Helps with aesthetic direction, typography, and making choices that don't read as templated defaults.
+description: "Distinctive visual design for interfaces. Invoke when building or reshaping UI that needs deliberate typography and style."
 license: Complete terms in LICENSE.txt
+disable-model-invocation: true
 ---
 
 # Frontend Design

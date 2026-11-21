@@ -1,6 +1,7 @@
 ---
 name: tigerstyle
-description: Add TigerBeetle's TigerStyle guide to a repository, adapt its rules to that project, or review code against it. Use when the user names TigerStyle or Tiger Style.
+description: "TigerBeetle's TigerStyle guide. Invoke when adding or adapting its guidelines, or reviewing code against TigerStyle rules."
+disable-model-invocation: true
 ---
 
 # TigerStyle

@@ -9,3 +9,5 @@
 - Local changes: the question-tool limit notes that omp's `ask` has no fixed question count, so an omp round is not split at four.
 - License: MIT; see `LICENSE` in this directory.
 - Workflow alignment: trigger on unclear intent or consequential decisions, separate goals from proposed methods, avoid reopening settled questions, and reserve extra plan approval for consequential work.
+
+- Discovery metadata: shortened to a one-line description; explicit-only flags follow the local skill list. Codex discovery metadata is omitted. Skill bodies are unchanged by this metadata update.

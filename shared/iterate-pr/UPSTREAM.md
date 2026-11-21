@@ -7,3 +7,5 @@
 - Local changes: none.
 - Behavior to know: the skill commits and pushes fixes to the pull request branch and never merges. The installed instructions still govern authorization to push; the skill does not grant it.
 - Runtime requirements: an authenticated `gh` and `uv` (the scripts use only the Python standard library). The work profile excludes this skill.
+
+- Discovery metadata: shortened to a one-line description; explicit-only flags follow the local skill list. Codex discovery metadata is omitted. Skill bodies are unchanged by this metadata update.

@@ -1,6 +1,6 @@
 ---
 name: diagram
-description: Draw a Mermaid diagram of a system, request path, lifecycle, or data model, derived from the repository and committed into its docs so it renders in GitHub, GitLab, and Azure DevOps. Use when the user asks for an architecture diagram, sequence diagram, flow chart, or to visualize, map, or draw how something works.
+description: "Repository-grounded Mermaid diagrams for docs. Use for committed architecture, sequence, flow, lifecycle, or data diagrams."
 argument-hint: "[target or question]"
 ---
 

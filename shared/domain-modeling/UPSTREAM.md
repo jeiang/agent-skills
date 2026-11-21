@@ -6,3 +6,5 @@
 - Used by: `wayfinder`.
 - License: MIT; see `LICENSE` in this directory.
 - Local changes: the description excludes translation and content glossaries, and a legacy `CONTEXT.md` or `CONTEXT-MAP.md` is edited in place with an offer to rename it, following the legacy-file handling in upstream's `setup-matt-pocock-skills`.
+
+- Discovery metadata: shortened to a one-line description; explicit-only flags follow the local skill list. Codex discovery metadata is omitted. Skill bodies are unchanged by this metadata update.

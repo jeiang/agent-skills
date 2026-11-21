@@ -6,3 +6,5 @@
 - License: MIT; see `LICENSE` in this directory.
 - Local changes: none.
 - Runtime requirements: bash, and `gh` when a wizard writes GitHub secrets or variables.
+
+- Discovery metadata: shortened to a one-line description; explicit-only flags follow the local skill list. Codex discovery metadata is omitted. Skill bodies are unchanged by this metadata update.

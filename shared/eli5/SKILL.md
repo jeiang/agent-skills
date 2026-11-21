@@ -1,6 +1,6 @@
 ---
 name: eli5
-description: Explain at the reader's level using the actual case. Use for plain explanations or simpler English when the user says they are lost.
+description: "Explain at the reader's level using the actual case. Use for plain explanations or simpler English when the user is lost."
 argument-hint: "[eli5|colleague|expert]"
 ---
 
