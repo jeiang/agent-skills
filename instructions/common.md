@@ -105,6 +105,12 @@ and update it only by fast-forward. Do not edit, commit, or switch branches
 in the main checkout. If it is on another branch or has changes you do not
 own, do not discard them; report the state.
 
+After a branch is merged into the upstream default branch, fast-forward the
+main checkout, then remove the worktree with
+`git worktree remove .worktrees/<name>` and delete the local branch with
+`git branch -d <branch>`. Do not force either command. If one refuses, for
+example because the worktree has uncommitted changes, report the state.
+
 {% endif %}
 An implementation request authorizes local commits unless the user says
 otherwise. Commit each completed logical change as a coherent working
