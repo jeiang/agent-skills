@@ -52,6 +52,7 @@
 
 ### Changed
 
+- pi's worktree rule ends with `worktree` action `prune` once a branch merges, so merged worktrees and their branches do not pile up.
 - pi's worktree rule: the agent creates or enters a worktree with the `worktree` tool before its first write in a main checkout, and moves a file the user edited in the main checkout (such as a sops secret) into it with `carry`.
 - Skill fixes from a review of omp session transcripts:
   - `devshell-preflight` defers tool approval to the environment policy instead of always asking, which contradicted the personal profile. It skips resolution when the assignment or AGENTS.md names the prefix, and it does not wrap `git`, `gh`, or `ssh` in the shell. The macOS userland note moves to the personal profile, where sessions without the skill also see it.

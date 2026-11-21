@@ -64,7 +64,8 @@ then. When the user edits a file in the main checkout for you, such as a sops
 secret, move it in with `carry`. Subagents that edit files in parallel each
 get one: commit first (the checkout must be clean), then launch them with
 `worktree: true`. Each child commits on its own branch; merge the branches
-you keep.
+you keep. Once a branch merges, call `worktree` with action `prune` to
+delete its merged worktrees and branches.
 
 ## Communication
 
