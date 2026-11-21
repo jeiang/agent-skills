@@ -130,24 +130,24 @@ try {
   Assert ($backups.Count -eq 1 -and [IO.File]::ReadAllText($backups[0].FullName) -ceq 'Linked user instructions.') 'linked instructions are backed up'
   Assert-Payload $instructionFile cloud $false
 
-  $testHome = Join-Path $testRoot 'generic'
+  $testHome = Join-Path $testRoot 'switch'
   Assert-Throws { & $installer -Agent claude -Profile '' -InstallHome $testHome 6> $null }
   Assert-Throws { & $installer -Agent claude -Profile other -InstallHome $testHome 6> $null }
   Assert (-not (Test-Path $testHome)) 'missing or unknown profile installs nothing'
-  & $installer -Agent claude -Profile cloud -InstallHome $testHome 6> $null
-  Assert-Link (Join-Path $testHome '.claude/skills/devshell-preflight') (Join-Path $repoDir 'shared/devshell-preflight')
-  & $installer -Agent claude -Profile generic -InstallHome $testHome 6> $null
-  Assert-Payload (Join-Path $testHome '.claude/CLAUDE.md') generic $false
+  & $installer -Agent omp -Profile personal -InstallHome $testHome 6> $null
+  Assert-Link (Join-Path $testHome '.omp/agent/skills/devshell-preflight') (Join-Path $repoDir 'shared/devshell-preflight')
+  & $installer -Agent omp -Profile work -InstallHome $testHome 6> $null
+  Assert-Payload (Join-Path $testHome '.omp/agent/AGENTS.md') work $false
   foreach ($source in Get-ChildItem -LiteralPath (Join-Path $repoDir 'shared') -Directory) {
-    $target = Join-Path $testHome ".claude/skills/$($source.Name)"
-    if ($source.Name -in (Get-Excluded generic)) {
+    $target = Join-Path $testHome ".omp/agent/skills/$($source.Name)"
+    if ($source.Name -in (Get-Excluded work)) {
       Assert ($null -eq (Get-Item -LiteralPath $target -Force -ErrorAction SilentlyContinue)) 'excluded skill retired on profile switch'
     }
     else { Assert-Link $target $source.FullName }
   }
-  & $installer -Agent copilot -Profile generic -InstallHome $testHome 6> $null
-  Assert-Payload (Join-Path $testHome '.copilot/instructions/agent-skills.instructions.md') generic $true
-  Assert-Link (Join-Path $testHome '.copilot/skills/warp-skill-doctor') (Join-Path $repoDir 'shared/warp-skill-doctor')
+  & $installer -Agent copilot -Profile work -InstallHome $testHome 6> $null
+  Assert-Payload (Join-Path $testHome '.copilot/instructions/agent-skills.instructions.md') work $true
+  Assert-Link (Join-Path $testHome '.copilot/skills/diagram') (Join-Path $repoDir 'shared/diagram')
 
   $testHome = Join-Path $testRoot 'foreign'
   $foreign = Join-Path $testHome '.copilot/skills/devshell-preflight'
