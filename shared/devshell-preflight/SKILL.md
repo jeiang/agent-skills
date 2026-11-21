@@ -1,6 +1,6 @@
 ---
 name: devshell-preflight
-description: Resolve repository commands inside a declared Nix development environment on macOS or Linux systems with Nix available. Use at the start of any task in a repository that has devenv.nix, flake.nix, shell.nix, or .envrc, before the first just, statix, formatter, build, or test command, and when diagnosing that environment. Skip it when the assignment or the repository's AGENTS.md already names the command prefix. Do not use on the work machine, in environments without Nix, or for arbitrary missing commands.
+description: "Resolve Nix development environments. Use before repository commands or environment diagnosis; skip known command prefixes."
 ---
 
 # Devshell Preflight

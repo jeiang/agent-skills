@@ -2,10 +2,10 @@
 #Requires -Version 7
 param(
   [Parameter(Mandatory, Position = 0)]
-  [ValidateSet('codex', 'claude', 'copilot', 'omp', 'pi')]
+  [ValidateSet('claude', 'copilot', 'omp')]
   [string] $Agent,
   [Parameter(Mandatory, Position = 1)]
-  [ValidateSet('personal', 'work', 'generic')]
+  [ValidateSet('personal', 'work', 'cloud')]
   [string] $Profile,
   [ValidateNotNullOrEmpty()]
   [string] $InstallHome,
@@ -14,6 +14,9 @@ param(
 $ErrorActionPreference = 'Stop'
 $Agent = $Agent.ToLowerInvariant()
 $Profile = $Profile.ToLowerInvariant()
+if ("$Agent-$Profile" -notin 'omp-personal', 'omp-work', 'copilot-work', 'claude-cloud') {
+  throw "Unsupported installation: $Agent-$Profile"
+}
 $repoDir = $PSScriptRoot
 $profileDir = Join-Path $repoDir "profiles/$Profile"
 $renderedInstructions = Join-Path $repoDir "dist/instructions/$Profile.md"
@@ -26,19 +29,15 @@ $customHome = $PSBoundParameters.ContainsKey('InstallHome')
 if (-not $customHome) {
   $InstallHome = if ($env:USERPROFILE) { $env:USERPROFILE } else { $env:HOME }
 }
-$agentRoot = if ($Agent -in 'omp', 'pi') { Join-Path $InstallHome ".$Agent/agent" } else { Join-Path $InstallHome ".$Agent" }
+$agentRoot = if ($Agent -eq 'omp') { Join-Path $InstallHome ".$Agent/agent" } else { Join-Path $InstallHome ".$Agent" }
 switch ($Agent) {
-  'codex' {
-    if (-not $customHome -and $env:CODEX_HOME) { $agentRoot = $env:CODEX_HOME }
-    $instructionFile = Join-Path $agentRoot 'AGENTS.md'
-  }
   'claude' {
     $instructionFile = Join-Path $agentRoot 'CLAUDE.md'
   }
   'copilot' {
     $instructionFile = Join-Path $agentRoot 'instructions/agent-skills.instructions.md'
   }
-  { $_ -in 'omp', 'pi' } {
+  'omp' {
     $instructionFile = Join-Path $agentRoot 'AGENTS.md'
   }
 }
@@ -118,7 +117,7 @@ $excludedSkills = @(Get-Content -LiteralPath (Join-Path $profileDir 'excluded-sk
 foreach ($skill in $excludedSkills) {
   Remove-OwnedLink (Join-Path $skillsRoot $skill)
 }
-foreach ($root in 'shared', 'generic', $Agent) {
+foreach ($root in 'shared', $Agent) {
   $sourceRoot = Join-Path $repoDir $root
   if (-not (Test-Path -LiteralPath $sourceRoot -PathType Container)) { continue }
   foreach ($source in Get-ChildItem -LiteralPath $sourceRoot -Directory) {
@@ -129,11 +128,6 @@ foreach ($root in 'shared', 'generic', $Agent) {
 }
 $agentsRoot = Join-Path $agentRoot 'agents'
 New-Item -ItemType Directory -Force -Path $agentsRoot | Out-Null
-if ($Agent -eq 'codex') {
-  foreach ($name in 'task-orchestrator.toml', 'prompt-validator.toml', 'agents-md-author.toml') {
-    Remove-OwnedLink (Join-Path $agentsRoot $name)
-  }
-}
 foreach ($agentSource in (Join-Path $repoDir "agents/$Agent"), (Join-Path $repoDir "dist/agents/$Agent")) {
   if (-not (Test-Path -LiteralPath $agentSource -PathType Container)) { continue }
   foreach ($source in Get-ChildItem -LiteralPath $agentSource -File) {

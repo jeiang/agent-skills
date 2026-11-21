@@ -8,3 +8,5 @@
 - Local changes: every command in `SKILL.md` sets `DISABLE_TELEMETRY=1`, and the "Using npx / pnpx" section has a bullet that says to keep it set. The CLI otherwise sends each search query, each retrieved guide ID, the operating system, and the detected agent name to Google (`play.googleapis.com/log`). All other text is unchanged.
 - Updating: copy upstream `SKILL.md`, re-apply the telemetry change, and keep the `--skill-version` value upstream ships. The CLI prints an update notice when that value is older than the published package.
 - Runtime requirements: Node.js 22 or later with `npx` or `pnpx`, and network access to the npm registry on first use. Installation links the skill but does not install these tools; the active environment policy governs how a missing `npx` is supplied. The work profile excludes this skill because it fetches an undeclared tool.
+
+- Discovery metadata: shortened to a one-line description; explicit-only flags follow the local skill list. Codex discovery metadata is omitted. Skill bodies are unchanged by this metadata update.

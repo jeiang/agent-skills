@@ -1,6 +1,6 @@
 ---
 name: eli5
-description: Explain something at the right level for the person asking — code, a system, an error, a concept — grounded in the actual thing rather than the general pattern. Use when the user asks to explain something simply, in plain terms, like they're five, or says they don't understand how something works. Do NOT use for ordinary answers that happen to include an explanation.
+description: "Explain at the reader's level using the actual case. Use for plain explanations or simpler English when the user is lost."
 argument-hint: "[eli5|colleague|expert]"
 ---
 

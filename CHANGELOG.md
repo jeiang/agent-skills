@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+### Codebase audit
+
+- Replace the simplification and untangling skills with explicit-only codebase-audit, also informed by the pinned Pocock architecture audit. Rank by reduced change burden and defect risk relative to effort. End at a Markdown report without implementation, HTML, or browser tooling. Personal descriptions now total 2,925 characters.
+
+### Skill discovery
+
+- Shorten all shared descriptions to one line, totaling 3,057 characters for personal. Make tigerstyle, wizard, frontend-design, and research explicit-only. Vendor explicit-only handoff and new-module codebase-design from mattpocock/skills at abeeaf95660. Keep devshell-preflight body unchanged.
+
+### Communication
+
+- Remove i-have-adhd. Keep eli5 model-invocable, including simpler re-explanations when the user is lost. Clarify native Mermaid replies versus diagrams committed to docs.
+
+### Scope changes
+
+- Keep five explicit flake outputs: omp-personal, omp-work, copilot-work, claude-cloud, and skills-only pi-personal. Remove Codex, generic, and pi installer machinery. pi instructions and agents move to pi-extensions.
+
 ### Added
 
 - A `pi` harness (home `~/.pi/agent`) in both installers and as `pi-<profile>` flake packages. Its personal instructions are `instructions/pi-personal.md`, a shorter text that leaves the worktree, devshell, and command guard rules to pi extensions; any `instructions/<harness>-<profile>.md` replaces the rendered profile text for that harness. Its agents are pi-subagents definitions: scout, worker, security-reviewer, and max-reasoning under `agents/pi/`, plus the rendered change-reviewer and researcher, each loading its extensions from `~/.pi/agent/extensions/`. A diagnosis-only `devshell-preflight` under `pi/` replaces the shared one for pi, because pi's devshell extension already runs commands in the environment.

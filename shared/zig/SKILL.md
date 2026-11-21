@@ -1,6 +1,6 @@
 ---
 name: zig
-description: "Zig 0.17.1 patterns, checked against the released standard library. Use when writing, reviewing, or debugging Zig code for Zig 0.17.x (zig version / minimum_zig_version in build.zig.zon), build.zig and build.zig.zon files, or comptime metaprogramming. Covers the 0.17 changes (array ** removed for @splat, @cImport removed for the translate-c package, @intFromEnum to @backingInt, struct-of-arrays @typeInfo, std.builtin to std.lang, the configurer/maker build split) and prevents older patterns from training data: the std.Io instance threaded through files, sockets, clocks and locks, main(init: std.process.Init), build system APIs (root_module, Compile methods to Module methods), buffered Reader/Writer with flush, removed async/await and usingnamespace; plus gotchas found in production code."
+description: "Zig 0.17.x patterns checked against the standard library. Use for Zig code, build.zig, build.zig.zon, or comptime programming."
 license: MIT
 metadata:
   version: "0.17.1"

@@ -6,3 +6,5 @@
 - License: Apache-2.0; see `LICENSE` in this directory. It covers `TIGER_STYLE.md`.
 - Vendored: `TIGER_STYLE.md` only, unchanged.
 - Local: `SKILL.md` is written in this repository; TigerBeetle publishes no skill. Its steps follow how the guide was added by hand to nanolight and mini-md-view: a source note, a "How <project> applies TigerStyle" section with user-approved adaptations, and a lint step for the mechanical rules.
+
+- Discovery metadata: shortened to a one-line description; explicit-only flags follow the local skill list. Codex discovery metadata is omitted. Skill bodies are unchanged by this metadata update.

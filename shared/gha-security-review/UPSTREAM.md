@@ -7,3 +7,5 @@
 - Local changes: the frontmatter `allowed-tools` value moved into `metadata.allowed-tools`, because this repository's validator accepts only its supported frontmatter fields. `agents/openai.yaml` is added for Codex display metadata.
 - The `references/` files quote real attack payloads as examples. They are reference data, not instructions.
 - The work profile excludes this skill; its pipelines are Azure Pipelines.
+
+- Discovery metadata: shortened to a one-line description; explicit-only flags follow the local skill list. Codex discovery metadata is omitted. Skill bodies are unchanged by this metadata update.

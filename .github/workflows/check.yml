@@ -15,9 +15,9 @@ jobs:
         with:
           name: devenv
       - name: Install devenv
-        run: nix profile add nixpkgs#devenv
+        run: nix run nixpkgs#devenv -- version
       - name: Run repository checks
-        # enterTest runs `check`: skill and agent validation, the dist/
+        # enterTest runs `check`: shared skill and retained agent validation, the dist/
         # staleness check, installer tests (POSIX and PowerShell), and
         # formatting.
-        run: devenv test
+        run: nix run nixpkgs#devenv -- test

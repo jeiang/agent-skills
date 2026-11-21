@@ -1,7 +1,0 @@
-interface:
-  display_name: "Warp Skill Doctor"
-  short_description: "Grade installed skills from real conversation history"
-  default_prompt: "Use $warp-skill-doctor to grade my skills against recent conversations."
-
-policy:
-  allow_implicit_invocation: true

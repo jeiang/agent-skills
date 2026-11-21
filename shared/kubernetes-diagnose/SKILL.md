@@ -1,6 +1,6 @@
 ---
 name: kubernetes-diagnose
-description: Diagnose Kubernetes workload, Helm release, ingress, networking, storage, scheduling, image, and delivery-pipeline failures using repository configuration and live evidence when available. Use when a Kubernetes service is unhealthy, unavailable, failing rollout, or behaving differently from its declared configuration.
+description: "Evidence-led Kubernetes diagnosis. Use for unhealthy workloads, failed rollouts, or runtime behavior that differs from config."
 ---
 
 # Kubernetes Diagnose

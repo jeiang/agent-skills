@@ -1,6 +1,6 @@
 ---
 name: diagram
-description: Draw a Mermaid diagram of a system, request path, lifecycle, or data model, derived from the repository and committed into its docs so it renders in GitHub, GitLab, and Azure DevOps. Use when the user asks for an architecture diagram, sequence diagram, flow chart, or to visualize, map, or draw how something works.
+description: "Repository-grounded Mermaid diagrams for docs. Use for committed architecture, sequence, flow, lifecycle, or data diagrams."
 argument-hint: "[target or question]"
 ---
 
@@ -9,6 +9,8 @@ argument-hint: "[target or question]"
 A diagram earns its place when the relationship between parts is the thing
 that is hard to hold in your head. If prose or a list says it as well, write
 that instead and say why.
+
+A harness that draws `mermaid` blocks shows a diagram from a block in the reply; this skill is for diagrams committed to docs.
 
 ## Derive it, do not recall it
 

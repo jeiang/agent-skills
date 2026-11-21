@@ -13,16 +13,12 @@
         "x86_64-darwin"
         "aarch64-darwin"
       ];
-      # Instruction file path inside each harness home, as in install.sh. The
-      # omp and pi homes are ~/.omp/agent and ~/.pi/agent.
+      # Instruction paths for the full installations.
       harnesses = {
         claude = "CLAUDE.md";
-        codex = "AGENTS.md";
         copilot = "instructions/agent-skills.instructions.md";
         omp = "AGENTS.md";
-        pi = "AGENTS.md";
       };
-      profiles = builtins.attrNames (builtins.readDir ./profiles);
 
       # instructions/<harness>-<profile>.md replaces the rendered profile
       # instructions for that harness.
@@ -62,7 +58,6 @@
             [
               (./. + "/${harness}")
               ./shared
-              ./generic
             ]
         );
 
@@ -83,17 +78,20 @@
       mkHome =
         pkgs: harness: profile:
         pkgs.runCommand "agent-skills-${harness}-${profile}" { } ''
-          instructions=$out/${harnesses.${harness}}
-          mkdir -p "$out/skills" "$out/agents" "$(dirname "$instructions")"
-          {
-            ${lib.optionalString (harness == "copilot") ''printf '%s\n' '---' 'applyTo: "**"' '---' ""''}
-            cat ${instructionsFor harness profile}
-          } >"$instructions"
+          mkdir -p "$out/skills"
+          ${lib.optionalString (harness != "pi") ''
+            instructions=$out/${harnesses.${harness}}
+            mkdir -p "$out/agents" "$(dirname "$instructions")"
+            {
+              ${lib.optionalString (harness == "copilot") ''printf '%s\n' '---' 'applyTo: "**"' '---' ""''}
+              cat ${instructionsFor harness profile}
+            } >"$instructions"
+          ''}
           ${lib.concatStringsSep "\n" (
             lib.mapAttrsToList (name: path: ''cp -r ${path} "$out/skills/${name}"'') (skillsFor harness profile)
           )}
           ${lib.concatStringsSep "\n" (
-            lib.mapAttrsToList (name: path: ''cp ${path} "$out/agents/${name}"'') (agentsFor harness)
+            lib.mapAttrsToList (name: path: ''cp ${path} "$out/agents/${name}"'') (if harness == "pi" then { } else agentsFor harness)
           )}
           ${lib.optionalString (harness == "omp") ''cp ${./instructions/omp-rules.md} "$out/RULES.md"''}
         '';
@@ -103,34 +101,30 @@
       # entry at a time because the client owns the directory itself.
       lib = {
         inherit harnesses;
-        entries = lib.mapAttrs (
-          harness: instructions:
-          lib.genAttrs profiles (
-            profile:
-            {
-              inherit instructions;
-              skills = builtins.attrNames (skillsFor harness profile);
-              agents = builtins.attrNames (agentsFor harness);
-            }
-            # omp task subagents drop AGENTS.md but keep RULES.md.
-            // lib.optionalAttrs (harness == "omp") { rules = "RULES.md"; }
-          )
-        ) harnesses;
+        entries = let
+          full = harness: profile: {
+            instructions = harnesses.${harness};
+            skills = builtins.attrNames (skillsFor harness profile);
+            agents = builtins.attrNames (agentsFor harness);
+          } // lib.optionalAttrs (harness == "omp") { rules = "RULES.md"; };
+        in {
+          omp.personal = full "omp" "personal";
+          omp.work = full "omp" "work";
+          copilot.work = full "copilot" "work";
+          claude.cloud = full "claude" "cloud";
+          pi.personal.skills = builtins.attrNames (skillsFor "pi" "personal");
+        };
       };
 
       packages = lib.genAttrs systems (
         system:
-        lib.listToAttrs (
-          lib.mapCartesianProduct
-            (
-              { harness, profile }:
-              lib.nameValuePair "${harness}-${profile}" (mkHome nixpkgs.legacyPackages.${system} harness profile)
-            )
-            {
-              harness = builtins.attrNames harnesses;
-              profile = profiles;
-            }
-        )
+        let home = mkHome nixpkgs.legacyPackages.${system}; in {
+          omp-personal = home "omp" "personal";
+          omp-work = home "omp" "work";
+          copilot-work = home "copilot" "work";
+          claude-cloud = home "claude" "cloud";
+          pi-personal = home "pi" "personal";
+        }
       );
       checks = self.packages;
     };
