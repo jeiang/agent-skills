@@ -10,6 +10,8 @@ A diagram earns its place when the relationship between parts is the thing
 that is hard to hold in your head. If prose or a list says it as well, write
 that instead and say why.
 
+A harness that draws `mermaid` blocks shows a diagram from a block in the reply; this skill is for diagrams committed to docs.
+
 ## Derive it, do not recall it
 
 Read the repository before drawing: manifests, charts, pipeline YAML, entry

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Communication
+
+- Remove i-have-adhd. Keep eli5 model-invocable, including simpler re-explanations when the user is lost. Clarify native Mermaid replies versus diagrams committed to docs.
+
 ### Scope changes
 
 - Keep five explicit flake outputs: omp-personal, omp-work, copilot-work, claude-cloud, and skills-only pi-personal. Remove Codex, generic, and pi installer machinery. pi instructions and agents move to pi-extensions.
