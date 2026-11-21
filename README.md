@@ -73,10 +73,10 @@ a disposable Claude container with Nix and no host or cluster access.
 Every maintained skill lives under `shared/`. Descriptions define automatic
 relevance. `disable-model-invocation: true` makes a skill explicit-only.
 Invoke such skills directly through the harness. Explicit-only skills include
-ponytail, wayfinder, tigerstyle, wizard, handoff, frontend-design, and research.
+ponytail, wayfinder, tigerstyle, wizard, handoff, frontend-design, research, and codebase-audit.
 `handoff` preserves session context in a temporary document. `codebase-design`
 designs new module interfaces, with optional read-only design exploration.
-Personal skill descriptions total 3,057 characters. Discovery never authorizes
+Personal skill descriptions total 2,925 characters. Discovery never authorizes
 external actions or overrides environment restrictions.
 
 Reviewer and researcher bodies live in `agents/bodies/`, with harness
@@ -85,8 +85,11 @@ agents. Copilot installs exactly reviewer and researcher with read-only tools
 and no nested agents. omp keeps its existing agents and model roles.
 
 Vendored skills retain `UPSTREAM.md` and required licenses beside the source.
-Local deviations belong in the upstream note. `audit-your-codebase` has no
-stated upstream license; its upstream note records that limitation.
+Local deviations belong in the upstream note. `codebase-audit` combines three
+audit approaches into one explicit-only, read-only skill. It ranks simplification,
+agent readability, and module depth by reduced change burden and defect risk,
+then stops at a Markdown report. Its provenance note records the unlicensed
+gist source and preserves the two licensed sources.
 
 ## Development and verification
 

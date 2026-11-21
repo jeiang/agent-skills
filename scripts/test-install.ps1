@@ -83,7 +83,7 @@ try {
       }
       'omp' {
         $instructionFile = Join-Path $agentRoot 'AGENTS.md'
-        Assert-Payload $instructionFile cloud $false
+        Assert-Payload $instructionFile personal $false
         foreach ($ompAgent in 'designer', 'docs-author', 'fast', 'smol', 'max-reasoning') {
             Assert-Link (Join-Path $agentRoot "agents/$ompAgent.md") (Join-Path $repoDir "agents/omp/$ompAgent.md")
         }

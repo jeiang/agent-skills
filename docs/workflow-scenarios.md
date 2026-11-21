@@ -44,7 +44,7 @@ still answering the request through a suitable path.
 | kubernetes-delivery | Change a Helm chart's workload configuration | Explain what Helm is |
 | kubernetes-diagnose | Investigate a workload failing to become ready | Add a new chart setting without a failure to diagnose |
 | azure-pipelines-maintenance | Change a pipeline template output variable | Edit an unrelated YAML application setting |
-| audit-your-codebase | Audit the whole repository for structural simplifications | Review one diff or fix one function |
+| codebase-audit | Explicitly audit a repository for simplification, agent readability, and module depth; stop at a ranked Markdown report | Review one diff, implement fixes, or begin a redesign interview |
 | diagnosing-bugs | The app crashes on launch and the cause is unknown | Fix a typo the user pointed at |
 | diagram | Draw the repository's request path in its docs | Answer a one-step factual question |
 | domain-modeling | Resolve domain terminology or record a material design decision | Read a glossary to explain existing code |
@@ -58,7 +58,6 @@ still answering the request through a suitable path.
 | research | Investigate an API constraint from official sources | Reword supplied text without needing research |
 | tigerstyle | Add the TigerStyle guide to this repository | Format a Zig file |
 | warp-skill-doctor | Evaluate skills from supported personal agent histories | Research general skill practices or run in Copilot |
-| untangle-codebase | Explicitly refactor the whole codebase until changes land in one place | Refactor one module or review a diff |
 | wayfinder | Explicitly map a large effort into decision tickets | Plan a small task in the current conversation |
 | wizard | Walk me through creating the App Store Connect key and CI secrets | Set a secret the agent can already read from the environment |
 | writing-for-agents | Tighten this skill's description and steps | Write a README for people |

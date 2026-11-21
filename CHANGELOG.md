@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Codebase audit
+
+- Replace the simplification and untangling skills with explicit-only codebase-audit, also informed by the pinned Pocock architecture audit. Rank by reduced change burden and defect risk relative to effort. End at a Markdown report without implementation, HTML, or browser tooling. Personal descriptions now total 2,925 characters.
+
 ### Skill discovery
 
 - Shorten all shared descriptions to one line, totaling 3,057 characters for personal. Make tigerstyle, wizard, frontend-design, and research explicit-only. Vendor explicit-only handoff and new-module codebase-design from mattpocock/skills at abeeaf95660. Keep devshell-preflight body unchanged.
